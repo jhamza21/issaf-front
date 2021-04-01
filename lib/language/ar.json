@@ -6,9 +6,12 @@
     "FIRST_NAME": "الاسم",
     "INVALID_FIRST_NAME": "أدخل الاسم",
     "USERNAME": "اسم االمستخدم",
+    "MOBILE":"رقم الهاتف",
+    "INVALID_MOBILE": "رقم الهاتف غير صحيح",
     "INVALID_USERNAME": "أدخل اسم االمستخدم",
     "PASSWORD": "كلمه السر",
-    "IVALID_PASSWORD": "الحد الأدنى لطول كلمة المرور هو 6",
+    "NEW_PASSWORD":"كلمة مرور جديدة",
+    "IVALID_PASSWORD": "الحد الأدنى لطول كلمة المرور هو 8",
     "PASSWORD_CONFIRMATION": "تأكيد كلمة المرور",
     "INVALID_PASSWORD_CONFIRMATION": "لا يتطابق تأكيد كلمة المرور",
     "CREATE_AN_ACCOUNT": "انشئ حساب",
@@ -30,11 +33,26 @@
     "YES": "نعم",
     "NO": "لا",
     "CANCEL": "إلغاء",
+    "SAVE_CHANGES":"حفظ التغييرات",
+
 
     "INVALID_EMAIL": "يبدو أن عنوان بريدك الإلكتروني غير صحيح.",
     "INVALID_PASSWORD": "كلمة مرورك خاطئة",
     "EMAIL_ALREADY_IN_USE": "عنوان البريد الإلكتروني قيد الاستخدام بالفعل من قبل حساب آخر.",
-    "INVALID_CREDENTIALS":"أوراق الاعتماد هذه لا تتطابق مع سجلاتنا"
-    
+    "INVALID_CREDENTIALS":"أوراق الاعتماد هذه لا تتطابق مع سجلاتنا",
+    "LOGOUT":"تسجيل خروج",
+    "PERSONAL_INFORMATIONS":"معلومات شخصية",
+    "USER_PREFERENCES":"تفضيلات المستخدم",
+    "ABOUT":"حول",
+    "LANGUAGE":"اللغة",
+    "GENERAL_CONDITIONS":"شروط الخدمة",
+    "PRIVACY_POLICY":"سياسة الخصوصية",
+    "CONTACT_US":"اتصل بنا",
+    "MY_TICKETS": "تذاكري",
+    "IN_PROGRESS":"الجاري",
+    "HISTORICAL":"تاريخي"
+
+
+
 
 }

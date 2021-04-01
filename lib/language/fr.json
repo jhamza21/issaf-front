@@ -6,9 +6,12 @@
     "FIRST_NAME": "Prénom",
     "INVALID_FIRST_NAME": "Entrez un prénom",
     "USERNAME": "Nom d'utilisateur",
+    "MOBILE":"Numéro de téléphone",
+    "INVALID_MOBILE": "Numéro de téléphone invalide",
     "INVALID_USERNAME": "Entrez un nom d'utilisateur",
     "PASSWORD": "Mot de passe",
-    "IVALID_PASSWORD": "La longueur minimale du mot de passe est de 6",
+    "NEW_PASSWORD":"Nouveau mot de passe",
+    "IVALID_PASSWORD": "La longueur minimale du mot de passe est de 8",
     "PASSWORD_CONFIRMATION": "Confirmation mot de passe",
     "INVALID_PASSWORD_CONFIRMATION": "La confirmation du mot de passe ne correspond pas",
     "CREATE_AN_ACCOUNT": "Créer un compte",
@@ -30,10 +33,23 @@
     "YES": "Oui",
     "NO": "Non",
     "CANCEL":"Annuler",
+    "SAVE_CHANGES":"Enregistrer les modifications",
 
     "INVALID_EMAIL": "Votre adresse e-mail semble être malformée.",
     "INVALID_PASSWORD": "Votre mot de passe est incorrect.",
     "EMAIL_ALREADY_IN_USE": "L'adresse e-mail est déjà utilisée par un autre compte.",
-    "INVALID_CREDENTIALS":"Ces informations d'identification ne correspondent pas à nos enregistrements."
+    "INVALID_CREDENTIALS":"Ces informations d'identification ne correspondent pas à nos enregistrements.",
+    "LOGOUT":"Se déconnecter",
+    "PERSONAL_INFORMATIONS":"Informations personnelles",
+    "USER_PREFERENCES":"Préférence utilisateur",
+    "ABOUT":"À propos",
+    "LANGUAGE":"Langue",
+    "GENERAL_CONDITIONS":"Conditions générales d'utilisation",
+    "PRIVACY_POLICY":"Politique de confidentialité",
+    "CONTACT_US":"Contactez-nous",
+    "MY_TICKETS": "Mes tickets",
+    "IN_PROGRESS":"En cours",
+    "HISTORICAL":"Historique"
+
 
 }

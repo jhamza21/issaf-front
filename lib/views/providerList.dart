@@ -1,16 +1,14 @@
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter_redux/flutter_redux.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/provider.dart';
-import 'package:issaf/redux/providers/actions.dart';
-import 'package:issaf/redux/store.dart';
+import 'package:issaf/services/provideService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProvidersList extends StatefulWidget {
-  final bool favorite;
   final String title;
-  ProvidersList(this.favorite, this.title);
+  ProvidersList(this.title);
   @override
   _ProvidersListState createState() => _ProvidersListState();
 }
@@ -19,8 +17,11 @@ class ProvidersList extends StatefulWidget {
 class _ProvidersListState extends State<ProvidersList> {
   Widget cusSearchBar;
   Icon cusIcon = Icon(Icons.search);
-  List<String> favoriteProv = [];
-  String searchText;
+  List<String> _favoriteProviders = [];
+  List<Provider> _orderedProviders = [];
+  List<Provider> _providers = [];
+  String _searchText;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -32,11 +33,37 @@ class _ProvidersListState extends State<ProvidersList> {
 
   void _fetchFavorites() async {
     var prefs = await SharedPreferences.getInstance();
-    favoriteProv = prefs.getStringList("favorite") ?? [];
+    _favoriteProviders = prefs.getStringList("favorite") ?? [];
   }
 
-  void _fetchProviders() {
-    Redux.store.dispatch(fetchProvidersAction(Redux.store, context));
+  void _fetchProviders() async {
+    try {
+      var prefs = await SharedPreferences.getInstance();
+      final response =
+          await ProviderService().fetchProviders(prefs.getString('token'));
+
+      assert(response.statusCode == 200);
+      final jsonData = json.decode(response.body);
+      _providers = Provider.listFromJson(jsonData);
+      reorderProviders();
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  reorderProviders() {
+    _orderedProviders = [];
+    _providers.forEach((element) {
+      if (_favoriteProviders.contains(element.id.toString()))
+        _orderedProviders.insert(0, element);
+      else
+        _orderedProviders.add(element);
+    });
   }
 
   Card providerCard(Provider provider) {
@@ -53,37 +80,35 @@ class _ProvidersListState extends State<ProvidersList> {
             leading: CircleAvatar(
               backgroundColor: Colors.orange,
               radius: 30.0,
-              backgroundImage: provider.name == "STEG"
-                  ? AssetImage('assets/images/steg.png')
-                  : AssetImage('assets/images/avatar.png'),
+              backgroundImage: AssetImage('assets/images/avatar.png'),
             ),
-            trailing: !widget.favorite
-                ? IconButton(
-                    icon: Icon(
-                      favoriteProv.contains(provider.id.toString())
-                          ? Icons.star
-                          : Icons.star_border,
-                      color: Colors.red[600],
-                    ),
-                    onPressed: () async {
-                      if (favoriteProv.contains(provider.id.toString())) {
-                        //Remove favorite provider
-                        var prefs = await SharedPreferences.getInstance();
-                        setState(() {
-                          favoriteProv.remove(provider.id.toString());
-                        });
-                        prefs.setStringList("favorite", favoriteProv);
-                      } else {
-                        //Add favorite provider
-                        var prefs = await SharedPreferences.getInstance();
-                        setState(() {
-                          favoriteProv.add(provider.id.toString());
-                        });
-                        prefs.setStringList("favorite", favoriteProv);
-                      }
-                    },
-                  )
-                : SizedBox.shrink(),
+            trailing: IconButton(
+              icon: Icon(
+                _favoriteProviders.contains(provider.id.toString())
+                    ? Icons.favorite
+                    : Icons.favorite_border,
+                color: Colors.deepOrange,
+              ),
+              onPressed: () async {
+                if (_favoriteProviders.contains(provider.id.toString())) {
+                  //Remove favorite provider
+                  var prefs = await SharedPreferences.getInstance();
+                  setState(() {
+                    _favoriteProviders.remove(provider.id.toString());
+                    reorderProviders();
+                  });
+                  prefs.setStringList("favorite", _favoriteProviders);
+                } else {
+                  //Add favorite provider
+                  var prefs = await SharedPreferences.getInstance();
+                  setState(() {
+                    _favoriteProviders.add(provider.id.toString());
+                    reorderProviders();
+                  });
+                  prefs.setStringList("favorite", _favoriteProviders);
+                }
+              },
+            ),
           )),
     );
   }
@@ -91,88 +116,60 @@ class _ProvidersListState extends State<ProvidersList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        elevation: 0.0,
-        title: cusSearchBar,
-        actions: [
-          IconButton(
-              icon: cusIcon,
-              onPressed: () {
-                setState(() {
-                  if (cusIcon.icon == Icons.search) {
-                    cusIcon = Icon(Icons.cancel);
-                    cusSearchBar = TextFormField(
-                      decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: getTranslate(context, "SEARCH_HERE")),
-                      textInputAction: TextInputAction.go,
-                      style: TextStyle(color: Colors.white, fontSize: 16.0),
-                      onChanged: (val) {
-                        setState(() {
-                          searchText = val;
-                        });
-                      },
-                    );
-                  } else {
-                    cusIcon = Icon(Icons.search);
-                    cusSearchBar = Text(getTranslate(context, "PROVIDERS"));
-                    searchText = null;
-                  }
-                });
-              })
-        ],
-      ),
-      body: StoreConnector<AppState, AppState>(
-        converter: (store) => store.state,
-        builder: (context, state) {
-          if (state.providerState.isLoading)
-            return Center(child: circularProgressIndicator);
-          else if (state.providerState.providers.length == 0)
-            return Center(
-              child: Text(getTranslate(context, "NO_RESULT_FOUND")),
-            );
-          else
-            return ListView.builder(
-              padding: EdgeInsets.all(8),
-              itemCount: state.providerState.providers.length,
-              itemBuilder: (context, index) {
-                if (widget.favorite) {
-                  //show only favorite providers
-                  if (favoriteProv.contains(
-                      state.providerState.providers[index].id.toString())) {
-                    if (searchText != null) {
-                      //show only searched providers
-                      if (state.providerState.providers[index].name
-                          .toLowerCase()
-                          .contains(searchText.toLowerCase()))
-                        return providerCard(
-                            state.providerState.providers[index]);
-                      else
-                        return SizedBox.shrink();
+        appBar: AppBar(
+          centerTitle: true,
+          elevation: 0.0,
+          title: cusSearchBar,
+          actions: [
+            IconButton(
+                icon: cusIcon,
+                onPressed: () {
+                  setState(() {
+                    if (cusIcon.icon == Icons.search) {
+                      cusIcon = Icon(Icons.cancel);
+                      cusSearchBar = TextFormField(
+                        decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: getTranslate(context, "SEARCH_HERE")),
+                        textInputAction: TextInputAction.go,
+                        style: TextStyle(color: Colors.white, fontSize: 16.0),
+                        onChanged: (val) {
+                          setState(() {
+                            _searchText = val;
+                          });
+                        },
+                      );
                     } else {
-                      return providerCard(state.providerState.providers[index]);
+                      cusIcon = Icon(Icons.search);
+                      cusSearchBar = Text(getTranslate(context, "PROVIDERS"));
+                      _searchText = null;
                     }
-                  } else {
-                    return SizedBox.shrink();
-                  }
-                } else {
-                  //show all providers
-                  if (searchText != null) {
-                    //show only searched providers
-                    if (state.providerState.providers[index].name
-                        .toLowerCase()
-                        .contains(searchText.toLowerCase()))
-                      return providerCard(state.providerState.providers[index]);
-                    else
-                      return SizedBox.shrink();
-                  } else
-                    return providerCard(state.providerState.providers[index]);
-                }
-              },
-            );
-        },
-      ),
-    );
+                  });
+                })
+          ],
+        ),
+        body: _isLoading
+            ? Center(child: circularProgressIndicator)
+            : _providers.length == 0
+                ? Center(
+                    child: Text(getTranslate(context, "NO_RESULT_FOUND")),
+                  )
+                : ListView.builder(
+                    padding: EdgeInsets.all(8),
+                    itemCount: _orderedProviders.length,
+                    itemBuilder: (context, index) {
+                      if (_searchText != null) {
+                        //show only searched providers
+                        if (_orderedProviders[index]
+                            .name
+                            .toLowerCase()
+                            .contains(_searchText.toLowerCase()))
+                          return providerCard(_orderedProviders[index]);
+                        else
+                          return SizedBox.shrink();
+                      } else
+                        return providerCard(_orderedProviders[index]);
+                    },
+                  ));
   }
 }

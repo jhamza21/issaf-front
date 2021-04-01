@@ -5,9 +5,60 @@ import 'package:flutter/material.dart';
 inputTextDecoration(
     Icon prefixIcon, String hintText, GestureDetector suffixIcon) {
   return InputDecoration(
+    contentPadding: const EdgeInsets.symmetric(vertical: 5.0),
     hintText: hintText,
     prefixIcon: prefixIcon,
     suffixIcon: suffixIcon,
+    fillColor: Colors.white,
+    filled: true,
+    focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.orange[900], width: 2.0),
+        borderRadius: BorderRadius.all(Radius.circular(40))),
+    enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.orange[300], width: 2.0),
+        borderRadius: BorderRadius.all(Radius.circular(40))),
+    disabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.orange[300], width: 2.0),
+        borderRadius: BorderRadius.all(Radius.circular(40))),
+    errorBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.red[800], width: 2.0),
+        borderRadius: BorderRadius.all(Radius.circular(40))),
+    focusedErrorBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.red[400], width: 2.0),
+        borderRadius: BorderRadius.all(Radius.circular(40))),
+  );
+}
+
+//TEXT INPUT DECORATION
+inputTextDecorationProfile(Icon prefixIcon, String hintText) {
+  return InputDecoration(
+    contentPadding: const EdgeInsets.symmetric(vertical: 5.0),
+    hintText: hintText,
+    prefixIcon: prefixIcon,
+    fillColor: Colors.white,
+    filled: true,
+    focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.orange[900], width: 2.0),
+        borderRadius: BorderRadius.all(Radius.circular(40))),
+    enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.orange[300], width: 2.0),
+        borderRadius: BorderRadius.all(Radius.circular(40))),
+    disabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.orange[300], width: 2.0),
+        borderRadius: BorderRadius.all(Radius.circular(40))),
+    errorBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.red[800], width: 2.0),
+        borderRadius: BorderRadius.all(Radius.circular(40))),
+    focusedErrorBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.red[400], width: 2.0),
+        borderRadius: BorderRadius.all(Radius.circular(40))),
+  );
+}
+
+//TEXT INPUT DECORATION
+inputTextDecorationMobile(String hintText) {
+  return InputDecoration(
+    hintText: hintText,
     fillColor: Colors.white,
     filled: true,
     focusedBorder: OutlineInputBorder(

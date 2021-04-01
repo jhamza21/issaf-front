@@ -1,9 +1,9 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
-import 'package:issaf/redux/store.dart';
-import 'package:issaf/redux/users/actions.dart';
+import 'package:issaf/views/profile.dart';
 import 'package:issaf/views/providerList.dart';
+import 'package:issaf/views/tickets/index.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -14,19 +14,17 @@ class _HomeState extends State<Home> {
   int _currentIndex = 0;
 
   void onTabTapped(int index) {
-    if (index == 2) {
-      Redux.store.dispatch(logoutUserAction);
-    } else
-      setState(() {
-        _currentIndex = index;
-      });
+    setState(() {
+      _currentIndex = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> _children = [
-      ProvidersList(false, getTranslate(context, "PROVIDERS")),
-      ProvidersList(true, getTranslate(context, "PROVIDERS"))
+      ProvidersList(getTranslate(context, "PROVIDERS")),
+      Tickets(),
+      Profile()
     ];
     return new Scaffold(
         bottomNavigationBar: CurvedNavigationBar(
@@ -44,12 +42,12 @@ class _HomeState extends State<Home> {
                 color: Colors.black,
               ),
               Icon(
-                Icons.star,
+                Icons.bookmark,
                 size: 20,
                 color: Colors.black,
               ),
               Icon(
-                Icons.exit_to_app,
+                Icons.account_circle,
                 size: 20,
                 color: Colors.black,
               )
