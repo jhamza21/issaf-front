@@ -12,7 +12,7 @@ inputTextDecoration(
     fillColor: Colors.white,
     filled: true,
     focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.orange[900], width: 2.0),
+        borderSide: BorderSide(color: Colors.yellow[600], width: 2.0),
         borderRadius: BorderRadius.all(Radius.circular(40))),
     enabledBorder: OutlineInputBorder(
         borderSide: BorderSide(color: Colors.orange[300], width: 2.0),
@@ -21,61 +21,38 @@ inputTextDecoration(
         borderSide: BorderSide(color: Colors.orange[300], width: 2.0),
         borderRadius: BorderRadius.all(Radius.circular(40))),
     errorBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red[800], width: 2.0),
+        borderSide: BorderSide(color: Colors.red, width: 2.0),
         borderRadius: BorderRadius.all(Radius.circular(40))),
     focusedErrorBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red[400], width: 2.0),
+        borderSide: BorderSide(color: Colors.red, width: 2.0),
         borderRadius: BorderRadius.all(Radius.circular(40))),
   );
 }
 
 //TEXT INPUT DECORATION
-inputTextDecorationProfile(Icon prefixIcon, String hintText) {
+inputTextDecorationProfile(Icon prefixIcon, String hintText, String errorText) {
   return InputDecoration(
     contentPadding: const EdgeInsets.symmetric(vertical: 5.0),
     hintText: hintText,
     prefixIcon: prefixIcon,
+    errorText: errorText,
     fillColor: Colors.white,
     filled: true,
     focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.orange[900], width: 2.0),
-        borderRadius: BorderRadius.all(Radius.circular(40))),
+      borderSide: BorderSide(color: Colors.yellow[600], width: 1.5),
+    ),
     enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.orange[300], width: 2.0),
-        borderRadius: BorderRadius.all(Radius.circular(40))),
+      borderSide: BorderSide(color: Colors.orange[300], width: 1.5),
+    ),
     disabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.orange[300], width: 2.0),
-        borderRadius: BorderRadius.all(Radius.circular(40))),
+      borderSide: BorderSide(color: Colors.orange[300], width: 1.5),
+    ),
     errorBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red[800], width: 2.0),
-        borderRadius: BorderRadius.all(Radius.circular(40))),
+      borderSide: BorderSide(color: Colors.red, width: 1.5),
+    ),
     focusedErrorBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red[400], width: 2.0),
-        borderRadius: BorderRadius.all(Radius.circular(40))),
-  );
-}
-
-//TEXT INPUT DECORATION
-inputTextDecorationMobile(String hintText) {
-  return InputDecoration(
-    hintText: hintText,
-    fillColor: Colors.white,
-    filled: true,
-    focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.orange[900], width: 2.0),
-        borderRadius: BorderRadius.all(Radius.circular(40))),
-    enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.orange[300], width: 2.0),
-        borderRadius: BorderRadius.all(Radius.circular(40))),
-    disabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.orange[300], width: 2.0),
-        borderRadius: BorderRadius.all(Radius.circular(40))),
-    errorBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red[800], width: 2.0),
-        borderRadius: BorderRadius.all(Radius.circular(40))),
-    focusedErrorBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red[400], width: 2.0),
-        borderRadius: BorderRadius.all(Radius.circular(40))),
+      borderSide: BorderSide(color: Colors.red, width: 1.5),
+    ),
   );
 }
 

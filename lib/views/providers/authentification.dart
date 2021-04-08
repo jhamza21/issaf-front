@@ -11,8 +11,6 @@ import 'package:provider/provider.dart';
 class LoginSignUp extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _LoginSignUpState();
-  final void Function(int) callback;
-  LoginSignUp(this.callback);
 }
 
 class _LoginSignUpState extends State<LoginSignUp> {
@@ -66,26 +64,22 @@ class _LoginSignUpState extends State<LoginSignUp> {
   }
 
   Widget _showForm() {
-    return StoreConnector<AppState, AppState>(
-        converter: (store) => store.state,
-        builder: (context, state) {
-          return Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  showLogo(),
-                  showUserNameInput(),
-                  showPasswordInput(),
-                  !_isLoginForm ? showPasswordConfirmationInput() : SizedBox(),
-                  showErrorMessage(state.userState),
-                  showPrimaryButton(state.userState),
-                  showSecondaryButton(),
-                ],
-              ),
-            ),
-          );
-        });
+    return Form(
+      key: _formKey,
+      child: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            showLogo(),
+            showUserNameInput(),
+            showPasswordInput(),
+            !_isLoginForm ? showPasswordConfirmationInput() : SizedBox(),
+            showErrorMessage(),
+            showPrimaryButton(),
+            showSecondaryButton(),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget showLogo() {
@@ -163,26 +157,31 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
-  Widget showPrimaryButton(userState) {
+  Widget showPrimaryButton() {
     return Padding(
       padding: EdgeInsets.fromLTRB(0.0, 35.0, 0.0, 0.0),
       child: ButtonTheme(
         minWidth: 250,
-        child: RaisedButton.icon(
-          elevation: 5.0,
-          icon: userState.isLoading ? circularProgressIndicator : SizedBox(),
-          shape: new RoundedRectangleBorder(
-              borderRadius: new BorderRadius.circular(30.0)),
-          color: Colors.deepOrange[900],
-          label: Text(
-              _isLoginForm
-                  ? getTranslate(context, 'LOGIN').toUpperCase()
-                  : getTranslate(context, 'SIGN_UP').toUpperCase(),
-              style: new TextStyle(fontSize: 20.0, color: Colors.orange[100])),
-          onPressed: () {
-            validateAndSubmit();
-          },
-        ),
+        child: StoreConnector<AppState, bool>(
+            converter: (store) => store.state.userState.isLoading,
+            builder: (context, isLoading) {
+              return RaisedButton.icon(
+                elevation: 5.0,
+                icon: isLoading ? circularProgressIndicator : SizedBox(),
+                shape: new RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(30.0)),
+                color: Colors.deepOrange[900],
+                label: Text(
+                    _isLoginForm
+                        ? getTranslate(context, 'LOGIN').toUpperCase()
+                        : getTranslate(context, 'SIGN_UP').toUpperCase(),
+                    style: new TextStyle(
+                        fontSize: 20.0, color: Colors.orange[100])),
+                onPressed: () {
+                  validateAndSubmit();
+                },
+              );
+            }),
       ),
     );
   }
@@ -197,18 +196,24 @@ class _LoginSignUpState extends State<LoginSignUp> {
         onPressed: toggleFormMode);
   }
 
-  Widget showErrorMessage(userState) {
-    if (userState.isError)
-      return Padding(
-        padding: const EdgeInsets.only(top: 8.0),
-        child: Text(
-          userState.errorText,
-          style: TextStyle(
-              fontSize: 15.0, color: Colors.red, fontWeight: FontWeight.w400),
-        ),
-      );
-    else
-      return SizedBox.shrink();
+  Widget showErrorMessage() {
+    return StoreConnector<AppState, AppState>(
+        converter: (store) => store.state,
+        builder: (context, state) {
+          if (state.userState.isError)
+            return Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                state.userState.errorText,
+                style: TextStyle(
+                    fontSize: 15.0,
+                    color: Colors.red,
+                    fontWeight: FontWeight.w400),
+              ),
+            );
+          else
+            return SizedBox.shrink();
+        });
   }
 
   Widget showLanguageChange() {
@@ -243,11 +248,6 @@ class _LoginSignUpState extends State<LoginSignUp> {
         appBar: AppBar(
           elevation: 0.0,
           backgroundColor: Colors.transparent,
-          leading: IconButton(
-              onPressed: () {
-                widget.callback(0);
-              },
-              icon: Icon(Icons.arrow_back)),
           actions: [
             showLanguageChange(),
           ],

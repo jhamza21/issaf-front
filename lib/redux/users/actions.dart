@@ -21,7 +21,7 @@ Future<void> checkLoggedInUserAction(Store<AppState> store) async {
     var prefs = await SharedPreferences.getInstance();
     final response = await UserService().checkToken(prefs.getString('token'));
     final jsonData = json.decode(response.body);
-    assert(jsonData['valid'] == true);
+    assert(jsonData["id"] != null);
     store.dispatch(
       SetUserStateAction(
         UserState(
@@ -38,12 +38,12 @@ Future<void> checkLoggedInUserAction(Store<AppState> store) async {
 }
 
 //sign in user
-Future<void> signInUserAction(Store<AppState> store, String userName,
+Future<void> signInUserAction(Store<AppState> store, String username,
     String password, dynamic context) async {
   store.dispatch(SetUserStateAction(UserState(isLoading: true)));
   try {
     var prefs = await SharedPreferences.getInstance();
-    final response = await UserService().signIn(userName, password);
+    final response = await UserService().signIn(username, password);
     final jsonData = json.decode(response.body);
     if (response.statusCode == 200) {
       await prefs.setString('token', jsonData["data"]["api_token"]);
@@ -52,6 +52,8 @@ Future<void> signInUserAction(Store<AppState> store, String userName,
           UserState(
             isLoggedIn: true,
             isLoading: false,
+            isError: false,
+            errorText: '',
             user: User.fromJson(jsonData["data"]),
           ),
         ),
@@ -79,12 +81,12 @@ Future<void> signInUserAction(Store<AppState> store, String userName,
 }
 
 //sign up / register user
-Future<void> signUpUserAction(Store<AppState> store, String userName,
+Future<void> signUpUserAction(Store<AppState> store, String username,
     String password, dynamic context) async {
   store.dispatch(SetUserStateAction(UserState(isLoading: true)));
   try {
     var prefs = await SharedPreferences.getInstance();
-    final response = await UserService().signUp(userName, password);
+    final response = await UserService().signUp(username, password);
     final jsonData = json.decode(response.body);
     if (response.statusCode == 201) {
       await prefs.setString('token', jsonData["data"]["api_token"]);
@@ -92,6 +94,8 @@ Future<void> signUpUserAction(Store<AppState> store, String userName,
         SetUserStateAction(
           UserState(
             isLoggedIn: true,
+            isError: false,
+            errorText: '',
             isLoading: false,
             user: User.fromJson(jsonData["data"]),
           ),

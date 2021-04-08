@@ -5,12 +5,12 @@ import 'package:issaf/views/profile.dart';
 import 'package:issaf/views/providerList.dart';
 import 'package:issaf/views/tickets/index.dart';
 
-class Home extends StatefulWidget {
+class HomeC extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _HomeState();
+  State<StatefulWidget> createState() => new _HomeCState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeCState extends State<HomeC> {
   int _currentIndex = 0;
 
   void onTabTapped(int index) {

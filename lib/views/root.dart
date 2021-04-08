@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:issaf/redux/store.dart';
 import 'package:issaf/redux/users/actions.dart';
-import 'package:issaf/views/authentification.dart';
-import 'package:issaf/views/home.dart';
+import 'package:issaf/views/homeC.dart';
+import 'package:issaf/views/providers/homeP.dart';
 import 'package:issaf/views/waitingScreen.dart';
+import 'package:issaf/views/welcome.dart';
 
 class RootPage extends StatefulWidget {
   @override
@@ -30,9 +31,12 @@ class _RootPageState extends State<RootPage> {
         if (state.userState.isCheckingLogin) {
           return WaitingScreen();
         } else if (state.userState.isLoggedIn) {
-          return Home();
+          if (state.userState.user.role == "client")
+            return HomeC();
+          else
+            return HomeP();
         } else {
-          return LoginSignUp();
+          return Welcome();
         }
       },
     );

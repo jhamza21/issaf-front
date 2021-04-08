@@ -5,6 +5,7 @@ String errorHandler(String code, dynamic context) {
     "INVALID_EMAIL",
     "INVALID_PASSWORD",
     "EMAIL_ALREADY_IN_USE",
+    "USERNAME_ALREADY_IN_USE",
     "INVALID_CREDENTIALS"
   ];
   if (errors.contains(code.toUpperCase()))

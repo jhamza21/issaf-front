@@ -1,18 +1,29 @@
 class User {
   int id;
-  String userName;
+  String username;
   String name;
+  String role;
   String mobile;
+  String country;
   String email;
   String password;
-  String bio;
-  User({this.id, this.userName, this.name, this.email, this.password});
+  User(
+      {this.id,
+      this.username,
+      this.name,
+      this.role,
+      this.email,
+      this.password,
+      this.country,
+      this.mobile});
 
   User.fromJson(Map<String, dynamic> json)
       : id = json['id'],
-        userName = json['userName'] ?? '',
-        name = json['name'] ?? null,
-        mobile = json['mobile'] ?? null,
+        username = json['username'] ?? '',
+        name = json['name'] ?? '',
+        role = json['role'] ?? '',
+        mobile = json['mobile'] ?? '',
+        country = json['country'] ?? '',
         email = json['email'] ?? '',
         password = json['password'] ?? '';
 }

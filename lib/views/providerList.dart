@@ -80,19 +80,20 @@ class _ProvidersListState extends State<ProvidersList> {
             leading: CircleAvatar(
               backgroundColor: Colors.orange,
               radius: 30.0,
-              backgroundImage: AssetImage('assets/images/avatar.png'),
+              backgroundImage: NetworkImage(
+                  "http://10.0.2.2:8000/api/providerImg/" + provider.image),
             ),
             trailing: IconButton(
               icon: Icon(
                 _favoriteProviders.contains(provider.id.toString())
-                    ? Icons.favorite
-                    : Icons.favorite_border,
+                    ? Icons.star
+                    : Icons.star_border,
                 color: Colors.deepOrange,
               ),
               onPressed: () async {
+                var prefs = await SharedPreferences.getInstance();
                 if (_favoriteProviders.contains(provider.id.toString())) {
                   //Remove favorite provider
-                  var prefs = await SharedPreferences.getInstance();
                   setState(() {
                     _favoriteProviders.remove(provider.id.toString());
                     reorderProviders();
