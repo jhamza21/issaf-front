@@ -50,7 +50,24 @@
     "CONTACT_US":"Contactez-nous",
     "MY_TICKETS": "Mes tickets",
     "IN_PROGRESS":"En cours",
-    "HISTORICAL":"Historique"
+    "HISTORICAL":"Historique",
+    "TITLE": "Titre",
+    "INVALID_TITLE_LENGTH": "Le titre doit contenir entre 6 et 255 caractéres",
+    "DESCRIPTION": "Description",
+    "INVALID_DESCRIPTION_LENGTH": "La description doit contenir entre 6 et 255 caractéres",
+    "ADDRESS":"Addresse",
+    "INVALID_ADDRESS_LENGTH": "L'addresse doit contenir entre 6 et 255 caractéres",
+    "SITE_WEB":"Site web",
+    "INVALID_SITE_WEB":"Site web invalide",
+    "INSERT_IMAGE":"Insérer une image",
+    "USER_INFO": "Informations de l'utilisateur",
+    "SERVICE_INFO":"Informations du service",
+    "REQUIRED_FIELD":"* : Champs obligatoire",
+    "FOURNISSEUR": "Fournisseur",
+    "CLIENT":"Client",
+    "WELCOME_MSG": "La solution qui fait la queue à votre place !"
+
+
 
 
 }

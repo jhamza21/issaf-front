@@ -50,7 +50,28 @@
     "CONTACT_US":"اتصل بنا",
     "MY_TICKETS": "تذاكري",
     "IN_PROGRESS":"الجاري",
-    "HISTORICAL":"تاريخي"
+    "HISTORICAL":"تاريخي",
+    "TITLE": "العنوان",
+    "INVALID_TITLE_LENGTH": "يجب أن يحتوي العنوان على ما بين 6 و 255 حرفًا",
+    "DESCRIPTION": "الوصف",
+    "INVALID_DESCRIPTION_LENGTH": "يجب أن يحتوي الوصف على ما بين 6 و 255 حرفًا",
+    "ADDRESS":"موقعك",
+    "INVALID_ADDRESS_LENGTH":"يجب أن تحتوي موقعك على ما بين 6 و 255 حرفًا",
+    "SITE_WEB":"موقع إلكتروني",
+    "INVALID_SITE_WEB":"موقع غير صحيح",
+    "INSERT_IMAGE":"أدخل الصورة",
+    "USER_INFO": "معلومات المستخدم",
+    "SERVICE_INFO":"معلومات الخدمة",
+    "REQUIRED_FIELD":"* : حقل اجباري",
+    "FOURNISSEUR": "مزود",
+    "CLIENT":"زبون",
+    "WELCOME_MSG": "الحل الذي يصطف في مكانك!"
+
+
+
+
+
+
 
 
 

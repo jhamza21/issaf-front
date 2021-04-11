@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:issaf/language/appLanguage.dart';
 import 'package:issaf/redux/store.dart';
+import 'package:issaf/views/providerList.dart';
 import 'package:issaf/views/root.dart';
 import 'package:provider/provider.dart';
 import 'package:issaf/language/appLocalizations.dart';
@@ -44,7 +45,7 @@ class MyApp extends StatelessWidget {
           ],
           home: StoreProvider<AppState>(
             store: Redux.store,
-            child: RootPage(),
+            child: ProvidersList("list"),
           ),
         );
       }),

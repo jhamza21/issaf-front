@@ -2,10 +2,10 @@ import 'package:issaf/language/appLocalizations.dart';
 import 'package:flutter/material.dart';
 
 //TEXT INPUT DECORATION
-inputTextDecoration(
+inputTextDecorationRounded(
     Icon prefixIcon, String hintText, GestureDetector suffixIcon) {
   return InputDecoration(
-    contentPadding: const EdgeInsets.symmetric(vertical: 5.0),
+    contentPadding: const EdgeInsets.all(10.0),
     hintText: hintText,
     prefixIcon: prefixIcon,
     suffixIcon: suffixIcon,
@@ -30,11 +30,13 @@ inputTextDecoration(
 }
 
 //TEXT INPUT DECORATION
-inputTextDecorationProfile(Icon prefixIcon, String hintText, String errorText) {
+inputTextDecorationRectangle(Icon prefixIcon, String hintText, String errorText,
+    GestureDetector suffixIcon) {
   return InputDecoration(
-    contentPadding: const EdgeInsets.symmetric(vertical: 5.0),
+    contentPadding: const EdgeInsets.all(10),
     hintText: hintText,
     prefixIcon: prefixIcon,
+    suffixIcon: suffixIcon,
     errorText: errorText,
     fillColor: Colors.white,
     filled: true,

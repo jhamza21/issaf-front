@@ -7,6 +7,7 @@ class User {
   String country;
   String email;
   String password;
+  String sexe;
   User(
       {this.id,
       this.username,
@@ -15,6 +16,7 @@ class User {
       this.email,
       this.password,
       this.country,
+      this.sexe,
       this.mobile});
 
   User.fromJson(Map<String, dynamic> json)
@@ -25,5 +27,6 @@ class User {
         mobile = json['mobile'] ?? '',
         country = json['country'] ?? '',
         email = json['email'] ?? '',
+        sexe = json['sexe'] ?? '',
         password = json['password'] ?? '';
 }

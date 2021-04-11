@@ -1,6 +1,8 @@
+import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/language/appLanguage.dart';
 import 'package:issaf/language/language.dart';
@@ -17,8 +19,7 @@ class LoginSignUp extends StatefulWidget {
 
 class _LoginSignUpState extends State<LoginSignUp> {
   final _formKey = new GlobalKey<FormState>();
-  String _username;
-  String _password;
+  String _username, _password, _name, _email, _sexe = "homme", _mobile;
   bool _showPassword;
   bool _isLoginForm;
 
@@ -75,10 +76,17 @@ class _LoginSignUpState extends State<LoginSignUp> {
               child: Column(
                 children: <Widget>[
                   showLogo(),
+                  !_isLoginForm ? showNameInput() : SizedBox(),
                   showUserNameInput(),
                   showPasswordInput(),
                   !_isLoginForm ? showPasswordConfirmationInput() : SizedBox(),
+                  !_isLoginForm ? showEmailInput() : SizedBox(),
+                  !_isLoginForm ? showMobileInput() : SizedBox(),
+                  !_isLoginForm ? showSexeInput() : SizedBox(),
                   showErrorMessage(state.userState),
+                  !_isLoginForm
+                      ? showNotice(getTranslate(context, "REQUIRED_FIELD"))
+                      : SizedBox(),
                   showPrimaryButton(state.userState),
                   showSecondaryButton(),
                 ],
@@ -99,17 +107,91 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
+  void _handleRadioButton(String value) {
+    setState(() {
+      _sexe = value;
+    });
+  }
+
+  Widget showSexeInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          new Radio(
+              activeColor: Colors.black,
+              value: "homme",
+              groupValue: _sexe,
+              onChanged: _handleRadioButton),
+          new Text(
+            'Homme',
+            style: new TextStyle(fontSize: 16.0),
+          ),
+          new Radio(
+              activeColor: Colors.black,
+              value: "femme",
+              groupValue: _sexe,
+              onChanged: _handleRadioButton),
+          new Text(
+            'Femme',
+            style: new TextStyle(
+              fontSize: 16.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget showUserNameInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
         keyboardType: TextInputType.text,
-        decoration: inputTextDecoration(
-            Icon(Icons.person), getTranslate(context, 'USERNAME'), null),
+        decoration: inputTextDecorationRounded(
+            Icon(Icons.person), getTranslate(context, 'USERNAME') + "*", null),
         validator: (value) => value.length < 6 || value.length > 255
             ? getTranslate(context, 'INVALID_USERNAME_LENGTH')
             : null,
         onSaved: (value) => _username = value.trim(),
+      ),
+    );
+  }
+
+  Widget showEmailInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: TextFormField(
+        keyboardType: TextInputType.emailAddress,
+        decoration: inputTextDecorationRounded(
+            Icon(Icons.email), getTranslate(context, 'EMAIL'), null),
+        validator: (value) => value != null && !Validator.isValidEmail(value)
+            ? getTranslate(context, 'INVALID_EMAIL_LENGTH')
+            : null,
+        onSaved: (value) => _email = value.trim(),
+      ),
+    );
+  }
+
+  Widget showMobileInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: new IntlPhoneField(
+        initialCountryCode: "TN",
+        keyboardType: TextInputType.phone,
+        decoration: inputTextDecorationRounded(
+            null, getTranslate(context, 'MOBILE'), null),
+        validator: (value) => value.length < 8 || value.length > 14
+            ? getTranslate(context, "INVALID_MOBILE_LENGTH")
+            : null,
+        onChanged: (value) => setState(() {
+          _mobile = value.countryISOCode +
+              "" +
+              value.countryCode +
+              "/" +
+              value.number;
+        }),
       ),
     );
   }
@@ -119,9 +201,9 @@ class _LoginSignUpState extends State<LoginSignUp> {
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
         obscureText: !_showPassword,
-        decoration: inputTextDecoration(
+        decoration: inputTextDecorationRounded(
           Icon(Icons.lock_outline),
-          getTranslate(context, 'PASSWORD'),
+          getTranslate(context, 'PASSWORD') + "*",
           GestureDetector(
               child: Icon(
                   !_showPassword ? Icons.visibility_off : Icons.visibility),
@@ -139,14 +221,30 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
+  Widget showNameInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
+      child: new TextFormField(
+        keyboardType: TextInputType.text,
+        decoration: inputTextDecorationRounded(
+            Icon(Icons.supervised_user_circle),
+            getTranslate(context, 'NAME') + "*",
+            null),
+        onChanged: (value) => setState(() {
+          _name = value.trim();
+        }),
+      ),
+    );
+  }
+
   Widget showPasswordConfirmationInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
         obscureText: !_showPassword,
-        decoration: inputTextDecoration(
+        decoration: inputTextDecorationRounded(
           Icon(Icons.lock_outline),
-          getTranslate(context, 'PASSWORD_CONFIRMATION'),
+          getTranslate(context, 'PASSWORD_CONFIRMATION') + "*",
           GestureDetector(
               child: Icon(
                   !_showPassword ? Icons.visibility_off : Icons.visibility),
@@ -209,6 +307,23 @@ class _LoginSignUpState extends State<LoginSignUp> {
       );
     else
       return SizedBox.shrink();
+  }
+
+  Widget showNotice(String text) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: Row(
+        children: [
+          Text(
+            text,
+            style: TextStyle(
+                fontSize: 12.0,
+                color: Colors.black,
+                fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget showLanguageChange() {

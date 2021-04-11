@@ -22,7 +22,7 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   bool _isLoading = false, _showPasswordInput = false;
-  String name, mobile, country, password, email, username, error;
+  String name, mobile, country, password, email, username, sexe, error;
   Map errors, formData;
 
   @override
@@ -106,13 +106,14 @@ class _ProfileState extends State<Profile> {
         initialCountryCode: countryCode != '' ? countryCode : "TN",
         initialValue: previousMobile,
         keyboardType: TextInputType.phone,
-        decoration: inputTextDecorationProfile(
+        decoration: inputTextDecorationRectangle(
             Icon(
               Icons.mobile_friendly,
               color: Colors.transparent,
             ),
             getTranslate(context, 'MOBILE'),
-            errors['mobile']),
+            errors['mobile'],
+            null),
         onChanged: (value) => setState(() {
           country = value.countryISOCode;
           mobile = value.number;
@@ -127,13 +128,51 @@ class _ProfileState extends State<Profile> {
       child: new TextFormField(
         initialValue: previousName,
         keyboardType: TextInputType.text,
-        decoration: inputTextDecorationProfile(
+        decoration: inputTextDecorationRectangle(
             Icon(Icons.supervised_user_circle),
             getTranslate(context, 'NAME'),
-            errors['name']),
+            errors['name'],
+            null),
         onChanged: (value) => setState(() {
           name = value.trim();
         }),
+      ),
+    );
+  }
+
+  void _handleRadioButton(String value) {
+    setState(() {
+      sexe = value;
+    });
+  }
+
+  Widget showSexeInput(String _sexe) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          new Radio(
+              activeColor: Colors.black,
+              value: "homme",
+              groupValue: sexe != null ? sexe : _sexe,
+              onChanged: _handleRadioButton),
+          new Text(
+            'Homme',
+            style: new TextStyle(fontSize: 16.0),
+          ),
+          new Radio(
+              activeColor: Colors.black,
+              value: "femme",
+              groupValue: sexe != null ? sexe : _sexe,
+              onChanged: _handleRadioButton),
+          new Text(
+            'Femme',
+            style: new TextStyle(
+              fontSize: 16.0,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -144,8 +183,8 @@ class _ProfileState extends State<Profile> {
       child: new TextFormField(
         initialValue: previousUsername,
         keyboardType: TextInputType.text,
-        decoration: inputTextDecorationProfile(Icon(Icons.person),
-            getTranslate(context, 'USERNAME'), errors['username']),
+        decoration: inputTextDecorationRectangle(Icon(Icons.person),
+            getTranslate(context, 'USERNAME'), errors['username'], null),
         onChanged: (value) => setState(() {
           username = value.trim();
         }),
@@ -159,8 +198,8 @@ class _ProfileState extends State<Profile> {
       child: new TextFormField(
         initialValue: previousEmail,
         keyboardType: TextInputType.emailAddress,
-        decoration: inputTextDecorationProfile(Icon(Icons.email_rounded),
-            getTranslate(context, 'EMAIL'), errors['email']),
+        decoration: inputTextDecorationRectangle(Icon(Icons.email_rounded),
+            getTranslate(context, 'EMAIL'), errors['email'], null),
         onChanged: (value) => setState(() {
           email = value.trim();
         }),
@@ -174,8 +213,11 @@ class _ProfileState extends State<Profile> {
             padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
             child: TextFormField(
               obscureText: true,
-              decoration: inputTextDecorationProfile(Icon(Icons.lock_outline),
-                  getTranslate(context, 'NEW_PASSWORD'), errors['password']),
+              decoration: inputTextDecorationRectangle(
+                  Icon(Icons.lock_outline),
+                  getTranslate(context, 'NEW_PASSWORD'),
+                  errors['password'],
+                  null),
               onChanged: (value) => setState(() {
                 password = value.trim();
               }),
@@ -395,6 +437,7 @@ class _ProfileState extends State<Profile> {
                       showEmailInput(state.userState.user.email),
                       showMobileInput(state.userState.user.mobile,
                           state.userState.user.country),
+                      showSexeInput(state.userState.user.sexe),
                       showPasswordInput(),
                       showError(),
                       showSaveButton(state.userState.user),

@@ -41,6 +41,8 @@ dependencies:
   font_awesome_flutter: ^8.11.0
   curved_navigation_bar: ^0.3.7
   intl_phone_field: ^1.3.0
+  image_picker: ^0.6.7+11
+  smooth_page_indicator: ^0.2.3
   
 dev_dependencies:
   flutter_test:

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:issaf/constants.dart';
 import 'package:issaf/language/appLanguage.dart';
 import 'package:issaf/language/language.dart';
 import 'package:issaf/views/authentification.dart';
+import 'package:issaf/views/providers/authentification.dart';
 import 'package:provider/provider.dart';
 
 class Welcome extends StatefulWidget {
@@ -12,7 +14,7 @@ class Welcome extends StatefulWidget {
 class _WelcomeState extends State<Welcome> {
   int _currentIndex = 0;
 
-  Widget showPrimaryButton() {
+  Widget showProvidersButton() {
     return Padding(
       padding: EdgeInsets.fromLTRB(0.0, 35.0, 0.0, 0.0),
       child: ButtonTheme(
@@ -22,9 +24,11 @@ class _WelcomeState extends State<Welcome> {
           shape: new RoundedRectangleBorder(
               borderRadius: new BorderRadius.circular(30.0)),
           color: Colors.orange[300],
-          child: Text("Fournisseur",
+          child: Text(getTranslate(context, "FOURNISSEUR"),
               style: new TextStyle(fontSize: 20.0, color: Colors.black)),
-          onPressed: () {},
+          onPressed: () {
+            changePage(2);
+          },
         ),
       ),
     );
@@ -36,7 +40,7 @@ class _WelcomeState extends State<Welcome> {
     });
   }
 
-  Widget showSecondaryButton() {
+  Widget showClientsButton() {
     return Padding(
       padding: EdgeInsets.fromLTRB(0.0, 35.0, 0.0, 20.0),
       child: ButtonTheme(
@@ -46,7 +50,7 @@ class _WelcomeState extends State<Welcome> {
           shape: new RoundedRectangleBorder(
               borderRadius: new BorderRadius.circular(30.0)),
           color: Colors.orange[300],
-          child: Text("Client",
+          child: Text(getTranslate(context, "CLIENT"),
               style: new TextStyle(fontSize: 20.0, color: Colors.black)),
           onPressed: () {
             changePage(1);
@@ -60,10 +64,10 @@ class _WelcomeState extends State<Welcome> {
     return Padding(
       padding: EdgeInsets.fromLTRB(0.0, 25.0, 0.0, 10.0),
       child: Text(
-        "La solution qui fait la queue à votre place !",
+        getTranslate(context, "WELCOME_MSG"),
         style: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w700,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -83,9 +87,11 @@ class _WelcomeState extends State<Welcome> {
   Widget showLanguageChange() {
     var appLanguage = Provider.of<AppLanguage>(context);
     return Align(
-      alignment: Alignment.topRight,
+      alignment: appLanguage.appLocale == Locale("fr")
+          ? Alignment.topRight
+          : Alignment.topLeft,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 17, 10, 0),
+        padding: const EdgeInsets.fromLTRB(5, 15, 5, 0),
         child: DropdownButton(
           onChanged: (Language lang) {
             appLanguage.changeLanguage(lang.languageCode);
@@ -126,8 +132,8 @@ class _WelcomeState extends State<Welcome> {
               Spacer(),
               showLogo(),
               showWelcomeText(),
-              showPrimaryButton(),
-              showSecondaryButton(),
+              showProvidersButton(),
+              showClientsButton(),
             ],
           ),
         ),
@@ -136,7 +142,11 @@ class _WelcomeState extends State<Welcome> {
   }
 
   Widget build(BuildContext context) {
-    final List<Widget> _children = [welcome(), LoginSignUp(changePage)];
+    final List<Widget> _children = [
+      welcome(),
+      LoginSignUp(changePage),
+      LoginSignUpF(changePage)
+    ];
 
     return _children[_currentIndex];
   }

@@ -1,24 +1,42 @@
+import 'dart:io';
+
+import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/language/appLanguage.dart';
 import 'package:issaf/language/language.dart';
 import 'package:issaf/redux/store.dart';
 import 'package:issaf/redux/users/actions.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 
-class LoginSignUp extends StatefulWidget {
+class LoginSignUpF extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _LoginSignUpState();
+  State<StatefulWidget> createState() => new _LoginSignUpFState();
+  final void Function(int) callback;
+  LoginSignUpF(this.callback);
 }
 
-class _LoginSignUpState extends State<LoginSignUp> {
+class _LoginSignUpFState extends State<LoginSignUpF> {
   final _formKey = new GlobalKey<FormState>();
-  String _username;
-  String _password;
+  PageController pageController = PageController();
+  String _username,
+      _name,
+      _password,
+      _title,
+      _description,
+      _mobileF,
+      _mobileU,
+      _emailF,
+      _emailU,
+      _sexe = "homme",
+      _siteWeb;
   bool _showPassword;
   bool _isLoginForm;
+  File _image;
 
   @override
   void initState() {
@@ -64,21 +82,75 @@ class _LoginSignUpState extends State<LoginSignUp> {
   }
 
   Widget _showForm() {
-    return Form(
-      key: _formKey,
-      child: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            showLogo(),
-            showUserNameInput(),
-            showPasswordInput(),
-            !_isLoginForm ? showPasswordConfirmationInput() : SizedBox(),
-            showErrorMessage(),
-            showPrimaryButton(),
-            showSecondaryButton(),
-          ],
-        ),
+    return StoreConnector<AppState, AppState>(
+        converter: (store) => store.state,
+        builder: (context, state) {
+          return Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  showLogo(),
+                  !_isLoginForm
+                      ? _showSectionTitle(getTranslate(context, "USER_INFO"))
+                      : SizedBox(),
+                  showUserNameInput(),
+                  !_isLoginForm ? showNameInput() : SizedBox(),
+                  !_isLoginForm ? showEmailInput(true) : SizedBox(),
+                  !_isLoginForm ? showMobileInput(true) : SizedBox(),
+                  showPasswordInput(),
+                  !_isLoginForm ? showPasswordConfirmationInput() : SizedBox(),
+                  !_isLoginForm ? showSexeInput() : SizedBox(),
+                  !_isLoginForm
+                      ? _showSectionTitle(getTranslate(context, "SERVICE_INFO"))
+                      : SizedBox(),
+                  !_isLoginForm ? showImageInput() : SizedBox(),
+                  !_isLoginForm ? showTitleInput() : SizedBox(),
+                  !_isLoginForm ? showDescriptionInput() : SizedBox(),
+                  !_isLoginForm ? showEmailInput(false) : SizedBox(),
+                  !_isLoginForm ? showMobileInput(false) : SizedBox(),
+                  !_isLoginForm ? showSiteWebInput() : SizedBox(),
+                  showErrorMessage(state.userState),
+                  !_isLoginForm
+                      ? showNotice(getTranslate(context, "REQUIRED_FIELD"))
+                      : SizedBox(),
+                  showPrimaryButton(state.userState),
+                  showSecondaryButton(),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  Widget showNotice(String text) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: Row(
+        children: [
+          Text(
+            text,
+            style: TextStyle(
+                fontSize: 12.0,
+                color: Colors.black,
+                fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _showSectionTitle(String title) {
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+          child: Text(
+            title,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
     );
   }
 
@@ -98,8 +170,11 @@ class _LoginSignUpState extends State<LoginSignUp> {
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
         keyboardType: TextInputType.text,
-        decoration: inputTextDecoration(
-            Icon(Icons.person), getTranslate(context, 'USERNAME'), null),
+        decoration: inputTextDecorationRectangle(
+            _isLoginForm ? Icon(Icons.person) : null,
+            getTranslate(context, 'USERNAME') + "*",
+            null,
+            null),
         validator: (value) => value.length < 6 || value.length > 255
             ? getTranslate(context, 'INVALID_USERNAME_LENGTH')
             : null,
@@ -113,9 +188,10 @@ class _LoginSignUpState extends State<LoginSignUp> {
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
         obscureText: !_showPassword,
-        decoration: inputTextDecoration(
-          Icon(Icons.lock_outline),
-          getTranslate(context, 'PASSWORD'),
+        decoration: inputTextDecorationRectangle(
+          _isLoginForm ? Icon(Icons.lock_outline) : null,
+          getTranslate(context, 'PASSWORD') + "*",
+          null,
           GestureDetector(
               child: Icon(
                   !_showPassword ? Icons.visibility_off : Icons.visibility),
@@ -138,9 +214,10 @@ class _LoginSignUpState extends State<LoginSignUp> {
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
         obscureText: !_showPassword,
-        decoration: inputTextDecoration(
-          Icon(Icons.lock_outline),
-          getTranslate(context, 'PASSWORD_CONFIRMATION'),
+        decoration: inputTextDecorationRectangle(
+          null,
+          getTranslate(context, 'PASSWORD_CONFIRMATION') + "*",
+          null,
           GestureDetector(
               child: Icon(
                   !_showPassword ? Icons.visibility_off : Icons.visibility),
@@ -157,31 +234,24 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
-  Widget showPrimaryButton() {
+  Widget showPrimaryButton(userState) {
     return Padding(
       padding: EdgeInsets.fromLTRB(0.0, 35.0, 0.0, 0.0),
       child: ButtonTheme(
         minWidth: 250,
-        child: StoreConnector<AppState, bool>(
-            converter: (store) => store.state.userState.isLoading,
-            builder: (context, isLoading) {
-              return RaisedButton.icon(
-                elevation: 5.0,
-                icon: isLoading ? circularProgressIndicator : SizedBox(),
-                shape: new RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(30.0)),
-                color: Colors.deepOrange[900],
-                label: Text(
-                    _isLoginForm
-                        ? getTranslate(context, 'LOGIN').toUpperCase()
-                        : getTranslate(context, 'SIGN_UP').toUpperCase(),
-                    style: new TextStyle(
-                        fontSize: 20.0, color: Colors.orange[100])),
-                onPressed: () {
-                  validateAndSubmit();
-                },
-              );
-            }),
+        child: RaisedButton.icon(
+          elevation: 5.0,
+          icon: userState.isLoading ? circularProgressIndicator : SizedBox(),
+          color: Colors.deepOrange[900],
+          label: Text(
+              _isLoginForm
+                  ? getTranslate(context, 'LOGIN').toUpperCase()
+                  : getTranslate(context, 'SIGN_UP').toUpperCase(),
+              style: new TextStyle(fontSize: 20.0, color: Colors.orange[100])),
+          onPressed: () {
+            validateAndSubmit();
+          },
+        ),
       ),
     );
   }
@@ -196,24 +266,18 @@ class _LoginSignUpState extends State<LoginSignUp> {
         onPressed: toggleFormMode);
   }
 
-  Widget showErrorMessage() {
-    return StoreConnector<AppState, AppState>(
-        converter: (store) => store.state,
-        builder: (context, state) {
-          if (state.userState.isError)
-            return Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Text(
-                state.userState.errorText,
-                style: TextStyle(
-                    fontSize: 15.0,
-                    color: Colors.red,
-                    fontWeight: FontWeight.w400),
-              ),
-            );
-          else
-            return SizedBox.shrink();
-        });
+  Widget showErrorMessage(userState) {
+    if (userState.isError)
+      return Padding(
+        padding: const EdgeInsets.only(top: 8.0),
+        child: Text(
+          userState.errorText,
+          style: TextStyle(
+              fontSize: 15.0, color: Colors.red, fontWeight: FontWeight.w400),
+        ),
+      );
+    else
+      return SizedBox.shrink();
   }
 
   Widget showLanguageChange() {
@@ -239,22 +303,197 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
+  Widget showTitleInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: TextFormField(
+        keyboardType: TextInputType.text,
+        decoration: inputTextDecorationRectangle(
+            null, getTranslate(context, 'TITLE') + "*", null, null),
+        validator: (value) => value.length < 6 || value.length > 255
+            ? getTranslate(context, 'INVALID_TITLE_LENGTH')
+            : null,
+        onSaved: (value) => _title = value.trim(),
+      ),
+    );
+  }
+
+  Widget showMobileInput(bool _isUserField) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: new IntlPhoneField(
+        initialCountryCode: "TN",
+        keyboardType: TextInputType.phone,
+        decoration: inputTextDecorationRectangle(
+            null, getTranslate(context, 'MOBILE'), null, null),
+        validator: (value) => value.length < 8 || value.length > 14
+            ? getTranslate(context, "INVALID_MOBILE_LENGTH")
+            : null,
+        onChanged: (value) => setState(() {
+          if (_isUserField)
+            _mobileU = value.countryISOCode +
+                "" +
+                value.countryCode +
+                "/" +
+                value.number;
+          else
+            _mobileF = value.countryISOCode +
+                "" +
+                value.countryCode +
+                "/" +
+                value.number;
+        }),
+      ),
+    );
+  }
+
+  Widget showEmailInput(bool _isUserField) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: TextFormField(
+        keyboardType: TextInputType.emailAddress,
+        decoration: inputTextDecorationRectangle(
+            null, getTranslate(context, 'EMAIL'), null, null),
+        validator: (value) => value != null && !Validator.isValidEmail(value)
+            ? getTranslate(context, 'INVALID_EMAIL')
+            : null,
+        onSaved: (value) => {
+          if (_isUserField) _emailU = value.trim() else _emailF = value.trim()
+        },
+      ),
+    );
+  }
+
+  Widget showNameInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: TextFormField(
+        keyboardType: TextInputType.emailAddress,
+        decoration: inputTextDecorationRectangle(
+            null, getTranslate(context, 'NAME') + "*", null, null),
+        validator: (value) => value != null && !Validator.isValidEmail(value)
+            ? getTranslate(context, 'INVALID_NAME_LENGTH')
+            : null,
+        onSaved: (value) => {_name = value.trim()},
+      ),
+    );
+  }
+
+  void _handleRadioButton(String value) {
+    setState(() {
+      _sexe = value;
+    });
+  }
+
+  Widget showSexeInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          new Radio(
+              activeColor: Colors.black,
+              value: "homme",
+              groupValue: _sexe,
+              onChanged: _handleRadioButton),
+          new Text(
+            'Homme',
+            style: new TextStyle(fontSize: 16.0),
+          ),
+          new Radio(
+              activeColor: Colors.black,
+              value: "femme",
+              groupValue: _sexe,
+              onChanged: _handleRadioButton),
+          new Text(
+            'Femme',
+            style: new TextStyle(
+              fontSize: 16.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget showSiteWebInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: TextFormField(
+        keyboardType: TextInputType.emailAddress,
+        decoration: inputTextDecorationRectangle(
+            null, getTranslate(context, 'SITE_WEB'), null, null),
+        validator: (value) => value != null && Uri.parse(value).isAbsolute
+            ? getTranslate(context, 'INVALID_SITE_WEB')
+            : null,
+        onSaved: (value) => _siteWeb = value.trim(),
+      ),
+    );
+  }
+
+  Widget showDescriptionInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: TextFormField(
+        maxLines: 4,
+        keyboardType: TextInputType.text,
+        decoration: inputTextDecorationRectangle(
+            null, getTranslate(context, 'DESCRIPTION') + "*", null, null),
+        validator: (value) => value.length < 6 || value.length > 255
+            ? getTranslate(context, 'INVALID_DESCRIPTION_LENGTH')
+            : null,
+        onSaved: (value) => _description = value.trim(),
+      ),
+    );
+  }
+
+  Future getImageFromGallery() async {
+    var img = await ImagePicker().getImage(source: ImageSource.gallery);
+    setState(() {
+      if (img != null) _image = File(img.path);
+    });
+  }
+
+  Widget showImageInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          CircleAvatar(
+            child: Text(getTranslate(context, 'INSERT_IMAGE') + "*"),
+            backgroundColor: Colors.orange[200],
+            radius: 80,
+            backgroundImage: _image != null ? FileImage(_image) : null,
+          ),
+          IconButton(
+            icon: Icon(Icons.camera_alt, color: Colors.grey[600]),
+            onPressed: () {
+              getImageFromGallery();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(20.0),
-      decoration: mainBoxDecoration,
-      child: new Scaffold(
-        appBar: AppBar(
-          elevation: 0.0,
-          backgroundColor: Colors.transparent,
-          actions: [
-            showLanguageChange(),
-          ],
-        ),
+    return new Scaffold(
+      appBar: AppBar(
+        elevation: 0.0,
         backgroundColor: Colors.transparent,
-        body: _showForm(),
+        leading: IconButton(
+            onPressed: () {
+              widget.callback(0);
+            },
+            icon: Icon(Icons.arrow_back)),
+        actions: [
+          showLanguageChange(),
+        ],
       ),
+      backgroundColor: Colors.white,
+      body: _showForm(),
     );
   }
 }
