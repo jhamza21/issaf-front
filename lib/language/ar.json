@@ -71,7 +71,22 @@
     "REGISTER_AS":"سجل باسم",
     "SEARCH_BY_COUNTRY":"البحث عن طريق اسم الدولة",
     "SERVICE_INFORMATIONS":"معلومات الخدمة",
-    "SUCCESS_INFORMATIONS_UPDATE":"معلوماتك كلها محدثة!"
+    "SUCCESS_INFORMATIONS_UPDATE":"معلوماتك كلها محدثة!",
+    "SERVICE":"خدمة",
+    "USERNAME_RECEIVER":"اسم مستخدم المدير",
+    "TIME_PER_CLIENT":"متوسط ​​الوقت لكل عميل (دقيقة)",
+    "TIME_PER_CLIENT_NOTICE":"ملاحظة: سيتم تعديل هذه القيمة تلقائيًا",
+    "ADD_SERVICE":"إضافة صاف",
+    "WORK_TIME":"وقت العمل",
+    "START":"بداية",
+    "END":"نهاية",
+    "MEN":"رجل",
+    "WOMAN":"امراة",
+    "OPENED":"مفتوح",
+    "CLOSED":"مغلق"
+
+
+
 
 
 }

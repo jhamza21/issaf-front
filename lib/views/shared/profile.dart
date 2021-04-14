@@ -22,7 +22,7 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   bool _isLoading = false, _showPasswordInput = false;
-  String name, mobile, country, password, email, username, sexe, globalError;
+  String _name, _mobile, _password, _email, _username, _sexe, _error;
   final _formKey = new GlobalKey<FormState>();
 
   @override
@@ -32,12 +32,12 @@ class _ProfileState extends State<Profile> {
   }
 
   bool checkFormChanged(User user) {
-    if ((mobile != null && mobile != user.mobile) ||
-        (name != null && name != user.name) ||
-        (username != null && username != user.username) ||
-        (email != null && email != user.email) ||
-        (sexe != null && sexe != user.sexe) ||
-        password != null) return true;
+    if ((_mobile != null && _mobile != user.mobile) ||
+        (_name != null && _name != user.name) ||
+        (_username != null && _username != user.username) ||
+        (_email != null && _email != user.email) ||
+        (_sexe != null && _sexe != user.sexe) ||
+        _password != null) return true;
     return false;
   }
 
@@ -63,7 +63,7 @@ class _ProfileState extends State<Profile> {
                 ? getTranslate(context, "INVALID_MOBILE_LENGTH")
                 : null,
         onChanged: (value) => setState(() {
-          mobile = value.countryISOCode +
+          _mobile = value.countryISOCode +
               "/" +
               value.countryCode +
               "/" +
@@ -89,7 +89,7 @@ class _ProfileState extends State<Profile> {
                 ? getTranslate(context, 'INVALID_NAME_LENGTH')
                 : null,
         onChanged: (value) => setState(() {
-          name = value.trim();
+          _name = value.trim();
         }),
       ),
     );
@@ -97,36 +97,44 @@ class _ProfileState extends State<Profile> {
 
   void _handleRadioButton(String value) {
     setState(() {
-      sexe = value;
+      _sexe = value;
     });
   }
 
-  Widget showSexeInput(String _sexe) {
+  Widget showSexeInput(String sexe) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
-          new Radio(
-              activeColor: Colors.black,
-              value: "HOMME",
-              groupValue: sexe != null ? sexe : _sexe,
-              onChanged: _handleRadioButton),
-          new Text(
-            'Homme',
-            style: new TextStyle(fontSize: 16.0),
+          Row(
+            children: [
+              new Radio(
+                  activeColor: Colors.black,
+                  value: "HOMME",
+                  groupValue: _sexe != null ? _sexe : sexe,
+                  onChanged: _handleRadioButton),
+              new Text(
+                getTranslate(context, "MEN"),
+                style: new TextStyle(fontSize: 16.0),
+              ),
+            ],
           ),
-          new Radio(
-              activeColor: Colors.black,
-              value: "FEMME",
-              groupValue: sexe != null ? sexe : _sexe,
-              onChanged: _handleRadioButton),
-          new Text(
-            'Femme',
-            style: new TextStyle(
-              fontSize: 16.0,
-            ),
-          ),
+          Row(
+            children: [
+              new Radio(
+                  activeColor: Colors.black,
+                  value: "FEMME",
+                  groupValue: _sexe != null ? _sexe : sexe,
+                  onChanged: _handleRadioButton),
+              new Text(
+                getTranslate(context, "WOMAN"),
+                style: new TextStyle(
+                  fontSize: 16.0,
+                ),
+              ),
+            ],
+          )
         ],
       ),
     );
@@ -145,7 +153,7 @@ class _ProfileState extends State<Profile> {
                 ? getTranslate(context, 'INVALID_USERNAME_LENGTH')
                 : null,
         onChanged: (value) => setState(() {
-          username = value.trim();
+          _username = value.trim();
         }),
       ),
     );
@@ -163,7 +171,7 @@ class _ProfileState extends State<Profile> {
             ? getTranslate(context, 'INVALID_EMAIL')
             : null,
         onChanged: (value) => setState(() {
-          email = value.trim();
+          _email = value.trim();
         }),
       ),
     );
@@ -181,7 +189,7 @@ class _ProfileState extends State<Profile> {
                   ? getTranslate(context, 'INVALID_PASSWORD_LENGTH')
                   : null,
               onChanged: (value) => setState(() {
-                password = value.trim();
+                _password = value.trim();
               }),
             ),
           )
@@ -280,78 +288,54 @@ class _ProfileState extends State<Profile> {
   Widget showSaveButton(User user) {
     return checkFormChanged(user)
         ? TextButton.icon(
-            onPressed: () {
+            onPressed: () async {
               if (!_isLoading && validateAndSave())
-                singleInputDialog(
-                  context,
-                  title: getTranslate(context, "CONFIRMATION"),
-                  label: getTranslate(context, "PASSWORD"),
-                  keyboardType: TextInputType.text,
-                  validator: (value) => value.isEmpty || value.length < 8
-                      ? getTranslate(context, 'INVALID_PASSWORD_LENGTH')
-                      : null,
-                  neutralText: getTranslate(context, "CANCEL"),
-                  positiveText: getTranslate(context, "LOGIN"),
-                  positiveAction: (value) async {
-                    try {
-                      setState(() {
-                        globalError = null;
-                        _isLoading = true;
-                      });
-                      var prefs = await SharedPreferences.getInstance();
-                      var res = await UserService().updateUser(
-                          prefs.getString('token'),
-                          username,
-                          password,
-                          name,
-                          sexe,
-                          "CLIENT",
-                          email,
-                          mobile,
-                          value);
-                      if (res.statusCode == 401) {
-                        setState(() {
-                          _isLoading = false;
-                          globalError =
-                              getTranslate(context, "INVALID_PASSWORD");
-                        });
-                      } else if (res.statusCode == 200) {
-                        final snackBar = SnackBar(
-                          content: Text(
-                              getTranslate(context, "SUCCESS_USER_UPDATE")),
-                        );
-                        final jsonData = json.decode(res.body);
-                        Redux.store.dispatch(SetUserStateAction(
-                          UserState(
-                            isLoggedIn: true,
-                            user: User.fromJson(jsonData),
-                          ),
-                        ));
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        setState(() {
-                          _isLoading = false;
-                        });
-                      } else if (res.statusCode == 400) {
-                        final jsonData =
-                            json.decode(res.body) as Map<String, dynamic>;
-                        setState(() {
-                          _isLoading = false;
-                          globalError = getTranslate(
-                              context, jsonData.values.first[0].toUpperCase());
-                        });
-                      } else
-                        setState(() {
-                          _isLoading = false;
-                          globalError = getTranslate(context, "ERROR_SERVER");
-                        });
-                    } catch (e) {
-                      setState(() {
-                        _isLoading = false;
-                        globalError = getTranslate(context, "ERROR_SERVER");
-                      });
-                    }
-                  },
-                );
+                try {
+                  setState(() {
+                    _error = null;
+                    _isLoading = true;
+                  });
+                  var prefs = await SharedPreferences.getInstance();
+                  var res = await UserService().updateUser(
+                      prefs.getString('token'),
+                      _username,
+                      _password,
+                      _name,
+                      _sexe,
+                      "CLIENT",
+                      _email,
+                      _mobile);
+                  if (res.statusCode == 200) {
+                    final snackBar = SnackBar(
+                      content:
+                          Text(getTranslate(context, "SUCCESS_USER_UPDATE")),
+                    );
+                    final jsonData = json.decode(res.body);
+                    Redux.store.dispatch(SetUserStateAction(
+                      UserState(
+                        isLoggedIn: true,
+                        user: User.fromJson(jsonData),
+                      ),
+                    ));
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    setState(() {
+                      _isLoading = false;
+                    });
+                  } else {
+                    final jsonData =
+                        json.decode(res.body) as Map<String, dynamic>;
+                    setState(() {
+                      _isLoading = false;
+                      _error = getTranslate(
+                          context, jsonData.values.first[0].toUpperCase());
+                    });
+                  }
+                } catch (e) {
+                  setState(() {
+                    _isLoading = false;
+                    _error = getTranslate(context, "ERROR_SERVER");
+                  });
+                }
             },
             icon: _isLoading ? circularProgressIndicator : Icon(Icons.save),
             label: Text(getTranslate(context, "SAVE_CHANGES")))
@@ -368,11 +352,11 @@ class _ProfileState extends State<Profile> {
   }
 
   Widget showError() {
-    return globalError != null
+    return _error != null
         ? Padding(
             padding: const EdgeInsets.fromLTRB(0, 12.0, 0, 0.0),
             child: Text(
-              globalError,
+              _error,
               style: TextStyle(color: Colors.red, fontSize: 12),
             ),
           )

@@ -71,6 +71,19 @@
     "REGISTER_AS":"S'inscrire en tant que",
     "SEARCH_BY_COUNTRY":"Rechercher par nom de pays",
     "SERVICE_INFORMATIONS":"Informations du service",
-    "SUCCESS_INFORMATIONS_UPDATE":"Vos informations sont tous à jour ! "
+    "SUCCESS_INFORMATIONS_UPDATE":"Vos informations sont tous à jour ! ",
+    "SERVICE":"Service",
+    "USERNAME_RECEIVER":"Nom d'utilisateur du responsable",
+    "TIME_PER_CLIENT":"Temps moyen par client (minute)",
+    "TIME_PER_CLIENT_NOTICE":"NB : Cette valeur sera ajustée automatiquement",
+    "ADD_SERVICE":"Ajout d'un e-saff",
+    "WORK_TIME":"Temps de travail",
+    "START":"Début",
+    "END":"Fin",
+    "MEN":"Homme",
+    "WOMAN":"Femme",
+    "OPENED":"Ouvert",
+    "CLOSED":"Fermé"
+
 
 }

@@ -19,54 +19,63 @@ class ServiceService {
   }
 
 //update provider data
-  Future<http.StreamedResponse> updateProvider(
+  Future<http.StreamedResponse> updateService(
       String token,
       int id,
       String title,
       String description,
-      String address,
-      String email,
-      String mobile,
-      String siteWeb,
-      File image,
-      String oldPassword) async {
-    var url = "http://10.0.2.2:8000/api/providers/" +
+      String avgTimePerClient,
+      String counter,
+      String workStartTime,
+      String workEndTime,
+      List<String> openDays,
+      String status,
+      File image) async {
+    var url = "http://10.0.2.2:8000/api/services/" +
         id.toString() +
         "?api_token=" +
         token;
     var request = new http.MultipartRequest("POST", Uri.parse(url));
-    request.fields['oldPassword'] = oldPassword;
-
     if (image != null)
       request.files.add(await http.MultipartFile.fromPath('img', image.path));
     if (title != null) request.fields['title'] = title;
     if (description != null) request.fields['description'] = description;
-    if (address != null) request.fields['address'] = address;
-    if (email != null) request.fields['email'] = email;
-    if (mobile != null) request.fields['mobile'] = mobile;
-    if (siteWeb != null) request.fields['url'] = siteWeb;
+
+    if (avgTimePerClient != null)
+      request.fields['avg_time_per_client'] = avgTimePerClient;
+    if (counter != null) request.fields['counter'] = counter;
+    if (workStartTime != null)
+      request.fields['work_start_time'] = workStartTime;
+    if (workEndTime != null) request.fields['work_end_time'] = workEndTime;
+    if (openDays != null) request.fields['open_days'] = openDays.toString();
+    if (status != null) request.fields['status'] = status;
     return await request.send();
   }
 
   //fetch all providers
-  Future<http.StreamedResponse> addProvider(
+  Future<http.StreamedResponse> addService(
       String token,
       String title,
       String description,
-      String address,
-      String email,
-      String mobile,
-      String siteWeb,
+      String avgTimePerClient,
+      String counter,
+      String workStartTime,
+      String workEndTime,
+      List<String> openDays,
+      String status,
       File image) async {
-    var url = "http://10.0.2.2:8000/api/providers?api_token=" + token;
+    var url = "http://10.0.2.2:8000/api/services?api_token=" + token;
     var request = new http.MultipartRequest("POST", Uri.parse(url));
     request.files.add(await http.MultipartFile.fromPath('img', image.path));
     request.fields['title'] = title;
     request.fields['description'] = description;
-    request.fields['address'] = address;
-    request.fields['email'] = email;
-    request.fields['mobile'] = mobile;
-    request.fields['url'] = siteWeb;
+    request.fields['avg_time_per_client'] = avgTimePerClient;
+    request.fields['counter'] = counter;
+    request.fields['work_start_time'] = workStartTime;
+    request.fields['work_end_time'] = workEndTime;
+    request.fields['open_days'] = openDays.toString();
+    request.fields['status'] = status;
+
     return await request.send();
   }
 }

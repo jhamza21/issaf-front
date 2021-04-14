@@ -25,15 +25,12 @@ class ProviderService {
       String email,
       String mobile,
       String siteWeb,
-      File image,
-      String oldPassword) async {
+      File image) async {
     var url = "http://10.0.2.2:8000/api/providers/" +
         id.toString() +
         "?api_token=" +
         token;
     var request = new http.MultipartRequest("POST", Uri.parse(url));
-    request.fields['oldPassword'] = oldPassword;
-
     if (image != null)
       request.files.add(await http.MultipartFile.fromPath('img', image.path));
     if (title != null) request.fields['title'] = title;

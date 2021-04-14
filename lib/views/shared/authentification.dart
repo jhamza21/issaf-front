@@ -189,28 +189,36 @@ class _LoginSignUpState extends State<LoginSignUp> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
-          new Radio(
-              activeColor: Colors.black,
-              value: "HOMME",
-              groupValue: _sexe,
-              onChanged: _handleRadioButton),
-          new Text(
-            'Homme',
-            style: new TextStyle(fontSize: 16.0),
+          Row(
+            children: [
+              new Radio(
+                  activeColor: Colors.black,
+                  value: "HOMME",
+                  groupValue: _sexe,
+                  onChanged: _handleRadioButton),
+              new Text(
+                getTranslate(context, "MEN"),
+                style: new TextStyle(fontSize: 16.0),
+              ),
+            ],
           ),
-          new Radio(
-              activeColor: Colors.black,
-              value: "FEMME",
-              groupValue: _sexe,
-              onChanged: _handleRadioButton),
-          new Text(
-            'Femme',
-            style: new TextStyle(
-              fontSize: 16.0,
-            ),
-          ),
+          Row(
+            children: [
+              new Radio(
+                  activeColor: Colors.black,
+                  value: "FEMME",
+                  groupValue: _sexe,
+                  onChanged: _handleRadioButton),
+              new Text(
+                getTranslate(context, "WOMAN"),
+                style: new TextStyle(
+                  fontSize: 16.0,
+                ),
+              ),
+            ],
+          )
         ],
       ),
     );

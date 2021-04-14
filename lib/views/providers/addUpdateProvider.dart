@@ -21,7 +21,7 @@ class AddUpdateProvider extends StatefulWidget {
 
 class _AddUpdateProviderState extends State<AddUpdateProvider> {
   bool _isLoading = false;
-  String _title, _description, _email, _mobile, _siteWeb, _error, _errorImage;
+  String _title, _description, _email, _mobile, _siteWeb, _error;
   File _image;
   final _formKey = new GlobalKey<FormState>();
 
@@ -99,91 +99,69 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
   Widget showSaveProvider(ModelProvider.Provider provider) {
     return checkProviderChanged(provider)
         ? TextButton.icon(
-            onPressed: () {
+            onPressed: () async {
               if (!_isLoading && validateAndSave())
-                singleInputDialog(
-                  context,
-                  title: getTranslate(context, "CONFIRMATION"),
-                  label: getTranslate(context, "PASSWORD"),
-                  keyboardType: TextInputType.text,
-                  validator: (value) => value.isEmpty || value.length < 8
-                      ? getTranslate(context, 'INVALID_PASSWORD_LENGTH')
-                      : null,
-                  neutralText: getTranslate(context, "CANCEL"),
-                  positiveText: getTranslate(context, "LOGIN"),
-                  positiveAction: (value) async {
-                    try {
-                      setState(() {
-                        _error = null;
-                        _isLoading = true;
-                      });
-                      var prefs = await SharedPreferences.getInstance();
-                      var res = widget.provider == null
-                          ? await ProviderService().addProvider(
-                              prefs.getString('token'),
-                              _title,
-                              _description,
-                              "........",
-                              _email,
-                              _mobile,
-                              _siteWeb,
-                              _image)
-                          : await ProviderService().updateProvider(
-                              prefs.getString('token'),
-                              provider.id,
-                              _title,
-                              _description,
-                              ".........",
-                              _email,
-                              _mobile,
-                              _siteWeb,
-                              _image,
-                              value);
+                try {
+                  setState(() {
+                    _error = null;
+                    _isLoading = true;
+                  });
+                  var prefs = await SharedPreferences.getInstance();
+                  var res = widget.provider == null
+                      ? await ProviderService().addProvider(
+                          prefs.getString('token'),
+                          _title,
+                          _description,
+                          "........",
+                          _email,
+                          _mobile,
+                          _siteWeb,
+                          _image)
+                      : await ProviderService().updateProvider(
+                          prefs.getString('token'),
+                          provider.id,
+                          _title,
+                          _description,
+                          ".........",
+                          _email,
+                          _mobile,
+                          _siteWeb,
+                          _image);
 
-                      if (res.statusCode == 401) {
-                        setState(() {
-                          _isLoading = false;
-                          _error = getTranslate(context, "INVALID_PASSWORD");
-                        });
-                      } else if (res.statusCode == 200) {
-                        ModelProvider.Provider _resProvider =
-                            ModelProvider.Provider.fromJson(
-                                json.decode(await res.stream.bytesToString()));
-                        widget.callback(_resProvider);
-                        setState(() {
-                          _isLoading = false;
-                        });
-                        final snackBar = SnackBar(
-                          content: Text(getTranslate(
-                              context, "SUCCESS_INFORMATIONS_UPDATE")),
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      } else
-                        setState(() {
-                          _isLoading = false;
-                          _error = getTranslate(context, "ERROR_SERVER");
-                        });
-                    } catch (e) {
-                      setState(() {
-                        _isLoading = false;
-                        _error = getTranslate(context, "ERROR_SERVER");
-                      });
-                    }
-                  },
-                );
+                  if (res.statusCode == 200) {
+                    ModelProvider.Provider _resProvider =
+                        ModelProvider.Provider.fromJson(
+                            json.decode(await res.stream.bytesToString()));
+                    widget.callback(_resProvider);
+                    setState(() {
+                      _isLoading = false;
+                    });
+                    final snackBar = SnackBar(
+                      content: Text(
+                          getTranslate(context, "SUCCESS_INFORMATIONS_UPDATE")),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  } else {
+                    //TODO:HANDLE ERROR
+                    final jsonData =
+                        json.decode(await res.stream.bytesToString())
+                            as Map<String, dynamic>;
+                    setState(() {
+                      _isLoading = false;
+                      _error = getTranslate(
+                          context, jsonData.values.first[0].toUpperCase());
+                    });
+                  }
+                } catch (e) {
+                  setState(() {
+                    _isLoading = false;
+                    _error = getTranslate(context, "ERROR_SERVER");
+                  });
+                }
             },
             icon: _isLoading ? circularProgressIndicator : Icon(Icons.save),
             label: Text(getTranslate(context, "SAVE_CHANGES")))
         : SizedBox.shrink();
-  }
-
-  Widget showDivider() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 12.0, 0, 0.0),
-      child: Divider(
-        color: Colors.black54,
-      ),
-    );
   }
 
   Widget showError() {
@@ -291,16 +269,6 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
     );
   }
 
-  Widget showTitle(text) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 15.0),
-      child: Text(
-        text,
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -308,7 +276,7 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
       child: Scaffold(
         appBar: AppBar(
           elevation: 0,
-          title: Text(getTranslate(context, 'PROFILE')),
+          title: Text(getTranslate(context, 'SERVICE_INFORMATIONS')),
           centerTitle: true,
         ),
         body: Form(
@@ -316,7 +284,6 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
-                showTitle(getTranslate(context, "SERVICE_INFORMATIONS")),
                 showImageInput(
                     widget.provider != null ? widget.provider.image : null),
                 showTitleInput(

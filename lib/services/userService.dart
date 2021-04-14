@@ -43,11 +43,9 @@ class UserService {
       String sexe,
       String role,
       String email,
-      String mobile,
-      String oldPassword) async {
+      String mobile) async {
     var url = "http://10.0.2.2:8000/api/updateAccount?api_token=" + token;
     Map<String, dynamic> data;
-    data["oldPassword"] = oldPassword;
     if (username != null) data["username"] = username;
     if (password != null) data["password"] = password;
     if (name != null) data["name"] = name;

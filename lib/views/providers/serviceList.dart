@@ -201,6 +201,6 @@ class _ServiceListState extends State<ServiceList> {
                           return serviceCard(_services[index]);
                         },
                       ))
-        : AddUpdateService(widget.provider, changePage);
+        : AddUpdateService(widget.provider, null, changePage);
   }
 }
