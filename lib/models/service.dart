@@ -2,12 +2,12 @@ class Service {
   int id;
   String title;
   String description;
-  String timePerClient;
-  String counter;
+  int timePerClient;
+  int counter;
   String workStartTime;
   String workEndTime;
-  String openDays;
-  Status status;
+  List<dynamic> openDays;
+  String status;
 
   String image;
   Service(
@@ -26,11 +26,11 @@ class Service {
       : id = json['id'],
         title = json['title'] ?? '',
         description = json['description'] ?? '',
-        timePerClient = json['avg_time_per_client'] ?? '',
-        counter = json['counter'] ?? '',
+        timePerClient = json['avg_time_per_client'] ?? null,
+        counter = json['counter'] ?? null,
         workStartTime = json['work_start_time'] ?? '',
         workEndTime = json['work_end_time'] ?? '',
-        openDays = json['open_days'] ?? '',
+        openDays = json['open_days'] ?? null,
         status = json['status'] ?? '',
         image = json['image'] ?? '';
   static List<Service> listFromJson(List<dynamic> json) {
@@ -39,5 +39,3 @@ class Service {
         : json.map((value) => Service.fromJson(value)).toList();
   }
 }
-
-enum Status { OPENED, CLOSED }

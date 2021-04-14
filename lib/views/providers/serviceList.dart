@@ -36,12 +36,13 @@ class _ServiceListState extends State<ServiceList> {
           .fetchServices(prefs.getString('token'), widget.provider.id);
 
       assert(response.statusCode == 200);
-      final jsonData = json.decode(response.body);
+      final jsonData = json.decode(response.body)["services"];
       _services = Service.listFromJson(jsonData);
       setState(() {
         _isLoading = false;
       });
     } catch (error) {
+      print(error);
       setState(() {
         _isLoading = false;
       });
