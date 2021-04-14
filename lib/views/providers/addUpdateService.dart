@@ -8,8 +8,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:issaf/models/provider.dart' as ModelProvider;
 import 'package:issaf/models/service.dart';
 import 'package:issaf/constants.dart';
+import 'package:issaf/models/user.dart';
 import 'package:issaf/services/serviceService.dart';
 import 'package:day_picker/day_picker.dart';
+import 'package:issaf/services/userService.dart';
 
 class AddUpdateService extends StatefulWidget {
   final ModelProvider.Provider provider;
@@ -27,7 +29,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
       _description,
       _workStartTime = "08:00",
       _workEndTime = "17:00",
-      _status,
+      _status = "OPENED",
       _error;
   double _avgTimePerClient = 10;
   List<String> _openDays;
@@ -55,6 +57,43 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
     return false;
   }
 
+  Future<int> validateUsername() async {
+    try {
+      var prefs = await SharedPreferences.getInstance();
+
+      setState(() {
+        _isLoading = true;
+      });
+      var res = await UserService()
+          .getUserByUsername(prefs.getString('token'), _username);
+      if (res.statusCode != 200) {
+        setState(() {
+          _isLoading = false;
+          _error = getTranslate(context, "USER_NOT_FOUND");
+        });
+        return null;
+      }
+      if (res.statusCode == 200) {
+        var jsonData = json.decode(res.body);
+        User _user = User.fromJson(jsonData);
+        if (_user.role != "ADMIN_SAFF") {
+          setState(() {
+            _isLoading = false;
+            _error = getTranslate(context, "USER_INVALID_ROLE");
+          });
+          return null;
+        }
+        return _user.id;
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _error = getTranslate(context, "ERROR_SERVER");
+      });
+      return null;
+    }
+  }
+
   // Check if form is valid
   bool validateAndSave() {
     final form = _formKey.currentState;
@@ -68,6 +107,8 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
             onPressed: () async {
               if (!_isLoading && validateAndSave())
                 try {
+                  var _adminId = await validateUsername();
+                  if (_adminId == null) return;
                   setState(() {
                     _error = null;
                     _isLoading = true;
@@ -76,6 +117,8 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                   var res = widget.service == null
                       ? await ServiceService().addService(
                           prefs.getString('token'),
+                          widget.provider.id.toString(),
+                          _adminId.toString(),
                           _title,
                           _description,
                           _avgTimePerClient.toInt().toString(),
@@ -97,7 +140,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                           _openDays,
                           _status,
                           _image);
-                  if (res.statusCode == 200) {
+                  if (res.statusCode == 201) {
                     setState(() {
                       _isLoading = false;
                     });
@@ -118,6 +161,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                     });
                   }
                 } catch (e) {
+                  print(e);
                   setState(() {
                     _isLoading = false;
                     _error = getTranslate(context, "ERROR_SERVER");
@@ -280,17 +324,16 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
           borderRadius: BorderRadius.circular(30.0),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
-            // 10% of the width, so there are ten blinds.
             colors: [
               Colors.orange[200],
               Colors.orange[300],
-            ], // whitish to gray
-            tileMode: TileMode.repeated, // repeats the gradient over the canvas
+            ],
+            tileMode: TileMode.repeated,
           ),
         ),
-        onSelect: (values) {
-          print(values);
-        },
+        onSelect: (values) => setState(() {
+          _openDays = values;
+        }),
       ),
     );
   }
@@ -351,7 +394,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                   groupValue: _status != null ? _status : status,
                   onChanged: _handleRadioButton),
               new Text(
-                'Ouvert',
+                getTranslate(context, "OPENED"),
                 style: new TextStyle(fontSize: 16.0),
               ),
             ],
@@ -364,7 +407,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                   groupValue: _status != null ? _status : status,
                   onChanged: _handleRadioButton),
               new Text(
-                'Fermé',
+                getTranslate(context, "CLOSED"),
                 style: new TextStyle(
                   fontSize: 16.0,
                 ),
@@ -407,6 +450,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                 showWorkTimeInput(context),
                 showDayPicker(),
                 showStatusInput(null),
+                showError(),
                 showSaveService(widget.service)
               ],
             ),

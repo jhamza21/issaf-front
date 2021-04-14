@@ -83,7 +83,9 @@
     "MEN":"Homme",
     "WOMAN":"Femme",
     "OPENED":"Ouvert",
-    "CLOSED":"Fermé"
+    "CLOSED":"Fermé",
+    "USER_NOT_FOUND":"Il semble que l'username ne correspond à aucun utilisateur",
+    "USER_INVALID_ROLE":"L'utilisateur sélectionner doit avoir un compte responsable fournisseur"
 
 
 }

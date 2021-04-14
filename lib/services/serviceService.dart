@@ -55,6 +55,8 @@ class ServiceService {
   //fetch all providers
   Future<http.StreamedResponse> addService(
       String token,
+      String providerId,
+      String adminId,
       String title,
       String description,
       String avgTimePerClient,
@@ -66,14 +68,17 @@ class ServiceService {
       File image) async {
     var url = "http://10.0.2.2:8000/api/services?api_token=" + token;
     var request = new http.MultipartRequest("POST", Uri.parse(url));
+    for (int i = 0; i < openDays.length; i++)
+      request.fields['open_days[' + i.toString() + ']'] = openDays[i];
     request.files.add(await http.MultipartFile.fromPath('img', image.path));
+    request.fields['provider_id'] = providerId;
+    request.fields['admin_id'] = adminId;
     request.fields['title'] = title;
     request.fields['description'] = description;
     request.fields['avg_time_per_client'] = avgTimePerClient;
     request.fields['counter'] = counter;
     request.fields['work_start_time'] = workStartTime;
     request.fields['work_end_time'] = workEndTime;
-    request.fields['open_days'] = openDays.toString();
     request.fields['status'] = status;
 
     return await request.send();

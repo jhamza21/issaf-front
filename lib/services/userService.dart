@@ -3,6 +3,13 @@ import 'dart:convert';
 
 class UserService {
 //login
+  Future<http.Response> getUserByUsername(String token, String username) async {
+    var url =
+        "http://10.0.2.2:8000/api/getUser/" + username + "?api_token=" + token;
+    return await http.get(url);
+  }
+
+//login
   Future<http.Response> signIn(String username, String password) async {
     var url = "http://10.0.2.2:8000/api/login";
     return await http.post(url,
