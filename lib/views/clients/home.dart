@@ -1,16 +1,16 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
-import 'package:issaf/views/profile.dart';
-import 'package:issaf/views/providerList.dart';
-import 'package:issaf/views/tickets/index.dart';
+import 'package:issaf/views/clients/profile.dart';
+import 'package:issaf/views/clients/providerList.dart';
+import 'package:issaf/views/clients/tickets/index.dart';
 
-class HomeP extends StatefulWidget {
+class Home extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _HomePState();
+  State<StatefulWidget> createState() => new _HomeState();
 }
 
-class _HomePState extends State<HomeP> {
+class _HomeState extends State<Home> {
   int _currentIndex = 0;
 
   void onTabTapped(int index) {

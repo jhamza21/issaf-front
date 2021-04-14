@@ -19,7 +19,7 @@ class LoginSignUp extends StatefulWidget {
 
 class _LoginSignUpState extends State<LoginSignUp> {
   final _formKey = new GlobalKey<FormState>();
-  String _username, _password, _name, _email, _sexe = "homme", _mobile;
+  String _username, _password, _name, _email, _sexe = "HOMME", _mobile;
   bool _showPassword;
   bool _isLoginForm;
 
@@ -48,9 +48,9 @@ class _LoginSignUpState extends State<LoginSignUp> {
         Redux.store.dispatch(
             signInUserAction(Redux.store, _username, _password, context));
       } else {
-        // //SIGN UP
-        Redux.store.dispatch(
-            signUpUserAction(Redux.store, _username, _password, context));
+        // //SIGN UP CLIENT
+        Redux.store.dispatch(signUpUserAction(Redux.store, _username, _password,
+            _name, _email, _mobile, _sexe, "CLIENT", context));
       }
     }
   }
@@ -121,7 +121,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
         children: <Widget>[
           new Radio(
               activeColor: Colors.black,
-              value: "homme",
+              value: "HOMME",
               groupValue: _sexe,
               onChanged: _handleRadioButton),
           new Text(
@@ -130,7 +130,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
           ),
           new Radio(
               activeColor: Colors.black,
-              value: "femme",
+              value: "FEMME",
               groupValue: _sexe,
               onChanged: _handleRadioButton),
           new Text(
@@ -151,9 +151,10 @@ class _LoginSignUpState extends State<LoginSignUp> {
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRounded(
             Icon(Icons.person), getTranslate(context, 'USERNAME') + "*", null),
-        validator: (value) => value.length < 6 || value.length > 255
-            ? getTranslate(context, 'INVALID_USERNAME_LENGTH')
-            : null,
+        validator: (value) =>
+            value.isEmpty || value.length < 6 || value.length > 255
+                ? getTranslate(context, 'INVALID_USERNAME_LENGTH')
+                : null,
         onSaved: (value) => _username = value.trim(),
       ),
     );
@@ -166,8 +167,8 @@ class _LoginSignUpState extends State<LoginSignUp> {
         keyboardType: TextInputType.emailAddress,
         decoration: inputTextDecorationRounded(
             Icon(Icons.email), getTranslate(context, 'EMAIL'), null),
-        validator: (value) => value != null && !Validator.isValidEmail(value)
-            ? getTranslate(context, 'INVALID_EMAIL_LENGTH')
+        validator: (value) => value.isEmpty || !Validator.isValidEmail(value)
+            ? getTranslate(context, 'INVALID_EMAIL')
             : null,
         onSaved: (value) => _email = value.trim(),
       ),
@@ -178,20 +179,23 @@ class _LoginSignUpState extends State<LoginSignUp> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: new IntlPhoneField(
+        autoValidate: false,
         initialCountryCode: "TN",
+        searchText: getTranslate(context, "SEARCH_BY_COUNTRY"),
         keyboardType: TextInputType.phone,
         decoration: inputTextDecorationRounded(
             null, getTranslate(context, 'MOBILE'), null),
-        validator: (value) => value.length < 8 || value.length > 14
-            ? getTranslate(context, "INVALID_MOBILE_LENGTH")
-            : null,
-        onChanged: (value) => setState(() {
+        validator: (value) =>
+            value.isEmpty || value.length < 8 || value.length > 12
+                ? getTranslate(context, "INVALID_MOBILE_LENGTH")
+                : null,
+        onSaved: (value) => {
           _mobile = value.countryISOCode +
-              "" +
+              "/" +
               value.countryCode +
               "/" +
-              value.number;
-        }),
+              value.number
+        },
       ),
     );
   }
@@ -216,7 +220,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
         validator: (value) => value.isEmpty || value.length < 8
             ? getTranslate(context, 'INVALID_PASSWORD_LENGTH')
             : null,
-        onChanged: (value) => _password = value.trim(),
+        onSaved: (value) => _password = value.trim(),
       ),
     );
   }
@@ -230,9 +234,11 @@ class _LoginSignUpState extends State<LoginSignUp> {
             Icon(Icons.supervised_user_circle),
             getTranslate(context, 'NAME') + "*",
             null),
-        onChanged: (value) => setState(() {
-          _name = value.trim();
-        }),
+        validator: (value) =>
+            value.isEmpty || value.length < 6 || value.length > 255
+                ? getTranslate(context, 'INVALID_NAME_LENGTH')
+                : null,
+        onSaved: (value) => _name = value.trim(),
       ),
     );
   }
@@ -298,7 +304,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
   Widget showErrorMessage(userState) {
     if (userState.isError)
       return Padding(
-        padding: const EdgeInsets.only(top: 8.0),
+        padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
         child: Text(
           userState.errorText,
           style: TextStyle(

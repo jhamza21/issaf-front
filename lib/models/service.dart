@@ -5,7 +5,7 @@ class Service {
   String timePerClient;
   String counter;
   String workStartTime;
-  String endWorkTime;
+  String workEndTime;
   String openDays;
   Status status;
 
@@ -17,7 +17,7 @@ class Service {
       this.timePerClient,
       this.counter,
       this.workStartTime,
-      this.endWorkTime,
+      this.workEndTime,
       this.openDays,
       this.status,
       this.image});
@@ -29,8 +29,8 @@ class Service {
         timePerClient = json['avg_time_per_client'] ?? '',
         counter = json['counter'] ?? '',
         workStartTime = json['work_start_time'] ?? '',
-        endWorkTime = json['endWorkTime'] ?? '',
-        openDays = json['openDays'] ?? '',
+        workEndTime = json['work_end_time'] ?? '',
+        openDays = json['open_days'] ?? '',
         status = json['status'] ?? '',
         image = json['image'] ?? '';
   static List<Service> listFromJson(List<dynamic> json) {
@@ -40,4 +40,4 @@ class Service {
   }
 }
 
-enum Status { opened, closed }
+enum Status { OPENED, CLOSED }

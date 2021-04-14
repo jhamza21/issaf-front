@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
-import 'package:issaf/views/tickets/TicketInProgress.dart';
-import 'package:issaf/views/tickets/TicketOld.dart';
+import 'package:issaf/views/clients/tickets/TicketInProgress.dart';
+import 'package:issaf/views/clients/tickets/TicketOld.dart';
 
 class Tickets extends StatefulWidget {
   @override

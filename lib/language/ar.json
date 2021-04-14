@@ -30,9 +30,9 @@
     "CANCEL": "إلغاء",
     "SAVE_CHANGES":"حفظ التغييرات",
 
-    "INVALID_NAME_LENGTH":"يجب أن يتكون الاسم من 8 إلى 80 حرفًا",
+    "INVALID_NAME_LENGTH":"يجب أن يتكون الاسم من 8 إلى 255 حرفًا",
     "INVALID_PASSWORD_CONFIRMATION": "لا يتطابق تأكيد كلمة المرور",
-    "INVALID_MOBILE_LENGTH" : "يجب أن يتكون رقم الهاتف من 8 إلى 14 رقمًا",
+    "INVALID_MOBILE_LENGTH" : "يجب أن يتكون رقم الهاتف من 8 إلى 12 رقمًا",
     "INVALID_EMAIL": "يبدو أن عنوان بريدك الإلكتروني غير صحيح.",
     "INVALID_PASSWORD_LENGTH": "الحد الأدنى لطول كلمة المرور هو 8",
     "INVALID_PASSWORD": "كلمة مرورك خاطئة",
@@ -52,9 +52,9 @@
     "IN_PROGRESS":"الجاري",
     "HISTORICAL":"تاريخي",
     "TITLE": "العنوان",
-    "INVALID_TITLE_LENGTH": "يجب أن يحتوي العنوان على ما بين 6 و 255 حرفًا",
+    "INVALID_TITLE_LENGTH": "يجب أن يحتوي العنوان على ما بين 2 و 255 حرفًا",
     "DESCRIPTION": "الوصف",
-    "INVALID_DESCRIPTION_LENGTH": "يجب أن يحتوي الوصف على ما بين 6 و 255 حرفًا",
+    "INVALID_DESCRIPTION_LENGTH": "يجب أن يحتوي الوصف على ما بين 8 و 255 حرفًا",
     "ADDRESS":"موقعك",
     "INVALID_ADDRESS_LENGTH":"يجب أن تحتوي موقعك على ما بين 6 و 255 حرفًا",
     "SITE_WEB":"موقع إلكتروني",
@@ -65,15 +65,11 @@
     "REQUIRED_FIELD":"* : حقل اجباري",
     "FOURNISSEUR": "مزود",
     "CLIENT":"زبون",
-    "WELCOME_MSG": "الحل الذي يصطف في مكانك!"
-
-
-
-
-
-
-
-
+    "WELCOME_MSG": "الحل الذي يصطف في مكانك!",
+    "ADMIN_SAFF":"مسؤول",
+    "ADMIN_SERVICE":"مدير",
+    "REGISTER_AS":"سجل باسم",
+    "SEARCH_BY_COUNTRY":"البحث عن طريق اسم الدولة"
 
 
 }

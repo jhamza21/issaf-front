@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:issaf/errorHandler.dart';
 import 'package:issaf/models/user.dart';
 import 'package:issaf/redux/store.dart';
 import 'package:issaf/redux/users/state.dart';
+import 'package:issaf/services/provideService.dart';
 import 'package:issaf/services/userService.dart';
 import 'package:redux/redux.dart';
 import 'package:meta/meta.dart';
@@ -81,15 +83,86 @@ Future<void> signInUserAction(Store<AppState> store, String username,
 }
 
 //sign up / register user
-Future<void> signUpUserAction(Store<AppState> store, String username,
-    String password, dynamic context) async {
+Future<void> signUpUserAction(
+    Store<AppState> store,
+    String username,
+    String password,
+    String name,
+    String email,
+    String mobile,
+    String sexe,
+    String role,
+    dynamic context) async {
   store.dispatch(SetUserStateAction(UserState(isLoading: true)));
   try {
     var prefs = await SharedPreferences.getInstance();
-    final response = await UserService().signUp(username, password);
+    final response = await UserService()
+        .signUp(username, password, name, email, mobile, sexe, role);
     final jsonData = json.decode(response.body);
     if (response.statusCode == 201) {
       await prefs.setString('token', jsonData["data"]["api_token"]);
+      store.dispatch(
+        SetUserStateAction(
+          UserState(
+            isLoggedIn: true,
+            isError: false,
+            errorText: '',
+            isLoading: false,
+            user: User.fromJson(jsonData["data"]),
+          ),
+        ),
+      );
+    } else {
+      var error = jsonData["errors"] as Map<String, dynamic>;
+
+      store.dispatch(
+        SetUserStateAction(
+          UserState(
+            isLoggedIn: false,
+            isError: true,
+            isLoading: false,
+            errorText: errorHandler(error.values.first[0], context),
+          ),
+        ),
+      );
+    }
+  } catch (error) {
+    store.dispatch(SetUserStateAction(UserState(
+        isLoggedIn: false,
+        isError: true,
+        isLoading: false,
+        errorText: errorHandler("ERROR_SERVER", context))));
+  }
+}
+
+//sign up provider
+Future<void> signUpProviderAction(
+    Store<AppState> store,
+    String username,
+    String password,
+    String name,
+    String email,
+    String mobile,
+    String sexe,
+    String role,
+    String title,
+    String description,
+    String mobileF,
+    String emailF,
+    String address,
+    String url,
+    File image,
+    dynamic context) async {
+  store.dispatch(SetUserStateAction(UserState(isLoading: true)));
+  try {
+    var prefs = await SharedPreferences.getInstance();
+    final response = await UserService()
+        .signUp(username, password, name, email, mobile, sexe, role);
+    final jsonData = json.decode(response.body);
+    if (response.statusCode == 201) {
+      await prefs.setString('token', jsonData["data"]["api_token"]);
+      await ProviderService().addProvider(jsonData["data"]["api_token"], title,
+          description, address, emailF, mobileF, url, image);
       store.dispatch(
         SetUserStateAction(
           UserState(
@@ -115,7 +188,6 @@ Future<void> signUpUserAction(Store<AppState> store, String username,
       );
     }
   } catch (error) {
-    print(error);
     store.dispatch(SetUserStateAction(UserState(
         isLoggedIn: false,
         isError: true,

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
@@ -32,10 +33,10 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
       _mobileU,
       _emailF,
       _emailU,
-      _sexe = "homme",
+      _sexe = "HOMME",
+      _role = "ADMIN_SERVICE",
       _siteWeb;
-  bool _showPassword;
-  bool _isLoginForm;
+  bool _showPassword, _isLoginForm;
   File _image;
 
   @override
@@ -48,10 +49,7 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
   // Check if form is valid
   bool validateAndSave() {
     final form = _formKey.currentState;
-    if (form.validate()) {
-      form.save();
-      return true;
-    }
+    if (form.validate()) return true;
     return false;
   }
 
@@ -64,8 +62,35 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
             signInUserAction(Redux.store, _username, _password, context));
       } else {
         // //SIGN UP
-        Redux.store.dispatch(
-            signUpUserAction(Redux.store, _username, _password, context));
+        if (_role == "ADMIN_SAFF")
+          Redux.store.dispatch(signUpUserAction(
+              Redux.store,
+              _username,
+              _password,
+              _name,
+              _emailU,
+              _mobileU,
+              _sexe,
+              "ADMIN_SAFF",
+              context));
+        else
+          Redux.store.dispatch(signUpProviderAction(
+              Redux.store,
+              _username,
+              _password,
+              _name,
+              _emailU,
+              _mobileU,
+              _sexe,
+              "ADMIN_SERVICE",
+              _title,
+              _description,
+              _mobileF,
+              _emailF,
+              "address ...",
+              _siteWeb,
+              _image,
+              context));
       }
     }
   }
@@ -91,6 +116,7 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
               child: Column(
                 children: <Widget>[
                   showLogo(),
+                  !_isLoginForm ? showRoleInput() : SizedBox(),
                   !_isLoginForm
                       ? _showSectionTitle(getTranslate(context, "USER_INFO"))
                       : SizedBox(),
@@ -101,15 +127,27 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
                   showPasswordInput(),
                   !_isLoginForm ? showPasswordConfirmationInput() : SizedBox(),
                   !_isLoginForm ? showSexeInput() : SizedBox(),
-                  !_isLoginForm
+                  !_isLoginForm && _role == "ADMIN_SERVICE"
                       ? _showSectionTitle(getTranslate(context, "SERVICE_INFO"))
                       : SizedBox(),
-                  !_isLoginForm ? showImageInput() : SizedBox(),
-                  !_isLoginForm ? showTitleInput() : SizedBox(),
-                  !_isLoginForm ? showDescriptionInput() : SizedBox(),
-                  !_isLoginForm ? showEmailInput(false) : SizedBox(),
-                  !_isLoginForm ? showMobileInput(false) : SizedBox(),
-                  !_isLoginForm ? showSiteWebInput() : SizedBox(),
+                  !_isLoginForm && _role == "ADMIN_SERVICE"
+                      ? showImageInput()
+                      : SizedBox(),
+                  !_isLoginForm && _role == "ADMIN_SERVICE"
+                      ? showTitleInput()
+                      : SizedBox(),
+                  !_isLoginForm && _role == "ADMIN_SERVICE"
+                      ? showDescriptionInput()
+                      : SizedBox(),
+                  !_isLoginForm && _role == "ADMIN_SERVICE"
+                      ? showEmailInput(false)
+                      : SizedBox(),
+                  !_isLoginForm && _role == "ADMIN_SERVICE"
+                      ? showMobileInput(false)
+                      : SizedBox(),
+                  !_isLoginForm && _role == "ADMIN_SERVICE"
+                      ? showSiteWebInput()
+                      : SizedBox(),
                   showErrorMessage(state.userState),
                   !_isLoginForm
                       ? showNotice(getTranslate(context, "REQUIRED_FIELD"))
@@ -175,10 +213,13 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
             getTranslate(context, 'USERNAME') + "*",
             null,
             null),
-        validator: (value) => value.length < 6 || value.length > 255
-            ? getTranslate(context, 'INVALID_USERNAME_LENGTH')
-            : null,
-        onSaved: (value) => _username = value.trim(),
+        validator: (value) =>
+            value.isEmpty || value.length < 6 || value.length > 255
+                ? getTranslate(context, 'INVALID_USERNAME_LENGTH')
+                : null,
+        onChanged: (value) => setState(() {
+          _username = value.trim();
+        }),
       ),
     );
   }
@@ -195,11 +236,9 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
           GestureDetector(
               child: Icon(
                   !_showPassword ? Icons.visibility_off : Icons.visibility),
-              onTap: () {
-                setState(() {
-                  _showPassword = !_showPassword;
-                });
-              }),
+              onTap: () => setState(() {
+                    _showPassword = !_showPassword;
+                  })),
         ),
         validator: (value) => value.isEmpty || value.length < 8
             ? getTranslate(context, 'INVALID_PASSWORD_LENGTH')
@@ -269,7 +308,7 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
   Widget showErrorMessage(userState) {
     if (userState.isError)
       return Padding(
-        padding: const EdgeInsets.only(top: 8.0),
+        padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
         child: Text(
           userState.errorText,
           style: TextStyle(
@@ -303,6 +342,39 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
     );
   }
 
+  Widget showRoleInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 0, 12.0, 0.0),
+      child: Row(
+        children: [
+          Text(
+            getTranslate(context, "REGISTER_AS") + " : ",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          DropdownButton(
+            dropdownColor: Colors.orange[50],
+            hint: Text(getTranslate(context, _role)),
+            onChanged: (String value) {
+              setState(() {
+                _role = value;
+              });
+            },
+            icon: Icon(
+              Icons.arrow_downward,
+            ),
+            underline: SizedBox(),
+            items: ["ADMIN_SERVICE", "ADMIN_SAFF"]
+                .map<DropdownMenuItem<String>>((role) => DropdownMenuItem(
+                      value: role,
+                      child: Text(getTranslate(context, role)),
+                    ))
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget showTitleInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
@@ -310,10 +382,13 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRectangle(
             null, getTranslate(context, 'TITLE') + "*", null, null),
-        validator: (value) => value.length < 6 || value.length > 255
-            ? getTranslate(context, 'INVALID_TITLE_LENGTH')
-            : null,
-        onSaved: (value) => _title = value.trim(),
+        validator: (value) =>
+            value.isEmpty || value.length < 2 || value.length > 255
+                ? getTranslate(context, 'INVALID_TITLE_LENGTH')
+                : null,
+        onChanged: (value) => setState(() {
+          _title = value.trim();
+        }),
       ),
     );
   }
@@ -321,24 +396,27 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
   Widget showMobileInput(bool _isUserField) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
-      child: new IntlPhoneField(
+      child: IntlPhoneField(
+        autoValidate: false,
         initialCountryCode: "TN",
+        searchText: getTranslate(context, "SEARCH_BY_COUNTRY"),
         keyboardType: TextInputType.phone,
         decoration: inputTextDecorationRectangle(
-            null, getTranslate(context, 'MOBILE'), null, null),
-        validator: (value) => value.length < 8 || value.length > 14
-            ? getTranslate(context, "INVALID_MOBILE_LENGTH")
-            : null,
+            null, getTranslate(context, 'MOBILE') + "*", null, null),
+        validator: (value) =>
+            value.isEmpty || value.length < 8 || value.length > 12
+                ? getTranslate(context, "INVALID_MOBILE_LENGTH")
+                : null,
         onChanged: (value) => setState(() {
           if (_isUserField)
             _mobileU = value.countryISOCode +
-                "" +
+                "/" +
                 value.countryCode +
                 "/" +
                 value.number;
           else
             _mobileF = value.countryISOCode +
-                "" +
+                "/" +
                 value.countryCode +
                 "/" +
                 value.number;
@@ -353,13 +431,16 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
       child: TextFormField(
         keyboardType: TextInputType.emailAddress,
         decoration: inputTextDecorationRectangle(
-            null, getTranslate(context, 'EMAIL'), null, null),
-        validator: (value) => value != null && !Validator.isValidEmail(value)
+            null, getTranslate(context, 'EMAIL') + "*", null, null),
+        validator: (value) => value.isEmpty || !Validator.isValidEmail(value)
             ? getTranslate(context, 'INVALID_EMAIL')
             : null,
-        onSaved: (value) => {
-          if (_isUserField) _emailU = value.trim() else _emailF = value.trim()
-        },
+        onChanged: (value) => setState(() {
+          if (_isUserField)
+            _emailU = value.trim();
+          else
+            _emailF = value.trim();
+        }),
       ),
     );
   }
@@ -371,10 +452,13 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
         keyboardType: TextInputType.emailAddress,
         decoration: inputTextDecorationRectangle(
             null, getTranslate(context, 'NAME') + "*", null, null),
-        validator: (value) => value != null && !Validator.isValidEmail(value)
-            ? getTranslate(context, 'INVALID_NAME_LENGTH')
-            : null,
-        onSaved: (value) => {_name = value.trim()},
+        validator: (value) =>
+            value.isEmpty || value.length < 6 || value.length > 255
+                ? getTranslate(context, 'INVALID_NAME_LENGTH')
+                : null,
+        onChanged: (value) => setState(() {
+          _name = value.trim();
+        }),
       ),
     );
   }
@@ -393,7 +477,7 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
         children: <Widget>[
           new Radio(
               activeColor: Colors.black,
-              value: "homme",
+              value: "HOMME",
               groupValue: _sexe,
               onChanged: _handleRadioButton),
           new Text(
@@ -402,7 +486,7 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
           ),
           new Radio(
               activeColor: Colors.black,
-              value: "femme",
+              value: "FEMME",
               groupValue: _sexe,
               onChanged: _handleRadioButton),
           new Text(
@@ -422,11 +506,13 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
       child: TextFormField(
         keyboardType: TextInputType.emailAddress,
         decoration: inputTextDecorationRectangle(
-            null, getTranslate(context, 'SITE_WEB'), null, null),
-        validator: (value) => value != null && Uri.parse(value).isAbsolute
+            null, getTranslate(context, 'SITE_WEB') + "*", null, null),
+        validator: (value) => value.isEmpty || Uri.parse(value).isAbsolute
             ? getTranslate(context, 'INVALID_SITE_WEB')
             : null,
-        onSaved: (value) => _siteWeb = value.trim(),
+        onChanged: (value) => setState(() {
+          _siteWeb = value.trim();
+        }),
       ),
     );
   }
@@ -439,10 +525,13 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRectangle(
             null, getTranslate(context, 'DESCRIPTION') + "*", null, null),
-        validator: (value) => value.length < 6 || value.length > 255
-            ? getTranslate(context, 'INVALID_DESCRIPTION_LENGTH')
-            : null,
-        onSaved: (value) => _description = value.trim(),
+        validator: (value) =>
+            value.isEmpty || value.length < 8 || value.length > 255
+                ? getTranslate(context, 'INVALID_DESCRIPTION_LENGTH')
+                : null,
+        onChanged: (value) => setState(() {
+          _description = value.trim();
+        }),
       ),
     );
   }
@@ -461,7 +550,9 @@ class _LoginSignUpFState extends State<LoginSignUpF> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           CircleAvatar(
-            child: Text(getTranslate(context, 'INSERT_IMAGE') + "*"),
+            child: _image == null
+                ? Text(getTranslate(context, 'INSERT_IMAGE') + "*")
+                : SizedBox.shrink(),
             backgroundColor: Colors.orange[200],
             radius: 80,
             backgroundImage: _image != null ? FileImage(_image) : null,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/language/appLanguage.dart';
 import 'package:issaf/language/language.dart';
-import 'package:issaf/views/authentification.dart';
+import 'package:issaf/views/clients/authentification.dart';
 import 'package:issaf/views/providers/authentification.dart';
 import 'package:provider/provider.dart';
 

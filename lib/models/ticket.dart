@@ -28,4 +28,4 @@ class Ticket {
   }
 }
 
-enum Status { IN_PROGRESS, DONE, UNDONE }
+enum Status { IN_PROGRESS, DONE, DELAYED, CANCELED }

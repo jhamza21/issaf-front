@@ -1,16 +1,16 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
-import 'package:issaf/views/profile.dart';
-import 'package:issaf/views/providerList.dart';
-import 'package:issaf/views/tickets/index.dart';
+import 'package:issaf/views/responsables/profile.dart';
+import 'package:issaf/views/clients/providerList.dart';
+import 'package:issaf/views/clients/tickets/index.dart';
 
-class HomeC extends StatefulWidget {
+class Home extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _HomeCState();
+  State<StatefulWidget> createState() => new _HomeState();
 }
 
-class _HomeCState extends State<HomeC> {
+class _HomeState extends State<Home> {
   int _currentIndex = 0;
 
   void onTabTapped(int index) {
@@ -22,7 +22,7 @@ class _HomeCState extends State<HomeC> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> _children = [
-      ProvidersList(getTranslate(context, "PROVIDERS")),
+      ProvidersList(getTranslate(context, "PROVIDERS") + " :ASAFF"),
       Tickets(),
       Profile()
     ];

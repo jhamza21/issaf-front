@@ -22,101 +22,52 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   bool _isLoading = false, _showPasswordInput = false;
-  String name, mobile, country, password, email, username, sexe, error;
-  Map errors, formData;
+  String name, mobile, country, password, email, username, sexe, globalError;
+  final _formKey = new GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
     _isLoading = false;
-    errors = new Map<String, String>();
-    formData = new Map<String, String>();
   }
 
   bool checkFormChanged(User user) {
     if ((mobile != null && mobile != user.mobile) ||
-        (country != null && country != user.country) ||
         (name != null && name != user.name) ||
         (username != null && username != user.username) ||
         (email != null && email != user.email) ||
+        (sexe != null && sexe != user.sexe) ||
         password != null) return true;
     return false;
   }
 
-  bool validateForm(User user) {
-    formData = new Map<String, String>();
-    Map<String, String> _errors = new Map<String, String>();
-    bool valid = true;
-    //VALIDATE USERNAME
-    if (username != null && username != user.username) {
-      if (username.length < 6 || username.length > 255) {
-        _errors["username"] = getTranslate(context, "INVALID_USERNAME_LENGTH");
-        valid = false;
-      } else
-        formData["username"] = username;
-    }
-    //VALIDATE EMAIL
-    if (email != null && email != user.email) {
-      if (!Validator.isValidEmail(email)) {
-        _errors["email"] = getTranslate(context, "INVALID_EMAIL");
-        valid = false;
-      } else
-        formData["email"] = email;
-    }
-    //VALIDATE MOBILE
-    if (mobile != null && mobile != user.mobile) {
-      if (mobile.length < 8 || mobile.length > 14) {
-        _errors["mobile"] = getTranslate(context, "INVALID_MOBILE_LENGTH");
-        valid = false;
-      } else {
-        formData["mobile"] = mobile;
-        formData["country"] = country;
-      }
-    }
-    //VALIDATE country
-    if (country != null && country != user.country) {
-      formData["country"] = country;
-    }
-    //VALIDATE NAME
-    if (name != null && name != user.name) {
-      if (name.length < 8 || name.length > 80) {
-        _errors["name"] = getTranslate(context, "INVALID_NAME_LENGTH");
-        valid = false;
-      } else
-        formData["name"] = name;
-    }
-    //VALIDATE PASSWORD
-    if (password != null && password != user.password) {
-      if (password.length < 8) {
-        _errors["password"] = getTranslate(context, "INVALID_PASSWORD_LENGTH");
-        valid = false;
-      } else
-        formData["password"] = password;
-    }
-    setState(() {
-      errors = _errors;
-    });
-    return valid;
-  }
-
-  Widget showMobileInput(previousMobile, countryCode) {
+  Widget showMobileInput(previousMobile) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
       child: new IntlPhoneField(
-        initialCountryCode: countryCode != '' ? countryCode : "TN",
-        initialValue: previousMobile,
+        autoValidate: false,
+        searchText: getTranslate(context, "SEARCH_BY_COUNTRY"),
+        initialCountryCode: previousMobile.split('/')[0],
+        initialValue: previousMobile.split('/')[2],
         keyboardType: TextInputType.phone,
         decoration: inputTextDecorationRectangle(
             Icon(
               Icons.mobile_friendly,
               color: Colors.transparent,
             ),
-            getTranslate(context, 'MOBILE'),
-            errors['mobile'],
+            getTranslate(context, 'MOBILE') + "*",
+            null,
             null),
+        validator: (value) =>
+            value.isEmpty || value.length < 8 || value.length > 12
+                ? getTranslate(context, "INVALID_MOBILE_LENGTH")
+                : null,
         onChanged: (value) => setState(() {
-          country = value.countryISOCode;
-          mobile = value.number;
+          mobile = value.countryISOCode +
+              "/" +
+              value.countryCode +
+              "/" +
+              value.number;
         }),
       ),
     );
@@ -130,9 +81,13 @@ class _ProfileState extends State<Profile> {
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRectangle(
             Icon(Icons.supervised_user_circle),
-            getTranslate(context, 'NAME'),
-            errors['name'],
+            getTranslate(context, 'NAME') + "*",
+            null,
             null),
+        validator: (value) =>
+            value.isEmpty || value.length < 6 || value.length > 255
+                ? getTranslate(context, 'INVALID_NAME_LENGTH')
+                : null,
         onChanged: (value) => setState(() {
           name = value.trim();
         }),
@@ -154,7 +109,7 @@ class _ProfileState extends State<Profile> {
         children: <Widget>[
           new Radio(
               activeColor: Colors.black,
-              value: "homme",
+              value: "HOMME",
               groupValue: sexe != null ? sexe : _sexe,
               onChanged: _handleRadioButton),
           new Text(
@@ -163,7 +118,7 @@ class _ProfileState extends State<Profile> {
           ),
           new Radio(
               activeColor: Colors.black,
-              value: "femme",
+              value: "FEMME",
               groupValue: sexe != null ? sexe : _sexe,
               onChanged: _handleRadioButton),
           new Text(
@@ -184,7 +139,11 @@ class _ProfileState extends State<Profile> {
         initialValue: previousUsername,
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRectangle(Icon(Icons.person),
-            getTranslate(context, 'USERNAME'), errors['username'], null),
+            getTranslate(context, 'USERNAME') + "*", null, null),
+        validator: (value) =>
+            value.isEmpty || value.length < 6 || value.length > 255
+                ? getTranslate(context, 'INVALID_USERNAME_LENGTH')
+                : null,
         onChanged: (value) => setState(() {
           username = value.trim();
         }),
@@ -199,7 +158,10 @@ class _ProfileState extends State<Profile> {
         initialValue: previousEmail,
         keyboardType: TextInputType.emailAddress,
         decoration: inputTextDecorationRectangle(Icon(Icons.email_rounded),
-            getTranslate(context, 'EMAIL'), errors['email'], null),
+            getTranslate(context, 'EMAIL') + "*", null, null),
+        validator: (value) => value.isEmpty || !Validator.isValidEmail(value)
+            ? getTranslate(context, 'INVALID_EMAIL')
+            : null,
         onChanged: (value) => setState(() {
           email = value.trim();
         }),
@@ -213,11 +175,11 @@ class _ProfileState extends State<Profile> {
             padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
             child: TextFormField(
               obscureText: true,
-              decoration: inputTextDecorationRectangle(
-                  Icon(Icons.lock_outline),
-                  getTranslate(context, 'NEW_PASSWORD'),
-                  errors['password'],
-                  null),
+              decoration: inputTextDecorationRectangle(Icon(Icons.lock_outline),
+                  getTranslate(context, 'NEW_PASSWORD') + "*", null, null),
+              validator: (value) => value.isEmpty || value.length < 8
+                  ? getTranslate(context, 'INVALID_PASSWORD_LENGTH')
+                  : null,
               onChanged: (value) => setState(() {
                 password = value.trim();
               }),
@@ -299,11 +261,18 @@ class _ProfileState extends State<Profile> {
         label: Text(getTranslate(context, "LOGOUT")));
   }
 
+  // Check if form is valid
+  bool validateAndSave() {
+    final form = _formKey.currentState;
+    if (form.validate()) return true;
+    return false;
+  }
+
   Widget showSaveButton(User user) {
     return checkFormChanged(user)
         ? TextButton.icon(
             onPressed: () {
-              if (!_isLoading && validateForm(user))
+              if (!_isLoading && validateAndSave())
                 singleInputDialog(
                   context,
                   title: getTranslate(context, "CONFIRMATION"),
@@ -317,17 +286,25 @@ class _ProfileState extends State<Profile> {
                   positiveAction: (value) async {
                     try {
                       setState(() {
-                        error = null;
+                        globalError = null;
                         _isLoading = true;
                       });
                       var prefs = await SharedPreferences.getInstance();
-                      formData["oldPassword"] = value;
-                      var res = await UserService()
-                          .updateUser(formData, prefs.getString('token'));
+                      var res = await UserService().updateUser(
+                          prefs.getString('token'),
+                          username,
+                          password,
+                          name,
+                          sexe,
+                          "CLIENT",
+                          email,
+                          mobile,
+                          value);
                       if (res.statusCode == 401) {
                         setState(() {
                           _isLoading = false;
-                          error = getTranslate(context, "INVALID_PASSWORD");
+                          globalError =
+                              getTranslate(context, "INVALID_PASSWORD");
                         });
                       } else if (res.statusCode == 200) {
                         final snackBar = SnackBar(
@@ -351,18 +328,18 @@ class _ProfileState extends State<Profile> {
                             json.decode(res.body) as Map<String, dynamic>;
                         setState(() {
                           _isLoading = false;
-                          error = getTranslate(
+                          globalError = getTranslate(
                               context, jsonData.values.first[0].toUpperCase());
                         });
                       } else
                         setState(() {
                           _isLoading = false;
-                          error = getTranslate(context, "ERROR_SERVER");
+                          globalError = getTranslate(context, "ERROR_SERVER");
                         });
                     } catch (e) {
                       setState(() {
                         _isLoading = false;
-                        error = getTranslate(context, "ERROR_SERVER");
+                        globalError = getTranslate(context, "ERROR_SERVER");
                       });
                     }
                   },
@@ -383,11 +360,11 @@ class _ProfileState extends State<Profile> {
   }
 
   Widget showError() {
-    return error != null
+    return globalError != null
         ? Padding(
             padding: const EdgeInsets.fromLTRB(0, 12.0, 0, 0.0),
             child: Text(
-              error,
+              globalError,
               style: TextStyle(color: Colors.red, fontSize: 12),
             ),
           )
@@ -425,6 +402,7 @@ class _ProfileState extends State<Profile> {
           centerTitle: true,
         ),
         body: Form(
+          key: _formKey,
           child: SingleChildScrollView(
             child: StoreConnector<AppState, AppState>(
                 converter: (store) => store.state,
@@ -435,13 +413,12 @@ class _ProfileState extends State<Profile> {
                       showUsernameInput(state.userState.user.username),
                       showNameInput(state.userState.user.name),
                       showEmailInput(state.userState.user.email),
-                      showMobileInput(state.userState.user.mobile,
-                          state.userState.user.country),
+                      showMobileInput(state.userState.user.mobile),
                       showSexeInput(state.userState.user.sexe),
                       showPasswordInput(),
                       showError(),
-                      showSaveButton(state.userState.user),
                       showChangePassword(),
+                      showSaveButton(state.userState.user),
                       showDivider(),
                       showTitle(getTranslate(context, "USER_PREFERENCES")),
                       showLanguageChange(),

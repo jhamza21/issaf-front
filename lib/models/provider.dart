@@ -2,7 +2,7 @@ class Provider {
   int id;
   String title;
   String description;
-  String coordinates;
+  String address;
   String mobile;
   String email;
   String url;
@@ -11,7 +11,7 @@ class Provider {
       {this.id,
       this.title,
       this.description,
-      this.coordinates,
+      this.address,
       this.mobile,
       this.email,
       this.url,
@@ -21,7 +21,7 @@ class Provider {
       : id = json['id'],
         title = json['title'] ?? '',
         description = json['description'] ?? '',
-        coordinates = json['coordinates'] ?? '',
+        address = json['address'] ?? '',
         mobile = json['mobile'] ?? '',
         email = json['email'] ?? '',
         url = json['url'] ?? '',

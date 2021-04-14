@@ -31,8 +31,8 @@
     "ERROR": "Erreur",
     "ERROR_SERVER": "Erreur interne du serveur, réessayez plus tard",
     "INVALID_PASSWORD_CONFIRMATION": "La confirmation du mot de passe ne correspond pas",
-    "INVALID_MOBILE_LENGTH" : "Le numéro de téléphone doit contenir entre 8 et 14 chiffres",
-    "INVALID_NAME_LENGTH":"Le nom doit contenir entre 8 et 80 caractéres",
+    "INVALID_MOBILE_LENGTH" : "Le numéro de téléphone doit contenir entre 8 et 12 chiffres",
+    "INVALID_NAME_LENGTH":"Le nom doit contenir entre 6 et 255 caractéres",
     "INVALID_EMAIL": "Votre adresse e-mail semble être malformée.",
     "INVALID_PASSWORD_LENGTH": "La longueur minimale du mot de passe est de 8",
     "INVALID_PASSWORD": "Votre mot de passe est incorrect.",
@@ -52,9 +52,9 @@
     "IN_PROGRESS":"En cours",
     "HISTORICAL":"Historique",
     "TITLE": "Titre",
-    "INVALID_TITLE_LENGTH": "Le titre doit contenir entre 6 et 255 caractéres",
+    "INVALID_TITLE_LENGTH": "Le titre doit contenir entre 2 et 255 caractéres",
     "DESCRIPTION": "Description",
-    "INVALID_DESCRIPTION_LENGTH": "La description doit contenir entre 6 et 255 caractéres",
+    "INVALID_DESCRIPTION_LENGTH": "La description doit contenir entre 8 et 255 caractéres",
     "ADDRESS":"Addresse",
     "INVALID_ADDRESS_LENGTH": "L'addresse doit contenir entre 6 et 255 caractéres",
     "SITE_WEB":"Site web",
@@ -65,9 +65,9 @@
     "REQUIRED_FIELD":"* : Champs obligatoire",
     "FOURNISSEUR": "Fournisseur",
     "CLIENT":"Client",
-    "WELCOME_MSG": "La solution qui fait la queue à votre place !"
-
-
-
-
+    "WELCOME_MSG": "La solution qui fait la queue à votre place !",
+    "ADMIN_SAFF":"Responsable",
+    "ADMIN_SERVICE":"Administrateur",
+    "REGISTER_AS":"S'inscrire en tant que",
+    "SEARCH_BY_COUNTRY":"Rechercher par nom de pays"
 }

@@ -53,21 +53,6 @@ class _ProvidersListState extends State<ProvidersList> {
       });
     } catch (error) {
       setState(() {
-        _orderedProviders.add(new Provider(
-            title: "STEG",
-            description: "Société tunisienne d'électricité et du gaz",
-            email: "j.hamza@hotmail.fr",
-            id: 0,
-            url: "www.google.fr",
-            mobile: "+21655589087,"));
-        _isLoading = false;
-        _orderedProviders.add(new Provider(
-            title: "STEG",
-            description: "Société tunisienne d'électricité et du gaz",
-            email: "j.hamza@hotmail.fr",
-            id: 0,
-            url: "www.google.fr",
-            mobile: "+21655589087,"));
         _isLoading = false;
       });
     }
@@ -95,8 +80,8 @@ class _ProvidersListState extends State<ProvidersList> {
         leading: CircleAvatar(
           backgroundColor: Colors.orange,
           radius: 30.0,
-          backgroundImage: null, // NetworkImage(
-          //     "http://10.0.2.2:8000/api/providerImg/" + provider.image),
+          backgroundImage: NetworkImage(
+              "http://10.0.2.2:8000/api/providerImg/" + provider.image),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -111,13 +96,16 @@ class _ProvidersListState extends State<ProvidersList> {
                         return customDialog(
                             provider.title,
                             provider.description,
+                            provider.image,
                             Column(
                               children: [
                                 provider.email != null
                                     ? Row(
                                         children: [
                                           Icon(Icons.email),
-                                          Text(" : " + provider.email)
+                                          Expanded(
+                                              child:
+                                                  Text(" : " + provider.email))
                                         ],
                                       )
                                     : SizedBox.shrink(),
@@ -125,7 +113,9 @@ class _ProvidersListState extends State<ProvidersList> {
                                     ? Row(
                                         children: [
                                           Icon(Icons.phone),
-                                          Text(" : " + provider.mobile)
+                                          Text(" : " +
+                                              provider.mobile.split("/")[1] +
+                                              provider.mobile.split("/")[2])
                                         ],
                                       )
                                     : SizedBox.shrink(),
@@ -133,7 +123,8 @@ class _ProvidersListState extends State<ProvidersList> {
                                     ? Row(
                                         children: [
                                           Icon(Icons.web),
-                                          Text(" : " + provider.url)
+                                          Expanded(
+                                              child: Text(" : " + provider.url))
                                         ],
                                       )
                                     : SizedBox.shrink(),
@@ -239,7 +230,8 @@ class _ProvidersListState extends State<ProvidersList> {
   //       ));
   // }
 
-  Widget customDialog(String title, String description, Widget content) {
+  Widget customDialog(
+      String title, String description, String image, Widget content) {
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -289,9 +281,12 @@ class _ProvidersListState extends State<ProvidersList> {
             child: CircleAvatar(
               backgroundColor: Colors.transparent,
               radius: 45,
-              child: ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(45)),
-                  child: Image.asset("assets/images/steg.png")),
+              child: CircleAvatar(
+                backgroundColor: Colors.orange,
+                radius: 40.0,
+                backgroundImage: NetworkImage(
+                    "http://10.0.2.2:8000/api/providerImg/" + image),
+              ),
             ),
           ) // top part
         ],

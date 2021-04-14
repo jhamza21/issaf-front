@@ -4,7 +4,6 @@ class User {
   String name;
   String role;
   String mobile;
-  String country;
   String email;
   String password;
   String sexe;
@@ -15,7 +14,6 @@ class User {
       this.role,
       this.email,
       this.password,
-      this.country,
       this.sexe,
       this.mobile});
 
@@ -25,7 +23,6 @@ class User {
         name = json['name'] ?? '',
         role = json['role'] ?? '',
         mobile = json['mobile'] ?? '',
-        country = json['country'] ?? '',
         email = json['email'] ?? '',
         sexe = json['sexe'] ?? '',
         password = json['password'] ?? '';
