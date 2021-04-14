@@ -63,12 +63,18 @@ String getTranslate(BuildContext context, String key) {
   return AppLocalizations.of(context).getTranslatedValue(key);
 }
 
-//APPLICATION BACKGROUND COLOR GRADIENT
+//APPLICATION BACKGROUND COLOR GRADIENT FOR CLIENT
 BoxDecoration mainBoxDecoration = BoxDecoration(
     gradient: LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [Color(0xfffbb448), Color(0xffe46b10)]));
+//APPLICATION BACKGROUND COLOR GRADIENT FOR PROVIDER
+BoxDecoration mainBoxDecorationProvider = BoxDecoration(
+    gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Colors.white, Color(0xffe46b10)]));
 
 //CIRCULAR PROGRESS INDICATOR
 SizedBox circularProgressIndicator = SizedBox(

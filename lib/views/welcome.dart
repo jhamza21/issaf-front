@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/language/appLanguage.dart';
 import 'package:issaf/language/language.dart';
-import 'package:issaf/views/clients/authentification.dart';
-import 'package:issaf/views/providers/authentification.dart';
+import 'package:issaf/views/shared/authentification.dart';
 import 'package:provider/provider.dart';
 
 class Welcome extends StatefulWidget {
@@ -13,6 +12,7 @@ class Welcome extends StatefulWidget {
 
 class _WelcomeState extends State<Welcome> {
   int _currentIndex = 0;
+  bool _isProvider = false;
 
   Widget showProvidersButton() {
     return Padding(
@@ -27,17 +27,14 @@ class _WelcomeState extends State<Welcome> {
           child: Text(getTranslate(context, "FOURNISSEUR"),
               style: new TextStyle(fontSize: 20.0, color: Colors.black)),
           onPressed: () {
-            changePage(2);
+            setState(() {
+              _currentIndex = 1;
+              _isProvider = true;
+            });
           },
         ),
       ),
     );
-  }
-
-  void changePage(int x) {
-    setState(() {
-      _currentIndex = x;
-    });
   }
 
   Widget showClientsButton() {
@@ -53,7 +50,10 @@ class _WelcomeState extends State<Welcome> {
           child: Text(getTranslate(context, "CLIENT"),
               style: new TextStyle(fontSize: 20.0, color: Colors.black)),
           onPressed: () {
-            changePage(1);
+            setState(() {
+              _currentIndex = 1;
+              _isProvider = false;
+            });
           },
         ),
       ),
@@ -141,11 +141,16 @@ class _WelcomeState extends State<Welcome> {
     );
   }
 
+  void changePage(int x) {
+    setState(() {
+      _currentIndex = x;
+    });
+  }
+
   Widget build(BuildContext context) {
     final List<Widget> _children = [
       welcome(),
-      LoginSignUp(changePage),
-      LoginSignUpF(changePage)
+      LoginSignUp(changePage, _isProvider),
     ];
 
     return _children[_currentIndex];

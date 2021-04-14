@@ -253,9 +253,18 @@ class _ProfileState extends State<Profile> {
 
   Widget showLogout() {
     return TextButton.icon(
-        onPressed: () {
+        onPressed: () async {
           //disconnect
-          Redux.store.dispatch(logoutUserAction);
+          var prefs = await SharedPreferences.getInstance();
+          await prefs.setString('token', null);
+          Redux.store.dispatch(
+            SetUserStateAction(
+              UserState(
+                isLoggedIn: false,
+                user: null,
+              ),
+            ),
+          );
         },
         icon: Icon(Icons.exit_to_app),
         label: Text(getTranslate(context, "LOGOUT")));
@@ -315,7 +324,6 @@ class _ProfileState extends State<Profile> {
                         Redux.store.dispatch(SetUserStateAction(
                           UserState(
                             isLoggedIn: true,
-                            isLoading: false,
                             user: User.fromJson(jsonData),
                           ),
                         ));
@@ -393,47 +401,43 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: mainBoxDecoration,
-      child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          title: Text(getTranslate(context, 'PROFILE')),
-          centerTitle: true,
-        ),
-        body: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: StoreConnector<AppState, AppState>(
-                converter: (store) => store.state,
-                builder: (context, state) {
-                  return Column(
-                    children: <Widget>[
-                      showTitle(getTranslate(context, "PERSONAL_INFORMATIONS")),
-                      showUsernameInput(state.userState.user.username),
-                      showNameInput(state.userState.user.name),
-                      showEmailInput(state.userState.user.email),
-                      showMobileInput(state.userState.user.mobile),
-                      showSexeInput(state.userState.user.sexe),
-                      showPasswordInput(),
-                      showError(),
-                      showChangePassword(),
-                      showSaveButton(state.userState.user),
-                      showDivider(),
-                      showTitle(getTranslate(context, "USER_PREFERENCES")),
-                      showLanguageChange(),
-                      showDivider(),
-                      showTitle(getTranslate(context, "ABOUT")),
-                      showUrlToView(
-                          getTranslate(context, "GENERAL_CONDITIONS")),
-                      showUrlToView(getTranslate(context, "PRIVACY_POLICY")),
-                      showUrlToView(getTranslate(context, "CONTACT_US")),
-                      showDivider(),
-                      showLogout()
-                    ],
-                  );
-                }),
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        title: Text(getTranslate(context, 'PROFILE')),
+        centerTitle: true,
+      ),
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: StoreConnector<AppState, AppState>(
+              converter: (store) => store.state,
+              builder: (context, state) {
+                return Column(
+                  children: <Widget>[
+                    showTitle(getTranslate(context, "PERSONAL_INFORMATIONS")),
+                    showUsernameInput(state.userState.user.username),
+                    showNameInput(state.userState.user.name),
+                    showEmailInput(state.userState.user.email),
+                    showMobileInput(state.userState.user.mobile),
+                    showSexeInput(state.userState.user.sexe),
+                    showPasswordInput(),
+                    showError(),
+                    showChangePassword(),
+                    showSaveButton(state.userState.user),
+                    showDivider(),
+                    showTitle(getTranslate(context, "USER_PREFERENCES")),
+                    showLanguageChange(),
+                    showDivider(),
+                    showTitle(getTranslate(context, "ABOUT")),
+                    showUrlToView(getTranslate(context, "GENERAL_CONDITIONS")),
+                    showUrlToView(getTranslate(context, "PRIVACY_POLICY")),
+                    showUrlToView(getTranslate(context, "CONTACT_US")),
+                    showDivider(),
+                    showLogout()
+                  ],
+                );
+              }),
         ),
       ),
     );

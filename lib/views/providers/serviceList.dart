@@ -4,44 +4,40 @@ import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/provider.dart';
-import 'package:issaf/services/provideService.dart';
+import 'package:issaf/models/service.dart';
+import 'package:issaf/services/serviceService.dart';
+import 'package:issaf/views/providers/addUpdateService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ServiceList extends StatefulWidget {
-  final String title;
-  ServiceList(this.title);
+  final Provider provider;
+  ServiceList(this.provider);
+
   @override
   _ServiceListState createState() => _ServiceListState();
 }
 
 @override
 class _ServiceListState extends State<ServiceList> {
-  Widget cusSearchBar;
-  Icon cusIcon = Icon(Icons.search);
-  List<String> _favoriteProviders = [];
-  List<Provider> _orderedProviders = [];
-  List<Provider> _providers = [];
-  String _searchText;
+  List<Service> _services = [];
   bool _isLoading = true;
+  int _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    cusSearchBar = Text(widget.title);
-    _fetchProviders();
+    _fetchServices();
   }
 
-  void _fetchProviders() async {
+  void _fetchServices() async {
     try {
       var prefs = await SharedPreferences.getInstance();
-      final response =
-          await ProviderService().fetchProviders(prefs.getString('token'));
+      final response = await ServiceService()
+          .fetchServices(prefs.getString('token'), widget.provider.id);
 
       assert(response.statusCode == 200);
       final jsonData = json.decode(response.body);
-      _providers = Provider.listFromJson(jsonData);
-
-      sortedProviders();
+      _services = Service.listFromJson(jsonData);
       setState(() {
         _isLoading = false;
       });
@@ -52,30 +48,20 @@ class _ServiceListState extends State<ServiceList> {
     }
   }
 
-  sortedProviders() {
-    _orderedProviders = [];
-    _providers.forEach((element) {
-      if (_favoriteProviders.contains(element.id.toString()))
-        _orderedProviders.insert(0, element);
-      else
-        _orderedProviders.add(element);
-    });
-  }
-
-  Card providerCard(Provider provider) {
+  Card serviceCard(Service service) {
     return Card(
       color: Colors.orange[50],
       child: ListTile(
         dense: true,
         title: Text(
-          provider.title,
+          service.title,
         ),
-        subtitle: Text(provider.description),
+        subtitle: Text(service.description),
         leading: CircleAvatar(
           backgroundColor: Colors.orange,
           radius: 30.0,
           backgroundImage: NetworkImage(
-              "http://10.0.2.2:8000/api/providerImg/" + provider.image),
+              "http://10.0.2.2:8000/api/serviceImg/" + service.image),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -88,40 +74,12 @@ class _ServiceListState extends State<ServiceList> {
                       context: context,
                       builder: (BuildContext context) {
                         return customDialog(
-                            provider.title,
-                            provider.description,
-                            provider.image,
+                            service.title,
+                            service.description,
+                            service.image,
                             Column(
                               children: [
-                                provider.email != null
-                                    ? Row(
-                                        children: [
-                                          Icon(Icons.email),
-                                          Expanded(
-                                              child:
-                                                  Text(" : " + provider.email))
-                                        ],
-                                      )
-                                    : SizedBox.shrink(),
-                                provider.mobile != null
-                                    ? Row(
-                                        children: [
-                                          Icon(Icons.phone),
-                                          Text(" : " +
-                                              provider.mobile.split("/")[1] +
-                                              provider.mobile.split("/")[2])
-                                        ],
-                                      )
-                                    : SizedBox.shrink(),
-                                provider.url != null
-                                    ? Row(
-                                        children: [
-                                          Icon(Icons.web),
-                                          Expanded(
-                                              child: Text(" : " + provider.url))
-                                        ],
-                                      )
-                                    : SizedBox.shrink(),
+                                //TODO: add service card
                               ],
                             ));
                       });
@@ -134,95 +92,18 @@ class _ServiceListState extends State<ServiceList> {
               width: 8,
             ),
             IconButton(
-              padding: EdgeInsets.zero,
-              constraints: BoxConstraints(),
               icon: Icon(
-                _favoriteProviders.contains(provider.id.toString())
-                    ? Icons.star
-                    : Icons.star_border,
+                Icons.delete,
                 size: 17,
-                color: Colors.deepOrange,
+                color: Colors.red,
               ),
-              onPressed: () async {
-                var prefs = await SharedPreferences.getInstance();
-                if (_favoriteProviders.contains(provider.id.toString())) {
-                  //Remove favorite provider
-                  setState(() {
-                    _favoriteProviders.remove(provider.id.toString());
-                    sortedProviders();
-                  });
-                  prefs.setStringList("favorite", _favoriteProviders);
-                } else {
-                  //Add favorite provider
-                  var prefs = await SharedPreferences.getInstance();
-                  setState(() {
-                    _favoriteProviders.add(provider.id.toString());
-                    sortedProviders();
-                  });
-                  prefs.setStringList("favorite", _favoriteProviders);
-                }
-              },
+              onPressed: () async {},
             ),
           ],
         ),
       ),
     );
   }
-  // Widget providerCard(Provider provider) {
-  //   return new Container(
-  //       height: 120.0,
-  //       margin: const EdgeInsets.symmetric(
-  //         vertical: 10.0,
-  //       ),
-  //       child: new Stack(
-  //         children: <Widget>[
-  //           //container
-  //           new Container(
-  //             margin: new EdgeInsets.only(left: 46.0),
-  //             decoration: new BoxDecoration(
-  //               color: Colors.orange[50],
-  //               shape: BoxShape.rectangle,
-  //               borderRadius: new BorderRadius.circular(8.0),
-  //               boxShadow: <BoxShadow>[
-  //                 new BoxShadow(
-  //                   color: Colors.black12,
-  //                   blurRadius: 2.0,
-  //                   offset: new Offset(0.0, 10.0),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //           //image
-  //           new Container(
-  //             margin: new EdgeInsets.symmetric(vertical: 16.0),
-  //             alignment: FractionalOffset.centerLeft,
-  //             child: new Image(
-  //               image: new AssetImage("assets/images/steg.png"),
-  //               height: 92.0,
-  //               width: 92.0,
-  //             ),
-  //           ),
-  //           //arrow
-  //           new Container(
-  //             margin: new EdgeInsets.symmetric(vertical: 16.0),
-  //             alignment: FractionalOffset.centerRight,
-  //             child: new Icon(
-  //               Icons.arrow_forward_ios,
-  //               color: Colors.grey[700],
-  //             ),
-  //           ),
-  //           //dots
-  //           new Container(
-  //             margin: new EdgeInsets.symmetric(vertical: 16.0),
-  //             alignment: FractionalOffset.topRight,
-  //             child: new Icon(
-  //               Icons.threesixty_rounded,
-  //               color: Colors.grey[700],
-  //             ),
-  //           ),
-  //         ],
-  //       ));
-  // }
 
   Widget customDialog(
       String title, String description, String image, Widget content) {
@@ -288,63 +169,38 @@ class _ServiceListState extends State<ServiceList> {
     );
   }
 
+  void changePage(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          elevation: 0.0,
-          title: cusSearchBar,
-          actions: [
-            IconButton(
-                icon: cusIcon,
-                onPressed: () {
-                  setState(() {
-                    if (cusIcon.icon == Icons.search) {
-                      cusIcon = Icon(Icons.cancel);
-                      cusSearchBar = TextFormField(
-                        decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: getTranslate(context, "SEARCH_HERE")),
-                        textInputAction: TextInputAction.go,
-                        style: TextStyle(color: Colors.white, fontSize: 16.0),
-                        onChanged: (val) {
-                          setState(() {
-                            _searchText = val;
-                          });
+    return _currentIndex == 0
+        ? Scaffold(
+            appBar: AppBar(
+              centerTitle: true,
+              elevation: 0.0,
+              title: Text("Saff"),
+              actions: [
+                IconButton(
+                    icon: Icon(Icons.add), onPressed: () => changePage(1))
+              ],
+            ),
+            body: _isLoading
+                ? Center(child: circularProgressIndicator)
+                : _services.length == 0
+                    ? Center(
+                        child: Text(getTranslate(context, "NO_RESULT_FOUND")),
+                      )
+                    : ListView.builder(
+                        padding: EdgeInsets.all(8),
+                        itemCount: _services.length,
+                        itemBuilder: (context, index) {
+                          return serviceCard(_services[index]);
                         },
-                      );
-                    } else {
-                      cusIcon = Icon(Icons.search);
-                      cusSearchBar = Text(getTranslate(context, "PROVIDERS"));
-                      _searchText = null;
-                    }
-                  });
-                })
-          ],
-        ),
-        body: _isLoading
-            ? Center(child: circularProgressIndicator)
-            : _orderedProviders.length == 0
-                ? Center(
-                    child: Text(getTranslate(context, "NO_RESULT_FOUND")),
-                  )
-                : ListView.builder(
-                    padding: EdgeInsets.all(8),
-                    itemCount: _orderedProviders.length,
-                    itemBuilder: (context, index) {
-                      if (_searchText != null) {
-                        //show only searched providers
-                        if (_orderedProviders[index]
-                            .title
-                            .toLowerCase()
-                            .contains(_searchText.toLowerCase()))
-                          return providerCard(_orderedProviders[index]);
-                        else
-                          return SizedBox.shrink();
-                      } else
-                        return providerCard(_orderedProviders[index]);
-                    },
-                  ));
+                      ))
+        : AddUpdateService(widget.provider, changePage);
   }
 }

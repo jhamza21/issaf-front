@@ -1,34 +1,40 @@
+import 'dart:convert';
+
 import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:issaf/constants.dart';
+import 'package:issaf/errorHandler.dart';
 import 'package:issaf/language/appLanguage.dart';
 import 'package:issaf/language/language.dart';
+import 'package:issaf/models/user.dart';
 import 'package:issaf/redux/store.dart';
 import 'package:issaf/redux/users/actions.dart';
+import 'package:issaf/redux/users/state.dart';
+import 'package:issaf/services/userService.dart';
 import 'package:provider/provider.dart';
 
 class LoginSignUp extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _LoginSignUpState();
   final void Function(int) callback;
-  LoginSignUp(this.callback);
+  final bool isProvider;
+  LoginSignUp(this.callback, this.isProvider);
 }
 
 class _LoginSignUpState extends State<LoginSignUp> {
   final _formKey = new GlobalKey<FormState>();
-  String _username, _password, _name, _email, _sexe = "HOMME", _mobile;
-  bool _showPassword;
-  bool _isLoginForm;
-
-  @override
-  void initState() {
-    super.initState();
-    _isLoginForm = true;
-    _showPassword = false;
-  }
+  String _username,
+      _password,
+      _name,
+      _email,
+      _sexe = "HOMME",
+      _mobile,
+      _role = "ADMIN_SERVICE",
+      _error;
+  bool _isLoginForm = true, _isLoading = false, _showPassword = false;
 
   // Check if form is valid
   bool validateAndSave() {
@@ -45,12 +51,75 @@ class _LoginSignUpState extends State<LoginSignUp> {
     if (validateAndSave()) {
       if (_isLoginForm) {
         //LOGIN
-        Redux.store.dispatch(
-            signInUserAction(Redux.store, _username, _password, context));
+        try {
+          setState(() {
+            _isLoading = true;
+          });
+          var prefs = await SharedPreferences.getInstance();
+          final response = await UserService().signIn(_username, _password);
+          final jsonData = json.decode(response.body);
+          if (response.statusCode == 200) {
+            await prefs.setString('token', jsonData["data"]["api_token"]);
+            Redux.store.dispatch(
+              SetUserStateAction(
+                UserState(
+                  isLoggedIn: true,
+                  user: User.fromJson(jsonData["data"]),
+                ),
+              ),
+            );
+          } else {
+            var error = jsonData["errors"] as Map<String, dynamic>;
+            setState(() {
+              _isLoading = false;
+              _error = errorHandler(error.values.first[0], context);
+            });
+          }
+        } catch (error) {
+          setState(() {
+            _isLoading = false;
+            _error = errorHandler("ERROR_SERVER", context);
+          });
+        }
       } else {
-        // //SIGN UP CLIENT
-        Redux.store.dispatch(signUpUserAction(Redux.store, _username, _password,
-            _name, _email, _mobile, _sexe, "CLIENT", context));
+        //SIGN UP CLIENT
+        try {
+          setState(() {
+            _isLoading = true;
+          });
+          var prefs = await SharedPreferences.getInstance();
+          final response = await UserService().signUp(
+              _username,
+              _password,
+              _name,
+              _email,
+              _mobile,
+              _sexe,
+              widget.isProvider ? _role : "CLIENT");
+          final jsonData = json.decode(response.body);
+          if (response.statusCode == 201) {
+            await prefs.setString('token', jsonData["data"]["api_token"]);
+            Redux.store.dispatch(
+              SetUserStateAction(
+                UserState(
+                  isLoggedIn: true,
+                  user: User.fromJson(jsonData["data"]),
+                ),
+              ),
+            );
+          } else {
+            var error = jsonData["errors"] as Map<String, dynamic>;
+            setState(() {
+              _isLoading = false;
+              _error = errorHandler(error.values.first[0], context);
+            });
+          }
+        } catch (error) {
+          setState(() {
+            _isLoading = false;
+            _error = errorHandler("ERROR_SERVER", context);
+          });
+        }
       }
     }
   }
@@ -76,6 +145,9 @@ class _LoginSignUpState extends State<LoginSignUp> {
               child: Column(
                 children: <Widget>[
                   showLogo(),
+                  !_isLoginForm && widget.isProvider
+                      ? showRoleInput()
+                      : SizedBox(),
                   !_isLoginForm ? showNameInput() : SizedBox(),
                   showUserNameInput(),
                   showPasswordInput(),
@@ -83,11 +155,11 @@ class _LoginSignUpState extends State<LoginSignUp> {
                   !_isLoginForm ? showEmailInput() : SizedBox(),
                   !_isLoginForm ? showMobileInput() : SizedBox(),
                   !_isLoginForm ? showSexeInput() : SizedBox(),
-                  showErrorMessage(state.userState),
+                  showErrorMessage(),
                   !_isLoginForm
                       ? showNotice(getTranslate(context, "REQUIRED_FIELD"))
                       : SizedBox(),
-                  showPrimaryButton(state.userState),
+                  showPrimaryButton(),
                   showSecondaryButton(),
                 ],
               ),
@@ -166,7 +238,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
       child: TextFormField(
         keyboardType: TextInputType.emailAddress,
         decoration: inputTextDecorationRounded(
-            Icon(Icons.email), getTranslate(context, 'EMAIL'), null),
+            Icon(Icons.email), getTranslate(context, 'EMAIL') + "*", null),
         validator: (value) => value.isEmpty || !Validator.isValidEmail(value)
             ? getTranslate(context, 'INVALID_EMAIL')
             : null,
@@ -184,7 +256,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
         searchText: getTranslate(context, "SEARCH_BY_COUNTRY"),
         keyboardType: TextInputType.phone,
         decoration: inputTextDecorationRounded(
-            null, getTranslate(context, 'MOBILE'), null),
+            null, getTranslate(context, 'MOBILE') + "*", null),
         validator: (value) =>
             value.isEmpty || value.length < 8 || value.length > 12
                 ? getTranslate(context, "INVALID_MOBILE_LENGTH")
@@ -220,7 +292,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
         validator: (value) => value.isEmpty || value.length < 8
             ? getTranslate(context, 'INVALID_PASSWORD_LENGTH')
             : null,
-        onSaved: (value) => _password = value.trim(),
+        onChanged: (value) => _password = value.trim(),
       ),
     );
   }
@@ -267,14 +339,14 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
-  Widget showPrimaryButton(userState) {
+  Widget showPrimaryButton() {
     return Padding(
       padding: EdgeInsets.fromLTRB(0.0, 35.0, 0.0, 0.0),
       child: ButtonTheme(
         minWidth: 250,
         child: RaisedButton.icon(
           elevation: 5.0,
-          icon: userState.isLoading ? circularProgressIndicator : SizedBox(),
+          icon: _isLoading ? circularProgressIndicator : SizedBox(),
           shape: new RoundedRectangleBorder(
               borderRadius: new BorderRadius.circular(30.0)),
           color: Colors.deepOrange[900],
@@ -301,12 +373,12 @@ class _LoginSignUpState extends State<LoginSignUp> {
         onPressed: toggleFormMode);
   }
 
-  Widget showErrorMessage(userState) {
-    if (userState.isError)
+  Widget showErrorMessage() {
+    if (_error != null)
       return Padding(
         padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
         child: Text(
-          userState.errorText,
+          _error,
           style: TextStyle(
               fontSize: 15.0, color: Colors.red, fontWeight: FontWeight.w400),
         ),
@@ -355,11 +427,45 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
+  Widget showRoleInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 0, 12.0, 0.0),
+      child: Row(
+        children: [
+          Text(
+            getTranslate(context, "REGISTER_AS") + " : ",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          DropdownButton(
+            dropdownColor: Colors.orange[50],
+            hint: Text(getTranslate(context, _role)),
+            onChanged: (String value) {
+              setState(() {
+                _role = value;
+              });
+            },
+            icon: Icon(
+              Icons.arrow_downward,
+            ),
+            underline: SizedBox(),
+            items: ["ADMIN_SERVICE", "ADMIN_SAFF"]
+                .map<DropdownMenuItem<String>>((role) => DropdownMenuItem(
+                      value: role,
+                      child: Text(getTranslate(context, role)),
+                    ))
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(20.0),
-      decoration: mainBoxDecoration,
+      decoration:
+          !widget.isProvider ? mainBoxDecoration : mainBoxDecorationProvider,
       child: new Scaffold(
         appBar: AppBar(
           elevation: 0.0,

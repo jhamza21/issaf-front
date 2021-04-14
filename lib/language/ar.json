@@ -69,7 +69,9 @@
     "ADMIN_SAFF":"مسؤول",
     "ADMIN_SERVICE":"مدير",
     "REGISTER_AS":"سجل باسم",
-    "SEARCH_BY_COUNTRY":"البحث عن طريق اسم الدولة"
+    "SEARCH_BY_COUNTRY":"البحث عن طريق اسم الدولة",
+    "SERVICE_INFORMATIONS":"معلومات الخدمة",
+    "SUCCESS_INFORMATIONS_UPDATE":"معلوماتك كلها محدثة!"
 
 
 }

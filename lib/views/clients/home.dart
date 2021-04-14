@@ -1,7 +1,7 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
-import 'package:issaf/views/clients/profile.dart';
+import 'package:issaf/views/shared/profile.dart';
 import 'package:issaf/views/clients/providerList.dart';
 import 'package:issaf/views/clients/tickets/index.dart';
 

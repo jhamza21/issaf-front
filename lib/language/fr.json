@@ -69,5 +69,8 @@
     "ADMIN_SAFF":"Responsable",
     "ADMIN_SERVICE":"Administrateur",
     "REGISTER_AS":"S'inscrire en tant que",
-    "SEARCH_BY_COUNTRY":"Rechercher par nom de pays"
+    "SEARCH_BY_COUNTRY":"Rechercher par nom de pays",
+    "SERVICE_INFORMATIONS":"Informations du service",
+    "SUCCESS_INFORMATIONS_UPDATE":"Vos informations sont tous à jour ! "
+
 }
