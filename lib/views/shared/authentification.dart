@@ -352,6 +352,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
       padding: EdgeInsets.fromLTRB(0.0, 35.0, 0.0, 0.0),
       child: ButtonTheme(
         minWidth: 250,
+        // ignore: deprecated_member_use
         child: RaisedButton.icon(
           elevation: 5.0,
           icon: _isLoading ? circularProgressIndicator : SizedBox(),
@@ -372,6 +373,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
   }
 
   Widget showSecondaryButton() {
+    // ignore: deprecated_member_use
     return new FlatButton(
         child: new Text(
             _isLoginForm

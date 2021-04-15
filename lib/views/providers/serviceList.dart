@@ -94,12 +94,14 @@ class _ServiceListState extends State<ServiceList> {
                               service.title +
                               " ?"),
                       actions: <Widget>[
+                        // ignore: deprecated_member_use
                         new FlatButton(
                           child: new Text(getTranslate(context, "NO")),
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
                         ),
+                        // ignore: deprecated_member_use
                         new FlatButton(
                           child: new Text(getTranslate(context, "YES")),
                           onPressed: () async {

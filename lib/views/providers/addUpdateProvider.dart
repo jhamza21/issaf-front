@@ -127,8 +127,7 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
                           _mobile,
                           _siteWeb,
                           _image);
-
-                  if (res.statusCode == 200) {
+                  if (res.statusCode == 201 || res.statusCode == 200) {
                     ModelProvider.Provider _resProvider =
                         ModelProvider.Provider.fromJson(
                             json.decode(await res.stream.bytesToString()));
@@ -137,18 +136,19 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
                       _isLoading = false;
                     });
                     final snackBar = SnackBar(
-                      content: Text(getTranslate(context, "SUCCESS_UPDATE")),
+                      content: Text(getTranslate(
+                          context,
+                          res.statusCode == 200
+                              ? "SUCCESS_UPDATE"
+                              : "SUCCESS_ADD")),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   } else {
-                    //TODO:HANDLE ERROR
                     final jsonData =
-                        json.decode(await res.stream.bytesToString())
-                            as Map<String, dynamic>;
+                        json.decode(await res.stream.bytesToString());
                     setState(() {
                       _isLoading = false;
-                      _error = getTranslate(
-                          context, jsonData.values.first[0].toUpperCase());
+                      _error = getTranslate(context, jsonData["error"]);
                     });
                   }
                 } catch (e) {

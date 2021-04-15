@@ -19,6 +19,7 @@ class _WelcomeState extends State<Welcome> {
       padding: EdgeInsets.fromLTRB(0.0, 35.0, 0.0, 0.0),
       child: ButtonTheme(
         minWidth: 250,
+        // ignore: deprecated_member_use
         child: RaisedButton(
           elevation: 5.0,
           shape: new RoundedRectangleBorder(
@@ -42,6 +43,7 @@ class _WelcomeState extends State<Welcome> {
       padding: EdgeInsets.fromLTRB(0.0, 35.0, 0.0, 20.0),
       child: ButtonTheme(
         minWidth: 250,
+        // ignore: deprecated_member_use
         child: RaisedButton(
           elevation: 5.0,
           shape: new RoundedRectangleBorder(

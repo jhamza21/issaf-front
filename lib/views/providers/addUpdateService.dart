@@ -99,7 +99,6 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                           _openDays,
                           _status,
                           _image);
-                  print(res.statusCode);
                   if (res.statusCode == 201) {
                     setState(() {
                       _isLoading = false;
