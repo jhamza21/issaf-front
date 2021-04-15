@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class ServiceService {
-//fetch all providers
+//fetch all services
   Future<http.Response> fetchServices(String token, int idProvider) async {
     var url = "http://10.0.2.2:8000/api/providers/" +
         idProvider.toString() +
@@ -12,13 +12,15 @@ class ServiceService {
     return await http.get(url);
   }
 
-  //fetch connected user provider
-  Future<http.Response> fetchProvider(String token) async {
-    var url = "http://10.0.2.2:8000/api/getUserProvider?api_token=" + token;
-    return await http.get(url);
+  Future<http.Response> deleteService(String token, int id) async {
+    var url = "http://10.0.2.2:8000/api/services/" +
+        id.toString() +
+        "?api_token=" +
+        token;
+    return await http.delete(url);
   }
 
-//update provider data
+//update service data
   Future<http.StreamedResponse> updateService(
       String token,
       int id,
@@ -56,7 +58,7 @@ class ServiceService {
   Future<http.StreamedResponse> addService(
       String token,
       String providerId,
-      String adminId,
+      String usernameAdmin,
       String title,
       String description,
       String avgTimePerClient,
@@ -72,7 +74,7 @@ class ServiceService {
       request.fields['open_days[' + i.toString() + ']'] = openDays[i];
     request.files.add(await http.MultipartFile.fromPath('img', image.path));
     request.fields['provider_id'] = providerId;
-    request.fields['admin_id'] = adminId;
+    request.fields['username_admin'] = usernameAdmin;
     request.fields['title'] = title;
     request.fields['description'] = description;
     request.fields['avg_time_per_client'] = avgTimePerClient;

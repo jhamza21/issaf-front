@@ -137,8 +137,7 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
                       _isLoading = false;
                     });
                     final snackBar = SnackBar(
-                      content: Text(
-                          getTranslate(context, "SUCCESS_INFORMATIONS_UPDATE")),
+                      content: Text(getTranslate(context, "SUCCESS_UPDATE")),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   } else {

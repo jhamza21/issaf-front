@@ -8,10 +8,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:issaf/models/provider.dart' as ModelProvider;
 import 'package:issaf/models/service.dart';
 import 'package:issaf/constants.dart';
-import 'package:issaf/models/user.dart';
 import 'package:issaf/services/serviceService.dart';
 import 'package:day_picker/day_picker.dart';
-import 'package:issaf/services/userService.dart';
 
 class AddUpdateService extends StatefulWidget {
   final ModelProvider.Provider provider;
@@ -57,43 +55,6 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
     return false;
   }
 
-  Future<int> validateUsername() async {
-    try {
-      var prefs = await SharedPreferences.getInstance();
-
-      setState(() {
-        _isLoading = true;
-      });
-      var res = await UserService()
-          .getUserByUsername(prefs.getString('token'), _username);
-      if (res.statusCode != 200) {
-        setState(() {
-          _isLoading = false;
-          _error = getTranslate(context, "USER_NOT_FOUND");
-        });
-        return null;
-      }
-      if (res.statusCode == 200) {
-        var jsonData = json.decode(res.body);
-        User _user = User.fromJson(jsonData);
-        if (_user.role != "ADMIN_SAFF") {
-          setState(() {
-            _isLoading = false;
-            _error = getTranslate(context, "USER_INVALID_ROLE");
-          });
-          return null;
-        }
-        return _user.id;
-      }
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _error = getTranslate(context, "ERROR_SERVER");
-      });
-      return null;
-    }
-  }
-
   // Check if form is valid
   bool validateAndSave() {
     final form = _formKey.currentState;
@@ -107,8 +68,6 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
             onPressed: () async {
               if (!_isLoading && validateAndSave())
                 try {
-                  var _adminId = await validateUsername();
-                  if (_adminId == null) return;
                   setState(() {
                     _error = null;
                     _isLoading = true;
@@ -118,7 +77,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                       ? await ServiceService().addService(
                           prefs.getString('token'),
                           widget.provider.id.toString(),
-                          _adminId.toString(),
+                          _username,
                           _title,
                           _description,
                           _avgTimePerClient.toInt().toString(),
@@ -140,24 +99,21 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                           _openDays,
                           _status,
                           _image);
+                  print(res.statusCode);
                   if (res.statusCode == 201) {
                     setState(() {
                       _isLoading = false;
                     });
                     final snackBar = SnackBar(
-                      content: Text(
-                          getTranslate(context, "SUCCESS_INFORMATIONS_UPDATE")),
+                      content: Text(getTranslate(context, "SUCCESS_UPDATE")),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   } else {
-                    //TODO:HANDLE ERROR
                     final jsonData =
-                        json.decode(await res.stream.bytesToString())
-                            as Map<String, dynamic>;
+                        json.decode(await res.stream.bytesToString());
                     setState(() {
                       _isLoading = false;
-                      _error = getTranslate(
-                          context, jsonData.values.first[0].toUpperCase());
+                      _error = getTranslate(context, jsonData["error"]);
                     });
                   }
                 } catch (e) {

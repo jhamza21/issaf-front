@@ -71,7 +71,6 @@
     "REGISTER_AS":"S'inscrire en tant que",
     "SEARCH_BY_COUNTRY":"Rechercher par nom de pays",
     "SERVICE_INFORMATIONS":"Informations du service",
-    "SUCCESS_INFORMATIONS_UPDATE":"Vos informations sont tous à jour ! ",
     "SERVICE":"Service",
     "USERNAME_RECEIVER":"Nom d'utilisateur du responsable",
     "TIME_PER_CLIENT":"Temps moyen par client (minute)",
@@ -85,7 +84,15 @@
     "OPENED":"Ouvert",
     "CLOSED":"Fermé",
     "USER_NOT_FOUND":"Il semble que l'username ne correspond à aucun utilisateur",
-    "USER_INVALID_ROLE":"L'utilisateur sélectionner doit avoir un compte responsable fournisseur"
+    "USER_INVALID_ROLE":"L'utilisateur sélectionner doit avoir un compte responsable fournisseur",
+    "SUCCESS_DELETE":"Suppression avec succés !",
+    "FAIL_DELETE":"Echec de la supression!",
+    "SUCCESS_UPDATE":"Succés de la mises à jour! ",
+    "FAIL_UPDATE":"Echec de la mise à jour!",
+    "SUCCESS_ADD":"Succés de l'ajout!",
+    "FAIL_ADD":"Echec de l'ajout!",
+    "DELETE":"Supprimer ?",
+    "DELETE_CONFIRMATION":"Vous etes sur de supprimer "
 
 
 }

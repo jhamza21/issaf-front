@@ -68,27 +68,12 @@ class _ServiceListState extends State<ServiceList> {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-                padding: EdgeInsets.zero,
-                constraints: BoxConstraints(),
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return customDialog(
-                            service.title,
-                            service.description,
-                            service.image,
-                            Column(
-                              children: [
-                                //TODO: add service card
-                              ],
-                            ));
-                      });
-                },
-                icon: Icon(
-                  Icons.info,
-                  size: 17,
-                )),
+              icon: Icon(
+                Icons.create_rounded,
+                size: 17,
+              ),
+              onPressed: () {},
+            ),
             SizedBox(
               width: 8,
             ),
@@ -98,7 +83,52 @@ class _ServiceListState extends State<ServiceList> {
                 size: 17,
                 color: Colors.red,
               ),
-              onPressed: () async {},
+              onPressed: () async {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: new Text(getTranslate(context, "DELETE")),
+                      content: new Text(
+                          getTranslate(context, "DELETE_CONFIRMATION") +
+                              service.title +
+                              " ?"),
+                      actions: <Widget>[
+                        new FlatButton(
+                          child: new Text(getTranslate(context, "NO")),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        new FlatButton(
+                          child: new Text(getTranslate(context, "YES")),
+                          onPressed: () async {
+                            try {
+                              var prefs = await SharedPreferences.getInstance();
+                              var res = await ServiceService().deleteService(
+                                  prefs.getString('token'), service.id);
+                              assert(res.statusCode == 204);
+                              final snackBar = SnackBar(
+                                content: Text(
+                                    getTranslate(context, "SUCCESS_DELETE")),
+                              );
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(snackBar);
+                            } catch (e) {
+                              final snackBar = SnackBar(
+                                content:
+                                    Text(getTranslate(context, "FAIL_DELETE")),
+                              );
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(snackBar);
+                            }
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
             ),
           ],
         ),
