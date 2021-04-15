@@ -322,15 +322,14 @@ class _ProfileState extends State<Profile> {
                       _isLoading = false;
                     });
                   } else {
-                    final jsonData =
-                        json.decode(res.body) as Map<String, dynamic>;
+                    final jsonData = json.decode(res.body);
                     setState(() {
                       _isLoading = false;
-                      _error = getTranslate(
-                          context, jsonData.values.first[0].toUpperCase());
+                      _error = getTranslate(context, jsonData["error"]);
                     });
                   }
                 } catch (e) {
+                  print(e);
                   setState(() {
                     _isLoading = false;
                     _error = getTranslate(context, "ERROR_SERVER");

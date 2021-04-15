@@ -8,6 +8,7 @@ import 'package:issaf/redux/users/actions.dart';
 import 'package:issaf/redux/users/state.dart';
 import 'package:issaf/services/provideService.dart';
 import 'package:issaf/views/providers/notifications.dart';
+import 'package:issaf/views/providers/requests.dart';
 import 'package:issaf/views/providers/addUpdateProvider.dart';
 import 'package:issaf/views/providers/serviceList.dart';
 import 'package:issaf/views/shared/profile.dart';

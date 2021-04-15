@@ -4,8 +4,19 @@ import 'dart:convert';
 class UserService {
 //login
   Future<http.Response> getUserByUsername(String token, String username) async {
-    var url =
-        "http://10.0.2.2:8000/api/getUser/" + username + "?api_token=" + token;
+    var url = "http://10.0.2.2:8000/api/getUserByUsername/" +
+        username +
+        "?api_token=" +
+        token;
+    return await http.get(url);
+  }
+
+//get user by id
+  Future<http.Response> getUserById(String token, int id) async {
+    var url = "http://10.0.2.2:8000/api/getUserById/" +
+        id.toString() +
+        "?api_token=" +
+        token;
     return await http.get(url);
   }
 
@@ -52,7 +63,7 @@ class UserService {
       String email,
       String mobile) async {
     var url = "http://10.0.2.2:8000/api/updateAccount?api_token=" + token;
-    Map<String, dynamic> data;
+    Map<String, dynamic> data = {};
     if (username != null) data["username"] = username;
     if (password != null) data["password"] = password;
     if (name != null) data["name"] = name;
