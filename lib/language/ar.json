@@ -95,7 +95,18 @@
     "DELETE_CONFIRMATION":"أنت متأكد من حذف ",
     "DELETE_REQUEST_CONFIRMATION":"هل أنت متأكد من إلغاء الدعوة إلى ",
     "IS_INVITED_FOR":"مدعو لـ e-saff: ",
-    "WAS_INVITED":"دعاك لتصبح مدير e-saff: "
+    "WAS_INVITED":"دعاك لتصبح مدير e-saff: ",
+    "INVITED_YOU":"دعوتك إلى منصب مسؤول عن e-saff: ",
+    "SERVICE_DETAILS":"تفاصيل الخدمة",
+    "REFUSE":"رفض؟",
+    "ACCEPT":"قبول؟ ",  
+    "ACCEPT_CONFIRMATION":"هل أنت متأكد من قبولك للدعوة؟",
+    "REFUSE_CONFIRMATION":"هل أنت متأكد أنك رفضت الدعوة؟",
+    "SUCCESS_ACCEPT_REQUEST":"الدعوة مقبولة!",
+    "SUCCESS_REFUSE_REQUEST":"حسنا رفضت الدعوة!"
+
+
+
 
 
 

@@ -95,7 +95,15 @@
     "DELETE_CONFIRMATION":"Etes vous sur de supprimer ",
     "DELETE_REQUEST_CONFIRMATION":"Etes vous sur d'annuler l'invitation à ",
     "IS_INVITED_FOR":" est invité pour le e-saff :",
-    "WAS_INVITED":" vous a invité pour devenir le responsable du e-saff : "
+    "WAS_INVITED":" vous a invité pour devenir le responsable du e-saff : ",
+    "INVITED_YOU":" vous a invité pour le poste responsable du e-saff : ",
+    "SERVICE_DETAILS":"Détails du service",
+    "REFUSE":"Refuser ?",
+    "ACCEPT":"Accepter ?",  
+    "ACCEPT_CONFIRMATION":"Etes vous sûr d'accepter l'invitation ?",
+    "REFUSE_CONFIRMATION":"Etes vous sûr de refuser l'invitation ?",
+    "SUCCESS_ACCEPT_REQUEST":"Invitation bien acceptée !",
+    "SUCCESS_REFUSE_REQUEST":"Invitation bien refusée"
 
 
 }

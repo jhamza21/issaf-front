@@ -41,7 +41,9 @@ class _HomeState extends State<Home> {
           .fetchReceivedRequests(prefs.getString('token'));
       assert(response.statusCode == 200);
       final jsonData = json.decode(response.body);
-      _notificationOn = Request.listFromJson(jsonData).length > 0;
+      setState(() {
+        _notificationOn = Request.listFromJson(jsonData).length > 0;
+      });
     } catch (e) {}
   }
 

@@ -42,10 +42,10 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
   @override
   void initState() {
     super.initState();
-    initializeUserData();
+    initializeServiceData();
   }
 
-  void initializeUserData() async {
+  void initializeServiceData() async {
     if (widget.service != null)
       try {
         setState(() {

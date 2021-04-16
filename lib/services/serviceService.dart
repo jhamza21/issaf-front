@@ -21,6 +21,12 @@ class ServiceService {
     return await http.get(url);
   }
 
+  //get service by admin
+  Future<http.Response> getServiceByAdmin(String token) async {
+    var url = "http://10.0.2.2:8000/api/getServiceByAdmin/?api_token=" + token;
+    return await http.get(url);
+  }
+
 //delete service
   Future<http.Response> deleteService(String token, int id) async {
     var url = "http://10.0.2.2:8000/api/services/" +

@@ -22,11 +22,17 @@ class _ServiceListState extends State<ServiceList> {
   List<Service> _services = [];
   bool _isLoading = true;
   int _currentIndex = 0;
+  var _tapPosition;
 
   @override
   void initState() {
     super.initState();
     _fetchServices();
+    _tapPosition = Offset(0.0, 0.0);
+  }
+
+  void _storePosition(TapDownDetails details) {
+    _tapPosition = details.globalPosition;
   }
 
   void _fetchServices() async {
@@ -49,44 +55,37 @@ class _ServiceListState extends State<ServiceList> {
     }
   }
 
-  Card serviceCard(Service service) {
-    return Card(
-      color: Colors.orange[50],
-      child: ListTile(
-        dense: true,
-        title: Text(
-          service.title,
-        ),
-        subtitle: Text(service.description),
-        leading: CircleAvatar(
-          backgroundColor: Colors.orange,
-          radius: 30.0,
-          backgroundImage: NetworkImage(
-              "http://10.0.2.2:8000/api/serviceImg/" + service.image),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
+  _showPopupMenu(Service service) async {
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject();
+    await showMenu(
+        context: context,
+        position: RelativeRect.fromRect(
+            _tapPosition & Size(40, 40), Offset.zero & overlay.size),
+        items: <PopupMenuEntry>[
+          PopupMenuItem(
+            // ignore: deprecated_member_use
+            child: FlatButton.icon(
               icon: Icon(
                 Icons.create_rounded,
-                size: 17,
               ),
+              label: Text("Modifier"),
               onPressed: () {
+                Navigator.of(context).pop();
                 _selectedService = service;
                 changePage(1);
               },
             ),
-            SizedBox(
-              width: 8,
-            ),
-            IconButton(
+          ),
+          PopupMenuItem(
+            // ignore: deprecated_member_use
+            child: FlatButton.icon(
               icon: Icon(
                 Icons.delete,
-                size: 17,
-                color: Colors.red,
               ),
+              label: Text("Supprimer"),
               onPressed: () async {
+                Navigator.of(context).pop();
+
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -135,75 +134,54 @@ class _ServiceListState extends State<ServiceList> {
                 );
               },
             ),
-          ],
+          ),
+          PopupMenuItem(
+            // ignore: deprecated_member_use
+            child: FlatButton.icon(
+              icon: Icon(
+                Icons.info,
+              ),
+              label: Text("Détails"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _selectedService = service;
+                changePage(1);
+              },
+            ),
+          ),
+        ]);
+  }
+
+  Widget serviceCard(Service service) {
+    return GestureDetector(
+      onTapDown: _storePosition,
+      onLongPress: () => _showPopupMenu(service),
+      child: Card(
+        color: Colors.orange[50],
+        child: ListTile(
+          dense: true,
+          title: Text(
+            service.title,
+          ),
+          subtitle: Text(service.description),
+          leading: CircleAvatar(
+            backgroundColor: Colors.orange,
+            radius: 30.0,
+            backgroundImage: NetworkImage(
+                "http://10.0.2.2:8000/api/serviceImg/" + service.image),
+          ),
+          trailing: Icon(
+            Icons.circle,
+            color: service.requestStatus == null
+                ? Colors.grey
+                : service.requestStatus == "ACCEPTED"
+                    ? Colors.green
+                    : Colors.red,
+          ),
         ),
       ),
     );
   }
-
-  // Widget customDialog(
-  //     String title, String description, String image, Widget content) {
-  //   return Dialog(
-  //     shape: RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.circular(20),
-  //     ),
-  //     elevation: 0,
-  //     backgroundColor: Colors.transparent,
-  //     child: Stack(
-  //       children: <Widget>[
-  //         Container(
-  //           padding: EdgeInsets.only(left: 20, top: 65, right: 20, bottom: 20),
-  //           margin: EdgeInsets.only(top: 45),
-  //           decoration: BoxDecoration(
-  //               shape: BoxShape.rectangle,
-  //               color: Colors.orange[50],
-  //               borderRadius: BorderRadius.circular(20),
-  //               boxShadow: [
-  //                 BoxShadow(
-  //                     color: Colors.black,
-  //                     offset: Offset(0, 10),
-  //                     blurRadius: 10),
-  //               ]),
-  //           child: Column(
-  //             mainAxisSize: MainAxisSize.min,
-  //             children: <Widget>[
-  //               Text(
-  //                 title,
-  //                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-  //               ),
-  //               SizedBox(
-  //                 height: 8,
-  //               ),
-  //               Text(
-  //                 description,
-  //                 style: TextStyle(fontSize: 14),
-  //                 textAlign: TextAlign.center,
-  //               ),
-  //               SizedBox(
-  //                 height: 10,
-  //               ),
-  //               content,
-  //             ],
-  //           ),
-  //         ), // bottom part
-  //         Positioned(
-  //           left: 20,
-  //           right: 20,
-  //           child: CircleAvatar(
-  //             backgroundColor: Colors.transparent,
-  //             radius: 45,
-  //             child: CircleAvatar(
-  //               backgroundColor: Colors.orange,
-  //               radius: 40.0,
-  //               backgroundImage: NetworkImage(
-  //                   "http://10.0.2.2:8000/api/providerImg/" + image),
-  //             ),
-  //           ),
-  //         ) // top part
-  //       ],
-  //     ),
-  //   );
-  // }
 
   void changePage(int index) {
     setState(() {

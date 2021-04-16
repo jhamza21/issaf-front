@@ -10,15 +10,14 @@ import 'package:issaf/services/serviceService.dart';
 import 'package:issaf/services/userService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Requests extends StatefulWidget {
-  final bool isReceivedRequests;
-  Requests(this.isReceivedRequests);
+class Notifications extends StatefulWidget {
+  final void Function() callback;
+  Notifications(this.callback);
   @override
-  _RequestsState createState() => _RequestsState();
+  _NotificationsState createState() => _NotificationsState();
 }
 
-@override
-class _RequestsState extends State<Requests> {
+class _NotificationsState extends State<Notifications> {
   List<Request> _requests = [];
   bool _isLoading = true;
 
@@ -31,11 +30,8 @@ class _RequestsState extends State<Requests> {
   void _fetchRequests() async {
     try {
       var prefs = await SharedPreferences.getInstance();
-      final response = widget.isReceivedRequests
-          ? await RequestService()
-              .fetchReceivedRequests(prefs.getString('token'))
-          : await RequestService()
-              .fetchSendedRequests(prefs.getString('token'));
+      final response = await RequestService()
+          .fetchReceivedRequests(prefs.getString('token'));
       assert(response.statusCode == 200);
       final jsonData = json.decode(response.body);
       _requests = Request.listFromJson(jsonData);
@@ -51,85 +47,49 @@ class _RequestsState extends State<Requests> {
 
   Future<Map<String, dynamic>> getRequestData(Request request) async {
     try {
-      User sender, receiver;
       var prefs = await SharedPreferences.getInstance();
-      if (widget.isReceivedRequests) {
-        var res = await UserService()
-            .getUserById(prefs.getString('token'), request.senderId);
-        assert(res.statusCode == 200);
-        sender = User.fromJson(json.decode(res.body));
-      } else {
-        var res = await UserService()
-            .getUserById(prefs.getString('token'), request.receiverId);
-        assert(res.statusCode == 200);
-        receiver = User.fromJson(json.decode(res.body));
-      }
-      var res = await ServiceService()
+      var res = await UserService()
+          .getUserById(prefs.getString('token'), request.senderId);
+      assert(res.statusCode == 200);
+      User sender = User.fromJson(json.decode(res.body));
+
+      res = await ServiceService()
           .getServiceById(prefs.getString('token'), request.serviceId);
       assert(res.statusCode == 200);
       Service service = Service.fromJson(json.decode(res.body));
-      return {"sender": sender, "service": service, "receiver": receiver};
+      return {"sender": sender, "service": service};
     } catch (e) {
       return null;
     }
   }
 
-  Card requestCard(
-      int id, String sender, String serviceName, String receiver, String date) {
+  Card requestCard(int id, String sender, String serviceName, String date) {
     return Card(
       color: Colors.orange[50],
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: widget.isReceivedRequests
-            ? ListTile(
-                title: Text(
-                  date,
-                ),
-                subtitle: Text(sender +
-                    getTranslate(context, "WAS_INVITED") +
-                    serviceName),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.remove_circle,
-                        color: Colors.red[600],
-                      ),
-                      onPressed: () async {},
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.check_circle,
-                        color: Colors.green[800],
-                      ),
-                      onPressed: () async {},
-                    ),
-                  ],
-                ),
-              )
-            : ListTile(
-                title: Text(
-                  date,
-                ),
-                subtitle: Text(receiver +
-                    getTranslate(context, "IS_INVITED_FOR") +
-                    serviceName),
-                trailing: IconButton(
+          padding: const EdgeInsets.all(8.0),
+          child: ListTile(
+            title: Text(
+              date,
+            ),
+            subtitle: Text(
+                sender + getTranslate(context, "INVITED_YOU") + serviceName),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
                   icon: Icon(
-                    Icons.delete,
-                    color: Colors.red,
+                    Icons.remove_circle,
+                    color: Colors.red[600],
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: new Text(getTranslate(context, "DELETE")),
-                          content: new Text(getTranslate(
-                                  context, "DELETE_REQUEST_CONFIRMATION") +
-                              receiver +
-                              " ?"),
+                          title: new Text(getTranslate(context, "REFUSE")),
+                          content: new Text(
+                              getTranslate(context, "REFUSE_CONFIRMATION")),
                           actions: <Widget>[
                             // ignore: deprecated_member_use
                             new FlatButton(
@@ -146,19 +106,19 @@ class _RequestsState extends State<Requests> {
                                   var prefs =
                                       await SharedPreferences.getInstance();
                                   var res = await RequestService()
-                                      .deleteRequest(
+                                      .refuseRequest(
                                           prefs.getString('token'), id);
-                                  assert(res.statusCode == 204);
+                                  assert(res.statusCode == 200);
                                   final snackBar = SnackBar(
                                     content: Text(getTranslate(
-                                        context, "SUCCESS_DELETE")),
+                                        context, "SUCCESS_REFUSE_REQUEST")),
                                   );
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(snackBar);
                                 } catch (e) {
                                   final snackBar = SnackBar(
                                     content: Text(
-                                        getTranslate(context, "FAIL_DELETE")),
+                                        getTranslate(context, "ERROR_SERVER")),
                                   );
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(snackBar);
@@ -171,14 +131,74 @@ class _RequestsState extends State<Requests> {
                     );
                   },
                 ),
-              ),
-      ),
+                IconButton(
+                  icon: Icon(
+                    Icons.check_circle,
+                    color: Colors.green[800],
+                  ),
+                  onPressed: () async {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: new Text(getTranslate(context, "ACCEPT")),
+                          content: new Text(
+                              getTranslate(context, "ACCEPT_CONFIRMATION")),
+                          actions: <Widget>[
+                            // ignore: deprecated_member_use
+                            new FlatButton(
+                              child: new Text(getTranslate(context, "NO")),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                            // ignore: deprecated_member_use
+                            new FlatButton(
+                              child: new Text(getTranslate(context, "YES")),
+                              onPressed: () async {
+                                try {
+                                  var prefs =
+                                      await SharedPreferences.getInstance();
+                                  var res = await RequestService()
+                                      .acceptRequest(
+                                          prefs.getString('token'), id);
+                                  assert(res.statusCode == 200);
+                                  final snackBar = SnackBar(
+                                    content: Text(getTranslate(
+                                        context, "SUCCESS_ACCEPT_REQUEST")),
+                                  );
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(snackBar);
+                                } catch (e) {
+                                  final snackBar = SnackBar(
+                                    content: Text(
+                                        getTranslate(context, "ERROR_SERVER")),
+                                  );
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(snackBar);
+                                }
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          )),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: Text("Invitations"),
+          elevation: 0,
+        ),
         body: _isLoading
             ? Center(child: circularProgressIndicator)
             : _requests.length == 0
@@ -197,13 +217,8 @@ class _RequestsState extends State<Requests> {
                                   snapshot.data != null
                               ? requestCard(
                                   _requests[index].id,
-                                  widget.isReceivedRequests
-                                      ? snapshot.data["sender"].name
-                                      : null,
+                                  snapshot.data["sender"].name,
                                   snapshot.data["service"].title,
-                                  !widget.isReceivedRequests
-                                      ? snapshot.data["receiver"].name
-                                      : null,
                                   _requests[index].dateTime)
                               : Padding(
                                   padding: const EdgeInsets.all(10.0),
