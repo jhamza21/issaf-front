@@ -125,6 +125,7 @@ class _SelectDaysState extends State<SelectDays> {
   }
 
 // Handler to change the text color when the button is pressed and not pressed.
+  // ignore: missing_return
   Color _handleTextColor(bool onSelect) {
     if (onSelect == true) {
       if (widget.selectedDayTextColor == null) {

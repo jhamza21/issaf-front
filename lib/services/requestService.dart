@@ -7,9 +7,18 @@ class RequestService {
     return await http.get(url);
   }
 
-  //fetch received requests
+  //fetch sended requests
   Future<http.Response> fetchSendedRequests(String token) async {
     var url = "http://10.0.2.2:8000/api/requests/sended?api_token=" + token;
     return await http.get(url);
+  }
+
+  //delete request
+  Future<http.Response> deleteRequest(String token, int id) async {
+    var url = "http://10.0.2.2:8000/api/requests/" +
+        id.toString() +
+        "?api_token=" +
+        token;
+    return await http.delete(url);
   }
 }

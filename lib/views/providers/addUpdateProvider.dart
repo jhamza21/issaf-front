@@ -136,6 +136,7 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
                     ModelProvider.Provider _resProvider =
                         ModelProvider.Provider.fromJson(
                             json.decode(await res.stream.bytesToString()));
+                    _selectedImage = null;
                     widget.callback(_resProvider);
                     setState(() {
                       _isLoading = false;

@@ -34,8 +34,7 @@ class ProviderService {
           token;
     else
       url = "http://10.0.2.2:8000/api/providers?api_token=" + token;
-    var request =
-        new http.MultipartRequest(id != null ? "PUT" : "POST", Uri.parse(url));
+    var request = new http.MultipartRequest("POST", Uri.parse(url));
     if (image != null)
       request.files.add(await http.MultipartFile.fromPath('img', image.path));
     request.fields['title'] = title;

@@ -92,7 +92,10 @@
     "SUCCESS_ADD":"Succés de l'ajout!",
     "FAIL_ADD":"Echec de l'ajout!",
     "DELETE":"Supprimer ?",
-    "DELETE_CONFIRMATION":"Vous etes sur de supprimer "
+    "DELETE_CONFIRMATION":"Etes vous sur de supprimer ",
+    "DELETE_REQUEST_CONFIRMATION":"Etes vous sur d'annuler l'invitation à ",
+    "IS_INVITED_FOR":" est invité pour le e-saff :",
+    "WAS_INVITED":" vous a invité pour devenir le responsable du e-saff : "
 
 
 }

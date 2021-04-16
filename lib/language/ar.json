@@ -92,7 +92,11 @@
     "SUCCESS_ADD":"نجاح الإضافة!",
     "FAIL_ADD":"فشل الإضافة!",
     "DELETE":"إزالة ؟",
-    "DELETE_CONFIRMATION":"أنت متأكد من حذف "
+    "DELETE_CONFIRMATION":"أنت متأكد من حذف ",
+    "DELETE_REQUEST_CONFIRMATION":"هل أنت متأكد من إلغاء الدعوة إلى ",
+    "IS_INVITED_FOR":"مدعو لـ e-saff: ",
+    "WAS_INVITED":"دعاك لتصبح مدير e-saff: "
+
 
 
 }

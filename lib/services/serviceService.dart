@@ -51,8 +51,7 @@ class ServiceService {
           id.toString() +
           "?api_token=" +
           token;
-    var request =
-        new http.MultipartRequest(id == null ? "POST" : "PUT", Uri.parse(url));
+    var request = new http.MultipartRequest("POST", Uri.parse(url));
     if (image != null)
       request.files.add(await http.MultipartFile.fromPath('img', image.path));
     if (title != null) request.fields['title'] = title;

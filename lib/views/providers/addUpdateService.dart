@@ -124,14 +124,16 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                       _openDays,
                       _status,
                       _selectedImage);
-                  if (res.statusCode == 201) {
-                    setState(() {
-                      _isLoading = false;
-                    });
+                  if (res.statusCode == 201 || res.statusCode == 200) {
                     final snackBar = SnackBar(
-                      content: Text(getTranslate(context, "SUCCESS_UPDATE")),
+                      content: Text(getTranslate(
+                          context,
+                          res.statusCode == 201
+                              ? "SUCCESS_ADD"
+                              : "SUCCESS_UPDATE")),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    widget.callback(0);
                   } else {
                     final jsonData =
                         json.decode(await res.stream.bytesToString());

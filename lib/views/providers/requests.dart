@@ -74,7 +74,8 @@ class _RequestsState extends State<Requests> {
     }
   }
 
-  Card requestCard(String sender, String serviceName, String receiver) {
+  Card requestCard(
+      int id, String sender, String serviceName, String receiver, String date) {
     return Card(
       color: Colors.orange[50],
       child: Padding(
@@ -82,12 +83,12 @@ class _RequestsState extends State<Requests> {
         child: widget.isReceivedRequests
             ? ListTile(
                 title: Text(
-                  sender,
+                  date,
                   style: TextStyle(fontSize: 24.0),
                 ),
-                subtitle: Text(
-                    "vous a invité pour devenir le responsable du e-saff : " +
-                        serviceName),
+                subtitle: Text(sender +
+                    getTranslate(context, "WAS_INVITED") +
+                    serviceName),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -110,18 +111,66 @@ class _RequestsState extends State<Requests> {
               )
             : ListTile(
                 title: Text(
-                  receiver,
-                  style: TextStyle(fontSize: 24.0),
+                  date,
                 ),
-                subtitle: Text(
-                    "en attente du réponse pour le poste du responsable e-saff : " +
-                        serviceName),
+                subtitle: Text(receiver +
+                    getTranslate(context, "IS_INVITED_FOR") +
+                    serviceName),
                 trailing: IconButton(
                   icon: Icon(
                     Icons.delete,
                     color: Colors.red,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: new Text(getTranslate(context, "DELETE")),
+                          content: new Text(getTranslate(
+                                  context, "DELETE_REQUEST_CONFIRMATION") +
+                              receiver +
+                              " ?"),
+                          actions: <Widget>[
+                            // ignore: deprecated_member_use
+                            new FlatButton(
+                              child: new Text(getTranslate(context, "NO")),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                            // ignore: deprecated_member_use
+                            new FlatButton(
+                              child: new Text(getTranslate(context, "YES")),
+                              onPressed: () async {
+                                try {
+                                  var prefs =
+                                      await SharedPreferences.getInstance();
+                                  var res = await RequestService()
+                                      .deleteRequest(
+                                          prefs.getString('token'), id);
+                                  assert(res.statusCode == 204);
+                                  final snackBar = SnackBar(
+                                    content: Text(getTranslate(
+                                        context, "SUCCESS_DELETE")),
+                                  );
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(snackBar);
+                                } catch (e) {
+                                  final snackBar = SnackBar(
+                                    content: Text(
+                                        getTranslate(context, "FAIL_DELETE")),
+                                  );
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(snackBar);
+                                }
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
       ),
@@ -148,13 +197,15 @@ class _RequestsState extends State<Requests> {
                                       ConnectionState.done &&
                                   snapshot.data != null
                               ? requestCard(
+                                  _requests[index].id,
                                   widget.isReceivedRequests
                                       ? snapshot.data["sender"].name
                                       : null,
                                   snapshot.data["service"].title,
                                   !widget.isReceivedRequests
                                       ? snapshot.data["receiver"].name
-                                      : null)
+                                      : null,
+                                  _requests[index].dateTime)
                               : Padding(
                                   padding: const EdgeInsets.all(10.0),
                                   child:
