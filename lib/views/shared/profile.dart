@@ -25,30 +25,32 @@ class _ProfileState extends State<Profile> {
   String _name, _mobile, _password, _email, _username, _sexe, _error;
   final _formKey = new GlobalKey<FormState>();
 
-  @override
-  void initState() {
-    super.initState();
-    _isLoading = false;
+  void initializeUserData(User user) async {
+    _name = user.name;
+    _username = user.username;
+    _mobile = user.mobile;
+    _email = user.email;
+    _sexe = user.sexe;
   }
 
   bool checkFormChanged(User user) {
-    if ((_mobile != null && _mobile != user.mobile) ||
-        (_name != null && _name != user.name) ||
-        (_username != null && _username != user.username) ||
-        (_email != null && _email != user.email) ||
-        (_sexe != null && _sexe != user.sexe) ||
+    if (_mobile != user.mobile ||
+        _name != user.name ||
+        _username != user.username ||
+        _email != user.email ||
+        _sexe != user.sexe ||
         _password != null) return true;
     return false;
   }
 
-  Widget showMobileInput(previousMobile) {
+  Widget showMobileInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
       child: new IntlPhoneField(
         autoValidate: false,
         searchText: getTranslate(context, "SEARCH_BY_COUNTRY"),
-        initialCountryCode: previousMobile.split('/')[0],
-        initialValue: previousMobile.split('/')[2],
+        initialCountryCode: _mobile.split('/')[0],
+        initialValue: _mobile.split('/')[2],
         keyboardType: TextInputType.phone,
         decoration: inputTextDecorationRectangle(
             Icon(
@@ -73,11 +75,11 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget showNameInput(previousName) {
+  Widget showNameInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
       child: new TextFormField(
-        initialValue: previousName,
+        initialValue: _name,
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRectangle(
             Icon(Icons.supervised_user_circle),
@@ -101,7 +103,7 @@ class _ProfileState extends State<Profile> {
     });
   }
 
-  Widget showSexeInput(String sexe) {
+  Widget showSexeInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: Row(
@@ -112,7 +114,7 @@ class _ProfileState extends State<Profile> {
               new Radio(
                   activeColor: Colors.black,
                   value: "HOMME",
-                  groupValue: _sexe != null ? _sexe : sexe,
+                  groupValue: _sexe,
                   onChanged: _handleRadioButton),
               new Text(
                 getTranslate(context, "MEN"),
@@ -125,7 +127,7 @@ class _ProfileState extends State<Profile> {
               new Radio(
                   activeColor: Colors.black,
                   value: "FEMME",
-                  groupValue: _sexe != null ? _sexe : sexe,
+                  groupValue: _sexe,
                   onChanged: _handleRadioButton),
               new Text(
                 getTranslate(context, "WOMAN"),
@@ -140,11 +142,11 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget showUsernameInput(previousUsername) {
+  Widget showUsernameInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
       child: new TextFormField(
-        initialValue: previousUsername,
+        initialValue: _username,
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRectangle(Icon(Icons.person),
             getTranslate(context, 'USERNAME') + "*", null, null),
@@ -159,11 +161,11 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget showEmailInput(previousEmail) {
+  Widget showEmailInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
       child: new TextFormField(
-        initialValue: previousEmail,
+        initialValue: _email,
         keyboardType: TextInputType.emailAddress,
         decoration: inputTextDecorationRectangle(Icon(Icons.email_rounded),
             getTranslate(context, 'EMAIL') + "*", null, null),
@@ -396,14 +398,15 @@ class _ProfileState extends State<Profile> {
           child: StoreConnector<AppState, AppState>(
               converter: (store) => store.state,
               builder: (context, state) {
+                initializeUserData(state.userState.user);
                 return Column(
                   children: <Widget>[
                     showTitle(getTranslate(context, "PERSONAL_INFORMATIONS")),
-                    showUsernameInput(state.userState.user.username),
-                    showNameInput(state.userState.user.name),
-                    showEmailInput(state.userState.user.email),
-                    showMobileInput(state.userState.user.mobile),
-                    showSexeInput(state.userState.user.sexe),
+                    showUsernameInput(),
+                    showNameInput(),
+                    showEmailInput(),
+                    showMobileInput(),
+                    showSexeInput(),
                     showPasswordInput(),
                     showError(),
                     showChangePassword(),

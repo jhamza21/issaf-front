@@ -6,7 +6,9 @@ class Service {
   int counter;
   String workStartTime;
   String workEndTime;
-  List<dynamic> openDays;
+  List<String> openDays;
+  int providerId;
+  int userId;
   String status;
 
   String image;
@@ -19,6 +21,8 @@ class Service {
       this.workStartTime,
       this.workEndTime,
       this.openDays,
+      this.providerId,
+      this.userId,
       this.status,
       this.image});
 
@@ -30,7 +34,9 @@ class Service {
         counter = json['counter'] ?? null,
         workStartTime = json['work_start_time'] ?? '',
         workEndTime = json['work_end_time'] ?? '',
-        openDays = json['open_days'] ?? null,
+        openDays = json['open_days'].cast<String>() ?? null,
+        providerId = json['provider_id'] ?? null,
+        userId = json['admin_id'] ?? null,
         status = json['status'] ?? '',
         image = json['image'] ?? '';
   static List<Service> listFromJson(List<dynamic> json) {

@@ -3,12 +3,13 @@ import 'dart:convert';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:issaf/models/provider.dart' as ModelProvider;
+import 'package:issaf/models/request.dart';
 import 'package:issaf/redux/store.dart';
 import 'package:issaf/redux/users/actions.dart';
 import 'package:issaf/redux/users/state.dart';
 import 'package:issaf/services/provideService.dart';
+import 'package:issaf/services/requestService.dart';
 import 'package:issaf/views/providers/notifications.dart';
-import 'package:issaf/views/providers/requests.dart';
 import 'package:issaf/views/providers/addUpdateProvider.dart';
 import 'package:issaf/views/providers/serviceList.dart';
 import 'package:issaf/views/shared/profile.dart';
@@ -23,12 +24,25 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   ModelProvider.Provider _provider;
   int _currentIndex = 0;
+  bool _notificationOn = false;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _fetchProvider();
+    _fetchRequests();
+  }
+
+  void _fetchRequests() async {
+    try {
+      var prefs = await SharedPreferences.getInstance();
+      final response = await RequestService()
+          .fetchReceivedRequests(prefs.getString('token'));
+      assert(response.statusCode == 200);
+      final jsonData = json.decode(response.body);
+      _notificationOn = Request.listFromJson(jsonData).length > 0;
+    } catch (e) {}
   }
 
   void _fetchProvider() async {
@@ -96,10 +110,25 @@ class _HomeState extends State<Home> {
                     size: 20,
                     color: Colors.black,
                   ),
-                  Icon(
-                    Icons.notifications,
-                    size: 20,
-                    color: Colors.black,
+                  Stack(
+                    children: [
+                      Icon(
+                        Icons.notifications,
+                        size: 20,
+                        color: Colors.black,
+                      ),
+                      _notificationOn
+                          ? new Positioned(
+                              top: 0.0,
+                              right: 0.0,
+                              child: new Icon(
+                                Icons.brightness_1,
+                                size: 10.0,
+                                color: Colors.red,
+                              ),
+                            )
+                          : SizedBox.shrink(),
+                    ],
                   ),
                   Icon(
                     Icons.settings,

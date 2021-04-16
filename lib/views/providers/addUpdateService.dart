@@ -8,8 +8,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:issaf/models/provider.dart' as ModelProvider;
 import 'package:issaf/models/service.dart';
 import 'package:issaf/constants.dart';
+import 'package:issaf/models/user.dart';
 import 'package:issaf/services/serviceService.dart';
-import 'package:day_picker/day_picker.dart';
+import 'package:issaf/services/userService.dart';
+import 'package:issaf/views/shared/selectDays.dart';
 
 class AddUpdateService extends StatefulWidget {
   final ModelProvider.Provider provider;
@@ -21,35 +23,72 @@ class AddUpdateService extends StatefulWidget {
 }
 
 class _AddUpdateServiceState extends State<AddUpdateService> {
+  final _formKey = new GlobalKey<FormState>();
   bool _isLoading = false;
   String _username,
+      _prevUsername,
       _title,
       _description,
       _workStartTime = "08:00",
       _workEndTime = "17:00",
       _status = "OPENED",
       _error;
-  double _avgTimePerClient = 10;
-  List<String> _openDays;
-  File _image;
-  final _formKey = new GlobalKey<FormState>();
 
-  bool checkProviderChanged(Service service) {
+  double _avgTimePerClient = 10;
+  List<String> _openDays = [];
+  File _selectedImage;
+  bool _isFetchingUser = false;
+
+  @override
+  void initState() {
+    super.initState();
+    initializeUserData();
+  }
+
+  void initializeUserData() async {
+    if (widget.service != null)
+      try {
+        setState(() {
+          _isFetchingUser = true;
+        });
+        _title = widget.service.title;
+        _description = widget.service.description;
+        _avgTimePerClient = widget.service.timePerClient.toDouble();
+        _workStartTime = widget.service.workStartTime.substring(0, 5);
+        _workEndTime = widget.service.workEndTime.substring(0, 5);
+        _openDays = widget.service.openDays;
+        _status = widget.service.status;
+        var prefs = await SharedPreferences.getInstance();
+        final response = await UserService()
+            .getUserById(prefs.getString('token'), widget.service.userId);
+        assert(response.statusCode == 200);
+        final jsonData = json.decode(response.body);
+        _username = User.fromJson(jsonData).username;
+        _prevUsername = User.fromJson(jsonData).username;
+        setState(() {
+          _isFetchingUser = false;
+        });
+      } catch (e) {
+        widget.callback(0);
+      }
+  }
+
+  bool checkServiceChanged(Service service) {
     if (service == null) return true;
-    if ((_title != null && _title != service.title) ||
-        (_description != null && _description != service.description) ||
-        (_avgTimePerClient != null &&
-            _avgTimePerClient != service.timePerClient) ||
-        (_workStartTime != null && _workStartTime != service.workStartTime) ||
-        (_workEndTime != null && _workEndTime != service.workEndTime) ||
-        (_workEndTime != null && _workEndTime != service.workEndTime) ||
-        (_status != null && _status != service.status) ||
-        (_image != null)) return true;
+    if (_title != service.title ||
+        _username != _prevUsername ||
+        _description != service.description ||
+        _avgTimePerClient != service.timePerClient ||
+        _workStartTime != service.workStartTime.substring(0, 5) ||
+        _workEndTime != service.workEndTime.substring(0, 5) ||
+        _openDays != service.openDays ||
+        _status != service.status ||
+        _selectedImage != null) return true;
     return false;
   }
 
   bool validateImage() {
-    if (_image != null ||
+    if (_selectedImage != null ||
         (widget.service != null && widget.service.image != null)) return true;
 
     return false;
@@ -62,8 +101,8 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
     return false;
   }
 
-  Widget showSaveService(Service service) {
-    return checkProviderChanged(service)
+  Widget showSaveService() {
+    return checkServiceChanged(widget.service)
         ? TextButton.icon(
             onPressed: () async {
               if (!_isLoading && validateAndSave())
@@ -86,7 +125,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                           _workEndTime,
                           _openDays,
                           _status,
-                          _image)
+                          _selectedImage)
                       : await ServiceService().updateService(
                           prefs.getString('token'),
                           widget.service.id,
@@ -98,7 +137,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                           _workEndTime,
                           _openDays,
                           _status,
-                          _image);
+                          _selectedImage);
                   if (res.statusCode == 201) {
                     setState(() {
                       _isLoading = false;
@@ -140,11 +179,11 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
         : SizedBox.shrink();
   }
 
-  Widget showDescriptionInput(String previousDescription) {
+  Widget showDescriptionInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
-        initialValue: previousDescription,
+        initialValue: _description,
         maxLines: 4,
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRectangle(
@@ -163,44 +202,59 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
   Future getImageFromGallery() async {
     var img = await ImagePicker().getImage(source: ImageSource.gallery);
     setState(() {
-      if (img != null) _image = File(img.path);
+      if (img != null) _selectedImage = File(img.path);
     });
   }
 
-  Widget showImageInput(String previousImage) {
+  Widget showImageInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           CircleAvatar(
-              child: previousImage == null && _image == null
+              child: _selectedImage == null && widget.service == null
                   ? Text(getTranslate(context, "INSERT_IMAGE") + "*")
                   : SizedBox.shrink(),
               backgroundColor: Colors.orange[200],
               radius: 80,
-              backgroundImage: _image != null
-                  ? FileImage(_image)
-                  : previousImage != null
-                      ? NetworkImage("http://10.0.2.2:8000/api/providerImg/" +
-                          previousImage)
+              backgroundImage: _selectedImage != null
+                  ? FileImage(_selectedImage)
+                  : widget.service != null
+                      ? NetworkImage("http://10.0.2.2:8000/api/serviceImg/" +
+                          widget.service.image)
                       : null),
-          IconButton(
-            icon: Icon(Icons.camera_alt, color: Colors.grey[600]),
-            onPressed: () {
-              getImageFromGallery();
-            },
+          Column(
+            children: [
+              IconButton(
+                icon: Icon(Icons.camera_alt, color: Colors.grey[600]),
+                onPressed: () {
+                  getImageFromGallery();
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.restore,
+                    color: _selectedImage != null
+                        ? Colors.grey[600]
+                        : Colors.grey[400]),
+                onPressed: () {
+                  setState(() {
+                    _selectedImage = null;
+                  });
+                },
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget showTitleInput(String previousTitle) {
+  Widget showTitleInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
-        initialValue: previousTitle,
+        initialValue: _title,
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRectangle(
             null, getTranslate(context, 'TITLE') + "*", null, null),
@@ -273,15 +327,16 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
   Widget showDayPicker() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
-      child: SelectWeekDays(
+      child: SelectDays(
         border: false,
+        initialValue: _openDays,
         boxDecoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30.0),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             colors: [
-              Colors.orange[200],
               Colors.orange[300],
+              Colors.orange[400],
             ],
             tileMode: TileMode.repeated,
           ),
@@ -293,11 +348,11 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
     );
   }
 
-  Widget showUsernameInput(previousUsername) {
+  Widget showUsernameInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
       child: new TextFormField(
-        initialValue: previousUsername,
+        initialValue: _username,
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRectangle(
             null, getTranslate(context, 'USERNAME_RECEIVER') + "*", null, null),
@@ -335,7 +390,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
     });
   }
 
-  Widget showStatusInput(String status) {
+  Widget showStatusInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: Row(
@@ -346,7 +401,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
               new Radio(
                   activeColor: Colors.black,
                   value: "OPENED",
-                  groupValue: _status != null ? _status : status,
+                  groupValue: _status,
                   onChanged: _handleRadioButton),
               new Text(
                 getTranslate(context, "OPENED"),
@@ -359,7 +414,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
               new Radio(
                   activeColor: Colors.black,
                   value: "CLOSED",
-                  groupValue: _status != null ? _status : status,
+                  groupValue: _status,
                   onChanged: _handleRadioButton),
               new Text(
                 getTranslate(context, "CLOSED"),
@@ -388,29 +443,30 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
             onPressed: () => widget.callback(0),
           ),
         ),
-        body: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                showImageInput(
-                    widget.service != null ? widget.service.image : null),
-                showUsernameInput(null),
-                showTitleInput(
-                    widget.service != null ? widget.service.title : null),
-                showDescriptionInput(
-                    widget.service != null ? widget.service.description : null),
-                showTimePerClientInput(),
-                showTitle(getTranslate(context, "WORK_TIME")),
-                showWorkTimeInput(context),
-                showDayPicker(),
-                showStatusInput(null),
-                showError(),
-                showSaveService(widget.service)
-              ],
-            ),
-          ),
-        ),
+        body: _isFetchingUser
+            ? Center(
+                child: circularProgressIndicator,
+              )
+            : Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      showImageInput(),
+                      showUsernameInput(),
+                      showTitleInput(),
+                      showDescriptionInput(),
+                      showTimePerClientInput(),
+                      showTitle(getTranslate(context, "WORK_TIME")),
+                      showWorkTimeInput(context),
+                      showDayPicker(),
+                      showStatusInput(),
+                      showError(),
+                      showSaveService()
+                    ],
+                  ),
+                ),
+              ),
       ),
     );
   }

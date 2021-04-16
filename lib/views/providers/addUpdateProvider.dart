@@ -21,30 +21,45 @@ class AddUpdateProvider extends StatefulWidget {
 
 class _AddUpdateProviderState extends State<AddUpdateProvider> {
   bool _isLoading = false;
-  String _title, _description, _email, _mobile, _siteWeb, _error;
-  File _image;
+  String _title, _description, _email, _mobile, _siteWeb, _image, _error;
+  File _selectedImage;
   final _formKey = new GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    initializeProviderData();
+  }
+
+  void initializeProviderData() async {
+    if (widget.provider != null) {
+      _title = widget.provider.title;
+      _description = widget.provider.description;
+      _mobile = widget.provider.mobile;
+      _email = widget.provider.email;
+      _image = widget.provider.image;
+      _siteWeb = widget.provider.url;
+    }
+  }
 
   bool checkProviderChanged(ModelProvider.Provider provider) {
     if (provider == null) return true;
-    if ((_mobile != null && _mobile != provider.mobile) ||
-        (_title != null && _title != provider.title) ||
-        (_description != null && _description != provider.description) ||
-        (_email != null && _email != provider.email) ||
-        (_image != null) ||
-        (_siteWeb != null && _siteWeb != provider.url)) return true;
+    if (_mobile != provider.mobile ||
+        _title != provider.title ||
+        _description != provider.description ||
+        _email != provider.email ||
+        _siteWeb != null && _siteWeb != provider.url ||
+        _selectedImage != null) return true;
     return false;
   }
 
-  Widget showMobileInput(String previousMobile) {
+  Widget showMobileInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: IntlPhoneField(
         autoValidate: false,
-        initialCountryCode:
-            previousMobile != null ? previousMobile.split('/')[0] : "TN",
-        initialValue:
-            previousMobile != null ? previousMobile.split('/')[2] : null,
+        initialCountryCode: _mobile != null ? _mobile.split('/')[0] : "TN",
+        initialValue: _mobile != null ? _mobile.split('/')[2] : null,
         searchText: getTranslate(context, "SEARCH_BY_COUNTRY"),
         keyboardType: TextInputType.phone,
         decoration: inputTextDecorationRectangle(
@@ -64,11 +79,11 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
     );
   }
 
-  Widget showEmailInput(String previousEmail) {
+  Widget showEmailInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
-        initialValue: previousEmail,
+        initialValue: _email,
         keyboardType: TextInputType.emailAddress,
         decoration: inputTextDecorationRectangle(
             null, getTranslate(context, 'EMAIL') + "*", null, null),
@@ -96,8 +111,8 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
     return false;
   }
 
-  Widget showSaveProvider(ModelProvider.Provider provider) {
-    return checkProviderChanged(provider)
+  Widget showSaveProvider() {
+    return checkProviderChanged(widget.provider)
         ? TextButton.icon(
             onPressed: () async {
               if (!_isLoading && validateAndSave())
@@ -116,17 +131,17 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
                           _email,
                           _mobile,
                           _siteWeb,
-                          _image)
+                          _selectedImage)
                       : await ProviderService().updateProvider(
                           prefs.getString('token'),
-                          provider.id,
+                          widget.provider.id,
                           _title,
                           _description,
                           ".........",
                           _email,
                           _mobile,
                           _siteWeb,
-                          _image);
+                          _selectedImage);
                   if (res.statusCode == 201 || res.statusCode == 200) {
                     ModelProvider.Provider _resProvider =
                         ModelProvider.Provider.fromJson(
@@ -175,11 +190,11 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
         : SizedBox.shrink();
   }
 
-  Widget showDescriptionInput(String previousDescription) {
+  Widget showDescriptionInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
-        initialValue: previousDescription,
+        initialValue: _description,
         maxLines: 4,
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRectangle(
@@ -198,44 +213,59 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
   Future getImageFromGallery() async {
     var img = await ImagePicker().getImage(source: ImageSource.gallery);
     setState(() {
-      if (img != null) _image = File(img.path);
+      if (img != null) _selectedImage = File(img.path);
     });
   }
 
-  Widget showImageInput(String previousImage) {
+  Widget showImageInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           CircleAvatar(
-              child: previousImage == null && _image == null
+              child: _selectedImage == null && widget.provider.image == null
                   ? Text(getTranslate(context, "INSERT_IMAGE") + "*")
                   : SizedBox.shrink(),
               backgroundColor: Colors.orange[200],
               radius: 80,
-              backgroundImage: _image != null
-                  ? FileImage(_image)
-                  : previousImage != null
+              backgroundImage: _selectedImage != null
+                  ? FileImage(_selectedImage)
+                  : widget.provider != null
                       ? NetworkImage("http://10.0.2.2:8000/api/providerImg/" +
-                          previousImage)
+                          widget.provider.image)
                       : null),
-          IconButton(
-            icon: Icon(Icons.camera_alt, color: Colors.grey[600]),
-            onPressed: () {
-              getImageFromGallery();
-            },
+          Column(
+            children: [
+              IconButton(
+                icon: Icon(Icons.camera_alt, color: Colors.grey[600]),
+                onPressed: () {
+                  getImageFromGallery();
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.restore,
+                    color: _selectedImage != null
+                        ? Colors.grey[600]
+                        : Colors.grey[400]),
+                onPressed: () {
+                  setState(() {
+                    _selectedImage = null;
+                  });
+                },
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget showSiteWebInput(String previousSite) {
+  Widget showSiteWebInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
-        initialValue: previousSite,
+        initialValue: _siteWeb,
         keyboardType: TextInputType.emailAddress,
         decoration: inputTextDecorationRectangle(
             null, getTranslate(context, 'SITE_WEB') + "*", null, null),
@@ -249,11 +279,11 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
     );
   }
 
-  Widget showTitleInput(String previousTitle) {
+  Widget showTitleInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
-        initialValue: previousTitle,
+        initialValue: _title,
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRectangle(
             null, getTranslate(context, 'TITLE') + "*", null, null),
@@ -283,21 +313,14 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
-                showImageInput(
-                    widget.provider != null ? widget.provider.image : null),
-                showTitleInput(
-                    widget.provider != null ? widget.provider.title : null),
-                showDescriptionInput(widget.provider != null
-                    ? widget.provider.description
-                    : null),
-                showEmailInput(
-                    widget.provider != null ? widget.provider.email : null),
-                showMobileInput(
-                    widget.provider != null ? widget.provider.mobile : null),
-                showSiteWebInput(
-                    widget.provider != null ? widget.provider.url : null),
+                showImageInput(),
+                showTitleInput(),
+                showDescriptionInput(),
+                showEmailInput(),
+                showMobileInput(),
+                showSiteWebInput(),
                 showError(),
-                showSaveProvider(widget.provider),
+                showSaveProvider(),
               ],
             ),
           ),
