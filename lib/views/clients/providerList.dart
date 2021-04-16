@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/provider.dart';
 import 'package:issaf/services/provideService.dart';
+import 'package:issaf/views/clients/serviceList.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProvidersList extends StatefulWidget {
@@ -17,12 +18,20 @@ class ProvidersList extends StatefulWidget {
 @override
 class _ProvidersListState extends State<ProvidersList> {
   Widget cusSearchBar;
+  int _currentIndex = 0;
+  Provider _selectedProvider;
   Icon cusIcon = Icon(Icons.search);
   List<String> _favoriteProviders = [];
   List<Provider> _orderedProviders = [];
   List<Provider> _providers = [];
   String _searchText;
   bool _isLoading = true;
+
+  void changePage(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
   @override
   void initState() {
@@ -68,108 +77,117 @@ class _ProvidersListState extends State<ProvidersList> {
     });
   }
 
-  Card providerCard(Provider provider) {
-    return Card(
-      color: Colors.orange[50],
-      child: ListTile(
-        dense: true,
-        title: Text(
-          provider.title,
-        ),
-        subtitle: Text(provider.description),
-        leading: CircleAvatar(
-          backgroundColor: Colors.orange,
-          radius: 30.0,
-          backgroundImage: NetworkImage(
-              "http://10.0.2.2:8000/api/providerImg/" + provider.image),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
+  void _selectProvider(Provider provider) {
+    _selectedProvider = provider;
+    changePage(1);
+  }
+
+  Widget providerCard(Provider provider) {
+    return GestureDetector(
+      onTap: () => _selectProvider(provider),
+      child: Card(
+        color: Colors.orange[50],
+        child: ListTile(
+          dense: true,
+          title: Text(
+            provider.title,
+          ),
+          subtitle: Text(provider.description),
+          leading: CircleAvatar(
+            backgroundColor: Colors.orange,
+            radius: 30.0,
+            backgroundImage: NetworkImage(
+                "http://10.0.2.2:8000/api/providerImg/" + provider.image),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: BoxConstraints(),
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return customDialog(
+                              provider.title,
+                              provider.description,
+                              provider.image,
+                              Column(
+                                children: [
+                                  provider.email != null
+                                      ? Row(
+                                          children: [
+                                            Icon(Icons.email),
+                                            Expanded(
+                                                child: Text(
+                                                    " : " + provider.email))
+                                          ],
+                                        )
+                                      : SizedBox.shrink(),
+                                  provider.mobile != null
+                                      ? Row(
+                                          children: [
+                                            Icon(Icons.phone),
+                                            Text(" : " +
+                                                provider.mobile.split("/")[1] +
+                                                provider.mobile.split("/")[2])
+                                          ],
+                                        )
+                                      : SizedBox.shrink(),
+                                  provider.url != null
+                                      ? Row(
+                                          children: [
+                                            Icon(Icons.web),
+                                            Expanded(
+                                                child:
+                                                    Text(" : " + provider.url))
+                                          ],
+                                        )
+                                      : SizedBox.shrink(),
+                                ],
+                              ));
+                        });
+                  },
+                  icon: Icon(
+                    Icons.info,
+                    size: 17,
+                  )),
+              SizedBox(
+                width: 8,
+              ),
+              IconButton(
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(),
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return customDialog(
-                            provider.title,
-                            provider.description,
-                            provider.image,
-                            Column(
-                              children: [
-                                provider.email != null
-                                    ? Row(
-                                        children: [
-                                          Icon(Icons.email),
-                                          Expanded(
-                                              child:
-                                                  Text(" : " + provider.email))
-                                        ],
-                                      )
-                                    : SizedBox.shrink(),
-                                provider.mobile != null
-                                    ? Row(
-                                        children: [
-                                          Icon(Icons.phone),
-                                          Text(" : " +
-                                              provider.mobile.split("/")[1] +
-                                              provider.mobile.split("/")[2])
-                                        ],
-                                      )
-                                    : SizedBox.shrink(),
-                                provider.url != null
-                                    ? Row(
-                                        children: [
-                                          Icon(Icons.web),
-                                          Expanded(
-                                              child: Text(" : " + provider.url))
-                                        ],
-                                      )
-                                    : SizedBox.shrink(),
-                              ],
-                            ));
-                      });
-                },
                 icon: Icon(
-                  Icons.info,
+                  _favoriteProviders.contains(provider.id.toString())
+                      ? Icons.star
+                      : Icons.star_border,
                   size: 17,
-                )),
-            SizedBox(
-              width: 8,
-            ),
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: BoxConstraints(),
-              icon: Icon(
-                _favoriteProviders.contains(provider.id.toString())
-                    ? Icons.star
-                    : Icons.star_border,
-                size: 17,
-                color: Colors.deepOrange,
-              ),
-              onPressed: () async {
-                var prefs = await SharedPreferences.getInstance();
-                if (_favoriteProviders.contains(provider.id.toString())) {
-                  //Remove favorite provider
-                  setState(() {
-                    _favoriteProviders.remove(provider.id.toString());
-                    sortedProviders();
-                  });
-                  prefs.setStringList("favorite", _favoriteProviders);
-                } else {
-                  //Add favorite provider
+                  color: Colors.deepOrange,
+                ),
+                onPressed: () async {
                   var prefs = await SharedPreferences.getInstance();
-                  setState(() {
-                    _favoriteProviders.add(provider.id.toString());
-                    sortedProviders();
-                  });
-                  prefs.setStringList("favorite", _favoriteProviders);
-                }
-              },
-            ),
-          ],
+                  if (_favoriteProviders.contains(provider.id.toString())) {
+                    //Remove favorite provider
+                    setState(() {
+                      _favoriteProviders.remove(provider.id.toString());
+                      sortedProviders();
+                    });
+                    prefs.setStringList("favorite", _favoriteProviders);
+                  } else {
+                    //Add favorite provider
+                    var prefs = await SharedPreferences.getInstance();
+                    setState(() {
+                      _favoriteProviders.add(provider.id.toString());
+                      sortedProviders();
+                    });
+                    prefs.setStringList("favorite", _favoriteProviders);
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -294,8 +312,7 @@ class _ProvidersListState extends State<ProvidersList> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _providersList() {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
@@ -352,5 +369,12 @@ class _ProvidersListState extends State<ProvidersList> {
                         return providerCard(_orderedProviders[index]);
                     },
                   ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _currentIndex == 0
+        ? _providersList()
+        : ServiceList(_selectedProvider, changePage);
   }
 }
