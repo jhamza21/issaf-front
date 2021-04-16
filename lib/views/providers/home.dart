@@ -49,7 +49,7 @@ class _HomeState extends State<Home> {
     try {
       var prefs = await SharedPreferences.getInstance();
       final response =
-          await ProviderService().fetchProvider(prefs.getString('token'));
+          await ProviderService().fetchProviderUser(prefs.getString('token'));
       assert(response.statusCode == 200);
       final jsonData = json.decode(response.body);
       setState(() {

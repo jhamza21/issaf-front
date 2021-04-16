@@ -21,6 +21,7 @@ class ServiceService {
     return await http.get(url);
   }
 
+//delete service
   Future<http.Response> deleteService(String token, int id) async {
     var url = "http://10.0.2.2:8000/api/services/" +
         id.toString() +
@@ -29,8 +30,8 @@ class ServiceService {
     return await http.delete(url);
   }
 
-//update service data
-  Future<http.StreamedResponse> updateService(
+//add or update service data
+  Future<http.StreamedResponse> addUpdateService(
       String token,
       int id,
       String title,
@@ -42,11 +43,16 @@ class ServiceService {
       List<String> openDays,
       String status,
       File image) async {
-    var url = "http://10.0.2.2:8000/api/services/" +
-        id.toString() +
-        "?api_token=" +
-        token;
-    var request = new http.MultipartRequest("POST", Uri.parse(url));
+    var url;
+    if (id == null)
+      url = "http://10.0.2.2:8000/api/services?api_token=" + token;
+    else
+      url = "http://10.0.2.2:8000/api/services/" +
+          id.toString() +
+          "?api_token=" +
+          token;
+    var request =
+        new http.MultipartRequest(id == null ? "POST" : "PUT", Uri.parse(url));
     if (image != null)
       request.files.add(await http.MultipartFile.fromPath('img', image.path));
     if (title != null) request.fields['title'] = title;
@@ -60,38 +66,6 @@ class ServiceService {
     if (workEndTime != null) request.fields['work_end_time'] = workEndTime;
     if (openDays != null) request.fields['open_days'] = openDays.toString();
     if (status != null) request.fields['status'] = status;
-    return await request.send();
-  }
-
-  //fetch all providers
-  Future<http.StreamedResponse> addService(
-      String token,
-      String providerId,
-      String usernameAdmin,
-      String title,
-      String description,
-      String avgTimePerClient,
-      String counter,
-      String workStartTime,
-      String workEndTime,
-      List<String> openDays,
-      String status,
-      File image) async {
-    var url = "http://10.0.2.2:8000/api/services?api_token=" + token;
-    var request = new http.MultipartRequest("POST", Uri.parse(url));
-    for (int i = 0; i < openDays.length; i++)
-      request.fields['open_days[' + i.toString() + ']'] = openDays[i];
-    request.files.add(await http.MultipartFile.fromPath('img', image.path));
-    request.fields['provider_id'] = providerId;
-    request.fields['username_admin'] = usernameAdmin;
-    request.fields['title'] = title;
-    request.fields['description'] = description;
-    request.fields['avg_time_per_client'] = avgTimePerClient;
-    request.fields['counter'] = counter;
-    request.fields['work_start_time'] = workStartTime;
-    request.fields['work_end_time'] = workEndTime;
-    request.fields['status'] = status;
-
     return await request.send();
   }
 }

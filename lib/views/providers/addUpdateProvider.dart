@@ -122,26 +122,16 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
                     _isLoading = true;
                   });
                   var prefs = await SharedPreferences.getInstance();
-                  var res = widget.provider == null
-                      ? await ProviderService().addProvider(
-                          prefs.getString('token'),
-                          _title,
-                          _description,
-                          "........",
-                          _email,
-                          _mobile,
-                          _siteWeb,
-                          _selectedImage)
-                      : await ProviderService().updateProvider(
-                          prefs.getString('token'),
-                          widget.provider.id,
-                          _title,
-                          _description,
-                          ".........",
-                          _email,
-                          _mobile,
-                          _siteWeb,
-                          _selectedImage);
+                  var res = await ProviderService().addUpdateProvider(
+                      prefs.getString('token'),
+                      widget.provider != null ? widget.provider.id : null,
+                      _title,
+                      _description,
+                      ".........",
+                      _email,
+                      _mobile,
+                      _siteWeb,
+                      _selectedImage);
                   if (res.statusCode == 201 || res.statusCode == 200) {
                     ModelProvider.Provider _resProvider =
                         ModelProvider.Provider.fromJson(

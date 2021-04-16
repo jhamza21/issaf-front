@@ -112,32 +112,18 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                     _isLoading = true;
                   });
                   var prefs = await SharedPreferences.getInstance();
-                  var res = widget.service == null
-                      ? await ServiceService().addService(
-                          prefs.getString('token'),
-                          widget.provider.id.toString(),
-                          _username,
-                          _title,
-                          _description,
-                          _avgTimePerClient.toInt().toString(),
-                          "0",
-                          _workStartTime,
-                          _workEndTime,
-                          _openDays,
-                          _status,
-                          _selectedImage)
-                      : await ServiceService().updateService(
-                          prefs.getString('token'),
-                          widget.service.id,
-                          _title,
-                          _description,
-                          _avgTimePerClient.toInt().toString(),
-                          "0",
-                          _workStartTime,
-                          _workEndTime,
-                          _openDays,
-                          _status,
-                          _selectedImage);
+                  var res = await ServiceService().addUpdateService(
+                      prefs.getString('token'),
+                      widget.service.id,
+                      _title,
+                      _description,
+                      _avgTimePerClient.toInt().toString(),
+                      "0",
+                      _workStartTime,
+                      _workEndTime,
+                      _openDays,
+                      _status,
+                      _selectedImage);
                   if (res.statusCode == 201) {
                     setState(() {
                       _isLoading = false;
