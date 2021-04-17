@@ -37,6 +37,8 @@ class ServiceService {
   Future<http.StreamedResponse> addUpdateService(
       String token,
       int id,
+      int providerId,
+      String username,
       String title,
       String description,
       String avgTimePerClient,
@@ -52,8 +54,11 @@ class ServiceService {
     else
       url = URL_BACKEND + "services/" + id.toString() + "?api_token=" + token;
     var request = new http.MultipartRequest("POST", Uri.parse(url));
+    request.fields['provider_id'] = providerId.toString();
     if (image != null)
       request.files.add(await http.MultipartFile.fromPath('img', image.path));
+    if (username != null) request.fields['username_admin'] = username;
+
     if (title != null) request.fields['title'] = title;
     if (description != null) request.fields['description'] = description;
 
@@ -63,8 +68,13 @@ class ServiceService {
     if (workStartTime != null)
       request.fields['work_start_time'] = workStartTime;
     if (workEndTime != null) request.fields['work_end_time'] = workEndTime;
-    if (openDays != null) request.fields['open_days'] = openDays.toString();
+    if (openDays != null) {
+      for (int i = 0; i < openDays.length; i++)
+        request.fields['open_days[' + i.toString() + ']'] =
+            openDays[i].toString();
+    }
     if (status != null) request.fields['status'] = status;
+
     return await request.send();
   }
 }

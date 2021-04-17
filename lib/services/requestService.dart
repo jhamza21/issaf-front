@@ -2,6 +2,12 @@ import 'package:http/http.dart' as http;
 import 'package:issaf/constants.dart';
 
 class RequestService {
+  //fetch request by service id
+  Future<http.Response> fetchRequestByServiceId(String token, int id) async {
+    var url = URL_BACKEND + "requests/" + id.toString() + "?api_token=" + token;
+    return await http.get(url);
+  }
+
 //fetch received requests
   Future<http.Response> fetchReceivedRequests(String token) async {
     var url = URL_BACKEND + "requests/received?api_token=" + token;
@@ -22,13 +28,21 @@ class RequestService {
 
   //refuse request
   Future<http.Response> refuseRequest(String token, int id) async {
-    var url = URL_BACKEND + "requests/" + id.toString() + "?api_token=" + token;
-    return await http.delete(url);
+    var url = URL_BACKEND +
+        "requests/refuse/" +
+        id.toString() +
+        "?api_token=" +
+        token;
+    return await http.put(url);
   }
 
   //accept request
   Future<http.Response> acceptRequest(String token, int id) async {
-    var url = URL_BACKEND + "requests/" + id.toString() + "?api_token=" + token;
-    return await http.delete(url);
+    var url = URL_BACKEND +
+        "requests/accept/" +
+        id.toString() +
+        "?api_token=" +
+        token;
+    return await http.put(url);
   }
 }

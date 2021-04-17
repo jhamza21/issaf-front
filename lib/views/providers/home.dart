@@ -91,7 +91,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     final List<Widget> _children = [
       ServiceList(_provider),
-      Notifications(),
+      Notifications(_fetchRequests),
       AddUpdateProvider(_provider, setProvider),
       Profile(),
     ];

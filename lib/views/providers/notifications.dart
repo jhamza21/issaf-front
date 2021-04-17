@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:issaf/constants.dart';
 import 'package:issaf/views/providers/requests.dart';
 
 class Notifications extends StatefulWidget {
+  final void Function() callback;
+  Notifications(this.callback);
   @override
   _NotificationsState createState() => _NotificationsState();
 }
@@ -20,20 +23,20 @@ class _NotificationsState extends State<Notifications> {
             tabs: [
               Tab(
                 icon: Icon(Icons.transit_enterexit),
-                child: Text("Reçues"),
+                child: Text(getTranslate(context, "RECEIVED")),
               ),
               Tab(
                 icon: Icon(Icons.send),
-                child: Text("Envoyées"),
+                child: Text(getTranslate(context, "SENDED")),
               ),
             ],
           ),
-          title: Text('Invitations'),
+          title: Text(getTranslate(context, "REQUESTS")),
         ),
         body: TabBarView(
           children: [
-            Requests(true),
-            Requests(false),
+            Requests(true, widget.callback),
+            Requests(false, widget.callback),
           ],
         ),
       ),

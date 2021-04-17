@@ -50,7 +50,7 @@ class _ServiceListState extends State<ServiceList> {
   }
 
   void _selectService(Service service) {
-    if (service.requestStatus == "ACCEPTED" && service.status == "OPENED") {
+    if (service.userId != null && service.status == "OPENED") {
       _selectedService = service;
       changePage(1);
     }
@@ -89,8 +89,7 @@ class _ServiceListState extends State<ServiceList> {
           ),
           trailing: Icon(
             Icons.circle,
-            color: service.requestStatus == "ACCEPTED" &&
-                    service.status == "OPENED"
+            color: service.userId != null && service.status == "OPENED"
                 ? Colors.green
                 : Colors.red,
           ),
@@ -112,7 +111,7 @@ class _ServiceListState extends State<ServiceList> {
             appBar: AppBar(
               centerTitle: true,
               elevation: 0.0,
-              title: Text("E-Saffs"),
+              title: Text(getTranslate(context, "E-SAFFS")),
               leading: IconButton(
                 icon: Icon(Icons.arrow_back),
                 onPressed: () => widget.callback(0),

@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:commons/commons.dart';
 import 'package:flutter_spinbox/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:issaf/models/provider.dart' as ModelProvider;
 import 'package:issaf/models/service.dart';
+import 'package:issaf/models/request.dart' as ModelRequest;
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/user.dart';
+import 'package:issaf/services/requestService.dart';
 import 'package:issaf/services/serviceService.dart';
 import 'package:issaf/services/userService.dart';
 import 'package:issaf/views/shared/selectDays.dart';
@@ -17,7 +18,9 @@ class AddUpdateService extends StatefulWidget {
   final ModelProvider.Provider provider;
   final Service service;
   final void Function(int) callback;
-  AddUpdateService(this.provider, this.service, this.callback);
+  final void Function() fetchServices;
+  AddUpdateService(
+      this.provider, this.service, this.callback, this.fetchServices);
   @override
   _AddUpdateServiceState createState() => _AddUpdateServiceState();
 }
@@ -37,7 +40,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
   double _avgTimePerClient = 10;
   List<String> _openDays = [];
   File _selectedImage;
-  bool _isFetchingUser = false;
+  bool _isFetchingUser = false, _requestStatus = false;
 
   @override
   void initState() {
@@ -59,18 +62,44 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
         _openDays = widget.service.openDays;
         _status = widget.service.status;
         var prefs = await SharedPreferences.getInstance();
-        final response = await UserService()
-            .getUserById(prefs.getString('token'), widget.service.userId);
-        assert(response.statusCode == 200);
-        final jsonData = json.decode(response.body);
-        _username = User.fromJson(jsonData).username;
-        _prevUsername = User.fromJson(jsonData).username;
+        if (widget.service.userId != null) {
+          _requestStatus = true;
+          _prevUsername = _username = await _getUsername(
+              prefs.getString('token'), widget.service.userId);
+        } else {
+          final response = await RequestService().fetchRequestByServiceId(
+              prefs.getString('token'), widget.service.id);
+          if (response.statusCode == 200) {
+            final jsonData = json.decode(response.body);
+            var _request = ModelRequest.Request.fromJson(jsonData);
+            if (_request.status == "REFUSED") {
+              _requestStatus = false;
+              _prevUsername = _username = await _getUsername(
+                  prefs.getString('token'), _request.senderId);
+            } else if (_request.status == null) {
+              _requestStatus = null;
+              _prevUsername = _username = await _getUsername(
+                  prefs.getString('token'), _request.receiverId);
+            }
+          } else {
+            _requestStatus = false;
+            _prevUsername = _username = null;
+          }
+        }
         setState(() {
           _isFetchingUser = false;
         });
       } catch (e) {
+        print(e);
         widget.callback(0);
       }
+  }
+
+  Future<String> _getUsername(String token, int id) async {
+    final response = await UserService().getUserById(token, id);
+    assert(response.statusCode == 200);
+    final jsonData = json.decode(response.body);
+    return User.fromJson(jsonData).username;
   }
 
   bool checkServiceChanged(Service service) {
@@ -114,7 +143,9 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                   var prefs = await SharedPreferences.getInstance();
                   var res = await ServiceService().addUpdateService(
                       prefs.getString('token'),
-                      widget.service.id,
+                      widget.service != null ? widget.service.id : null,
+                      widget.provider.id,
+                      _prevUsername != _username ? _username : null,
                       _title,
                       _description,
                       _avgTimePerClient.toInt().toString(),
@@ -133,10 +164,12 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                               : "SUCCESS_UPDATE")),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    widget.fetchServices();
                     widget.callback(0);
                   } else {
                     final jsonData =
                         json.decode(await res.stream.bytesToString());
+                    print(jsonData);
                     setState(() {
                       _isLoading = false;
                       _error = getTranslate(context, jsonData["error"]);
@@ -336,6 +369,22 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
     );
   }
 
+  GestureDetector _getSuffixIcon() {
+    if (widget.service == null)
+      return null;
+    else
+      return GestureDetector(
+        child: Icon(
+          Icons.circle,
+          color: _requestStatus == true
+              ? Colors.green[800]
+              : _requestStatus == false
+                  ? Colors.red[800]
+                  : Colors.grey,
+        ),
+      );
+  }
+
   Widget showUsernameInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
@@ -343,7 +392,10 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
         initialValue: _username,
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRectangle(
-            null, getTranslate(context, 'USERNAME_RECEIVER') + "*", null, null),
+            null,
+            getTranslate(context, 'USERNAME_RECEIVER') + "*",
+            null,
+            _getSuffixIcon()),
         validator: (value) =>
             value.isEmpty || value.length < 6 || value.length > 255
                 ? getTranslate(context, 'INVALID_USERNAME_LENGTH')
@@ -424,7 +476,8 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
       child: Scaffold(
         appBar: AppBar(
           elevation: 0,
-          title: Text(getTranslate(context, "ADD_SERVICE")),
+          title: Text(getTranslate(context,
+              widget.service == null ? "ADD_SERVICE" : "UPDATE_SERVICE")),
           centerTitle: true,
           leading: IconButton(
             icon: Icon(Icons.arrow_back),

@@ -19,7 +19,7 @@ class Request {
         senderId = json['sender_id'] ?? '',
         receiverId = json['receiver_id'] ?? '',
         serviceId = json['service_id'] ?? '',
-        status = json['status'] ?? '';
+        status = json['status'] ?? null;
 
   static List<Request> listFromJson(List<dynamic> json) {
     return json == null

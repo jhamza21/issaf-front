@@ -10,7 +10,6 @@ class Service {
   int providerId;
   int userId;
   String status;
-  String requestStatus;
 
   String image;
   Service(
@@ -25,7 +24,6 @@ class Service {
       this.providerId,
       this.userId,
       this.status,
-      this.requestStatus,
       this.image});
 
   Service.fromJson(Map<String, dynamic> json)
@@ -40,7 +38,6 @@ class Service {
         providerId = json['provider_id'] ?? null,
         userId = json['admin_id'] ?? null,
         status = json['status'] ?? '',
-        requestStatus = json['request_status'] ?? null,
         image = json['image'] ?? '';
   static List<Service> listFromJson(List<dynamic> json) {
     return json == null

@@ -296,7 +296,8 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
       child: Scaffold(
         appBar: AppBar(
           elevation: 0,
-          title: Text(getTranslate(context, 'SERVICE_INFORMATIONS')),
+          title: Text(getTranslate(context,
+              widget.provider == null ? 'ADD_PROVIDER' : 'UPDATE_PROVIDER')),
           centerTitle: true,
         ),
         body: Form(

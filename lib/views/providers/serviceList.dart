@@ -68,7 +68,7 @@ class _ServiceListState extends State<ServiceList> {
               icon: Icon(
                 Icons.create_rounded,
               ),
-              label: Text("Modifier"),
+              label: Text(getTranslate(context, "UPDATE")),
               onPressed: () {
                 Navigator.of(context).pop();
                 _selectedService = service;
@@ -82,7 +82,7 @@ class _ServiceListState extends State<ServiceList> {
               icon: Icon(
                 Icons.delete,
               ),
-              label: Text("Supprimer"),
+              label: Text(getTranslate(context, "DELETE")),
               onPressed: () async {
                 Navigator.of(context).pop();
 
@@ -90,7 +90,7 @@ class _ServiceListState extends State<ServiceList> {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: new Text(getTranslate(context, "DELETE")),
+                      title: new Text(getTranslate(context, "DELETE") + "?"),
                       content: new Text(
                           getTranslate(context, "DELETE_CONFIRMATION") +
                               service.title +
@@ -112,6 +112,8 @@ class _ServiceListState extends State<ServiceList> {
                               var res = await ServiceService().deleteService(
                                   prefs.getString('token'), service.id);
                               assert(res.statusCode == 204);
+                              Navigator.of(context).pop();
+                              _fetchServices();
                               final snackBar = SnackBar(
                                 content: Text(
                                     getTranslate(context, "SUCCESS_DELETE")),
@@ -141,7 +143,7 @@ class _ServiceListState extends State<ServiceList> {
               icon: Icon(
                 Icons.info,
               ),
-              label: Text("Détails"),
+              label: Text(getTranslate(context, "DETAILS")),
               onPressed: () {
                 Navigator.of(context).pop();
                 _selectedService = service;
@@ -172,11 +174,7 @@ class _ServiceListState extends State<ServiceList> {
           ),
           trailing: Icon(
             Icons.circle,
-            color: service.requestStatus == null
-                ? Colors.grey
-                : service.requestStatus == "ACCEPTED"
-                    ? Colors.green
-                    : Colors.red,
+            color: service.userId == null ? Colors.red : Colors.green,
           ),
         ),
       ),
@@ -196,7 +194,7 @@ class _ServiceListState extends State<ServiceList> {
             appBar: AppBar(
               centerTitle: true,
               elevation: 0.0,
-              title: Text("Saff"),
+              title: Text(getTranslate(context, "E-SAFFS")),
               actions: [
                 IconButton(
                   icon: Icon(Icons.add),
@@ -220,6 +218,7 @@ class _ServiceListState extends State<ServiceList> {
                           return serviceCard(_services[index]);
                         },
                       ))
-        : AddUpdateService(widget.provider, _selectedService, changePage);
+        : AddUpdateService(
+            widget.provider, _selectedService, changePage, _fetchServices);
   }
 }

@@ -52,13 +52,6 @@ class _ServiceDetailsState extends State<ServiceDetails> {
 
       var jsonData = json.decode(response.body);
       Service _service = Service.fromJson(jsonData);
-      if (_service.requestStatus != "ACCEPTED") {
-        setState(() {
-          _error = "Vous n'appartenez pas à aucun service !";
-          _isLoading = false;
-        });
-        return;
-      }
       _title = _service.title;
       _description = _service.description;
       _avgTimePerClient = _service.timePerClient.toDouble();

@@ -12,7 +12,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Requests extends StatefulWidget {
   final bool isReceivedRequests;
-  Requests(this.isReceivedRequests);
+  final void Function() callback;
+  Requests(this.isReceivedRequests, this.callback);
   @override
   _RequestsState createState() => _RequestsState();
 }
@@ -74,104 +75,90 @@ class _RequestsState extends State<Requests> {
     }
   }
 
-  Card requestCard(
-      int id, String sender, String serviceName, String receiver, String date) {
+  Card requestCard(int id, String sender, String serviceName, String receiver,
+      String date, String status) {
+    String _subtitle, _confirmation;
+    if (widget.isReceivedRequests) {
+      _confirmation =
+          getTranslate(context, "DELETE_REQUEST_RESPONSE_CONFIRMATION");
+      _subtitle = sender;
+      _subtitle += status == "ACCEPTED"
+          ? getTranslate(context, "HAS_ACCEPTED")
+          : getTranslate(context, "HAS_REFUSED");
+    } else {
+      _confirmation = getTranslate(context, "DELETE_REQUEST_CONFIRMATION");
+      _confirmation += receiver;
+      _confirmation += "?";
+      _subtitle = receiver;
+      _subtitle += getTranslate(context, "IS_INVITED_FOR");
+    }
+    _subtitle += serviceName;
+
     return Card(
       color: Colors.orange[50],
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: widget.isReceivedRequests
-            ? ListTile(
-                title: Text(
-                  date,
-                ),
-                subtitle: Text(sender +
-                    getTranslate(context, "WAS_INVITED") +
-                    serviceName),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.remove_circle,
-                        color: Colors.red[600],
+        child: ListTile(
+          title: Text(
+            date,
+          ),
+          subtitle: Text(_subtitle),
+          trailing: IconButton(
+            icon: Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: new Text(getTranslate(context, "DELETE") + "?"),
+                    content: new Text(_confirmation),
+                    actions: <Widget>[
+                      // ignore: deprecated_member_use
+                      new FlatButton(
+                        child: new Text(getTranslate(context, "NO")),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
                       ),
-                      onPressed: () async {},
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.check_circle,
-                        color: Colors.green[800],
+                      // ignore: deprecated_member_use
+                      new FlatButton(
+                        child: new Text(getTranslate(context, "YES")),
+                        onPressed: () async {
+                          try {
+                            var prefs = await SharedPreferences.getInstance();
+                            var res = await RequestService()
+                                .deleteRequest(prefs.getString('token'), id);
+                            assert(res.statusCode == 204);
+                            final snackBar = SnackBar(
+                              content:
+                                  Text(getTranslate(context, "SUCCESS_DELETE")),
+                            );
+                            widget.callback();
+                            _fetchRequests();
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
+                          } catch (e) {
+                            Navigator.of(context).pop();
+                            final snackBar = SnackBar(
+                              content:
+                                  Text(getTranslate(context, "FAIL_DELETE")),
+                            );
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
+                          }
+                        },
                       ),
-                      onPressed: () async {},
-                    ),
-                  ],
-                ),
-              )
-            : ListTile(
-                title: Text(
-                  date,
-                ),
-                subtitle: Text(receiver +
-                    getTranslate(context, "IS_INVITED_FOR") +
-                    serviceName),
-                trailing: IconButton(
-                  icon: Icon(
-                    Icons.delete,
-                    color: Colors.red,
-                  ),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: new Text(getTranslate(context, "DELETE")),
-                          content: new Text(getTranslate(
-                                  context, "DELETE_REQUEST_CONFIRMATION") +
-                              receiver +
-                              " ?"),
-                          actions: <Widget>[
-                            // ignore: deprecated_member_use
-                            new FlatButton(
-                              child: new Text(getTranslate(context, "NO")),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                            // ignore: deprecated_member_use
-                            new FlatButton(
-                              child: new Text(getTranslate(context, "YES")),
-                              onPressed: () async {
-                                try {
-                                  var prefs =
-                                      await SharedPreferences.getInstance();
-                                  var res = await RequestService()
-                                      .deleteRequest(
-                                          prefs.getString('token'), id);
-                                  assert(res.statusCode == 204);
-                                  final snackBar = SnackBar(
-                                    content: Text(getTranslate(
-                                        context, "SUCCESS_DELETE")),
-                                  );
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(snackBar);
-                                } catch (e) {
-                                  final snackBar = SnackBar(
-                                    content: Text(
-                                        getTranslate(context, "FAIL_DELETE")),
-                                  );
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(snackBar);
-                                }
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -197,14 +184,15 @@ class _RequestsState extends State<Requests> {
                                   snapshot.data != null
                               ? requestCard(
                                   _requests[index].id,
-                                  widget.isReceivedRequests
+                                  snapshot.data["sender"] != null
                                       ? snapshot.data["sender"].name
                                       : null,
                                   snapshot.data["service"].title,
-                                  !widget.isReceivedRequests
+                                  snapshot.data["receiver"] != null
                                       ? snapshot.data["receiver"].name
                                       : null,
-                                  _requests[index].dateTime)
+                                  _requests[index].dateTime,
+                                  _requests[index].status)
                               : Padding(
                                   padding: const EdgeInsets.all(10.0),
                                   child:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:issaf/constants.dart';
 
 class SelectDays extends StatefulWidget {
   //handle initial value
@@ -179,9 +180,10 @@ class _SelectDaysState extends State<SelectDays> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      day.dayName.substring(0, 3),
+                      getTranslate(context, day.dayName.toUpperCase()),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
+                        fontSize: 12,
                         color: _handleTextColor(day.isSelected),
                       ),
                     ),

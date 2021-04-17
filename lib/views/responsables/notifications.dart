@@ -113,9 +113,13 @@ class _NotificationsState extends State<Notifications> {
                                     content: Text(getTranslate(
                                         context, "SUCCESS_REFUSE_REQUEST")),
                                   );
+                                  Navigator.of(context).pop();
+                                  _fetchRequests();
+                                  widget.callback();
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(snackBar);
                                 } catch (e) {
+                                  Navigator.of(context).pop();
                                   final snackBar = SnackBar(
                                     content: Text(
                                         getTranslate(context, "ERROR_SERVER")),
@@ -167,9 +171,13 @@ class _NotificationsState extends State<Notifications> {
                                     content: Text(getTranslate(
                                         context, "SUCCESS_ACCEPT_REQUEST")),
                                   );
+                                  Navigator.of(context).pop();
+                                  _fetchRequests();
+                                  widget.callback();
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(snackBar);
                                 } catch (e) {
+                                  Navigator.of(context).pop();
                                   final snackBar = SnackBar(
                                     content: Text(
                                         getTranslate(context, "ERROR_SERVER")),
@@ -196,7 +204,7 @@ class _NotificationsState extends State<Notifications> {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: Text("Invitations"),
+          title: Text(getTranslate(context, "REQUESTS")),
           elevation: 0,
         ),
         body: _isLoading
