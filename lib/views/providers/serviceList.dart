@@ -167,8 +167,8 @@ class _ServiceListState extends State<ServiceList> {
           leading: CircleAvatar(
             backgroundColor: Colors.orange,
             radius: 30.0,
-            backgroundImage: NetworkImage(
-                "http://10.0.2.2:8000/api/serviceImg/" + service.image),
+            backgroundImage:
+                NetworkImage(URL_BACKEND + "serviceImg/" + service.image),
           ),
           trailing: Icon(
             Icons.circle,

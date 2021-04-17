@@ -111,7 +111,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
           backgroundColor: Colors.orange[200],
           radius: 80,
           backgroundImage: _image != null
-              ? NetworkImage("http://10.0.2.2:8000/api/serviceImg/" + _image)
+              ? NetworkImage(URL_BACKEND + "serviceImg/" + _image)
               : null),
     );
   }

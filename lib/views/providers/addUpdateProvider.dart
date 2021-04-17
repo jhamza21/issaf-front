@@ -223,8 +223,8 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
               backgroundImage: _selectedImage != null
                   ? FileImage(_selectedImage)
                   : widget.provider != null
-                      ? NetworkImage("http://10.0.2.2:8000/api/providerImg/" +
-                          widget.provider.image)
+                      ? NetworkImage(
+                          URL_BACKEND + "providerImg/" + widget.provider.image)
                       : null),
           Column(
             children: [

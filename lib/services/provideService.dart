@@ -1,17 +1,18 @@
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:issaf/constants.dart';
 
 class ProviderService {
 //fetch all providers
   Future<http.Response> fetchProviders(String token) async {
-    var url = "http://10.0.2.2:8000/api/providers?api_token=" + token;
+    var url = URL_BACKEND + "providers?api_token=" + token;
     return await http.get(url);
   }
 
   //fetch connected user provider
   Future<http.Response> fetchProviderUser(String token) async {
-    var url = "http://10.0.2.2:8000/api/getUserProvider?api_token=" + token;
+    var url = URL_BACKEND + "getUserProvider?api_token=" + token;
     return await http.get(url);
   }
 
@@ -28,12 +29,9 @@ class ProviderService {
       File image) async {
     var url;
     if (id != null)
-      url = "http://10.0.2.2:8000/api/providers/" +
-          id.toString() +
-          "?api_token=" +
-          token;
+      url = URL_BACKEND + "providers/" + id.toString() + "?api_token=" + token;
     else
-      url = "http://10.0.2.2:8000/api/providers?api_token=" + token;
+      url = URL_BACKEND + "providers?api_token=" + token;
     var request = new http.MultipartRequest("POST", Uri.parse(url));
     if (image != null)
       request.files.add(await http.MultipartFile.fromPath('img', image.path));

@@ -96,8 +96,8 @@ class _ProvidersListState extends State<ProvidersList> {
           leading: CircleAvatar(
             backgroundColor: Colors.orange,
             radius: 30.0,
-            backgroundImage: NetworkImage(
-                "http://10.0.2.2:8000/api/providerImg/" + provider.image),
+            backgroundImage:
+                NetworkImage(URL_BACKEND + "providerImg/" + provider.image),
           ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
@@ -302,8 +302,8 @@ class _ProvidersListState extends State<ProvidersList> {
               child: CircleAvatar(
                 backgroundColor: Colors.orange,
                 radius: 40.0,
-                backgroundImage: NetworkImage(
-                    "http://10.0.2.2:8000/api/providerImg/" + image),
+                backgroundImage:
+                    NetworkImage(URL_BACKEND + "providerImg/" + image),
               ),
             ),
           ) // top part

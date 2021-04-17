@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:issaf/constants.dart';
 
 class ServiceService {
 //fetch all services
   Future<http.Response> fetchServices(String token, int idProvider) async {
-    var url = "http://10.0.2.2:8000/api/providers/" +
+    var url = URL_BACKEND +
+        "providers/" +
         idProvider.toString() +
         "?api_token=" +
         token;
@@ -14,25 +16,20 @@ class ServiceService {
 
   //get service by id
   Future<http.Response> getServiceById(String token, int id) async {
-    var url = "http://10.0.2.2:8000/api/getServiceById/" +
-        id.toString() +
-        "?api_token=" +
-        token;
+    var url =
+        URL_BACKEND + "getServiceById/" + id.toString() + "?api_token=" + token;
     return await http.get(url);
   }
 
   //get service by admin
   Future<http.Response> getServiceByAdmin(String token) async {
-    var url = "http://10.0.2.2:8000/api/getServiceByAdmin/?api_token=" + token;
+    var url = URL_BACKEND + "getServiceByAdmin/?api_token=" + token;
     return await http.get(url);
   }
 
 //delete service
   Future<http.Response> deleteService(String token, int id) async {
-    var url = "http://10.0.2.2:8000/api/services/" +
-        id.toString() +
-        "?api_token=" +
-        token;
+    var url = URL_BACKEND + "services/" + id.toString() + "?api_token=" + token;
     return await http.delete(url);
   }
 
@@ -51,12 +48,9 @@ class ServiceService {
       File image) async {
     var url;
     if (id == null)
-      url = "http://10.0.2.2:8000/api/services?api_token=" + token;
+      url = URL_BACKEND + "services?api_token=" + token;
     else
-      url = "http://10.0.2.2:8000/api/services/" +
-          id.toString() +
-          "?api_token=" +
-          token;
+      url = URL_BACKEND + "services/" + id.toString() + "?api_token=" + token;
     var request = new http.MultipartRequest("POST", Uri.parse(url));
     if (image != null)
       request.files.add(await http.MultipartFile.fromPath('img', image.path));

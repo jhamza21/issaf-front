@@ -209,8 +209,8 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
               backgroundImage: _selectedImage != null
                   ? FileImage(_selectedImage)
                   : widget.service != null
-                      ? NetworkImage("http://10.0.2.2:8000/api/serviceImg/" +
-                          widget.service.image)
+                      ? NetworkImage(
+                          URL_BACKEND + "serviceImg/" + widget.service.image)
                       : null),
           Column(
             children: [
