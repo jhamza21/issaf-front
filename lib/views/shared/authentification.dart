@@ -108,6 +108,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
               ),
             );
           } else {
+            print(jsonData["error"]);
             var error = jsonData["errors"] as Map<String, dynamic>;
             setState(() {
               _isLoading = false;
@@ -115,6 +116,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
             });
           }
         } catch (error) {
+          print(error);
           setState(() {
             _isLoading = false;
             _error = errorHandler("ERROR_SERVER", context);

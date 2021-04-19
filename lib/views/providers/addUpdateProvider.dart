@@ -98,10 +98,9 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
   }
 
   bool validateImage() {
-    if (_image != null ||
-        (widget.provider != null && widget.provider.image != null)) return true;
+    if (widget.provider == null && _selectedImage == null) return false;
 
-    return false;
+    return true;
   }
 
   // Check if form is valid
@@ -132,6 +131,7 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
                       _mobile,
                       _siteWeb,
                       _selectedImage);
+
                   if (res.statusCode == 201 || res.statusCode == 200) {
                     ModelProvider.Provider _resProvider =
                         ModelProvider.Provider.fromJson(
@@ -215,7 +215,7 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           CircleAvatar(
-              child: _selectedImage == null && widget.provider.image == null
+              child: _selectedImage == null && widget.provider == null
                   ? Text(getTranslate(context, "INSERT_IMAGE") + "*")
                   : SizedBox.shrink(),
               backgroundColor: Colors.orange[200],

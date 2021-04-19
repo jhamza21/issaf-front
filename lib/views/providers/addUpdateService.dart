@@ -117,10 +117,9 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
   }
 
   bool validateImage() {
-    if (_selectedImage != null ||
-        (widget.service != null && widget.service.image != null)) return true;
+    if (widget.service == null && _selectedImage == null) return false;
 
-    return false;
+    return true;
   }
 
   // Check if form is valid
