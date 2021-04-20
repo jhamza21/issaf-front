@@ -95,9 +95,16 @@ class _ProvidersListState extends State<ProvidersList> {
           subtitle: Text(provider.description),
           leading: CircleAvatar(
             backgroundColor: Colors.orange,
+            child: provider.image == null
+                ? Text(
+                    provider.title[0].toUpperCase(),
+                    style: TextStyle(color: Colors.white),
+                  )
+                : SizedBox.shrink(),
             radius: 30.0,
-            backgroundImage:
-                NetworkImage(URL_BACKEND + "providerImg/" + provider.image),
+            backgroundImage: provider.image != null
+                ? NetworkImage(URL_BACKEND + "providerImg/" + provider.image)
+                : null,
           ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
@@ -112,7 +119,9 @@ class _ProvidersListState extends State<ProvidersList> {
                           return customDialog(
                               provider.title,
                               provider.description,
-                              provider.image,
+                              provider.image != null
+                                  ? "providerImg/" + provider.image
+                                  : null,
                               Column(
                                 children: [
                                   provider.email != null
@@ -189,125 +198,6 @@ class _ProvidersListState extends State<ProvidersList> {
             ],
           ),
         ),
-      ),
-    );
-  }
-  // Widget providerCard(Provider provider) {
-  //   return new Container(
-  //       height: 120.0,
-  //       margin: const EdgeInsets.symmetric(
-  //         vertical: 10.0,
-  //       ),
-  //       child: new Stack(
-  //         children: <Widget>[
-  //           //container
-  //           new Container(
-  //             margin: new EdgeInsets.only(left: 46.0),
-  //             decoration: new BoxDecoration(
-  //               color: Colors.orange[50],
-  //               shape: BoxShape.rectangle,
-  //               borderRadius: new BorderRadius.circular(8.0),
-  //               boxShadow: <BoxShadow>[
-  //                 new BoxShadow(
-  //                   color: Colors.black12,
-  //                   blurRadius: 2.0,
-  //                   offset: new Offset(0.0, 10.0),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //           //image
-  //           new Container(
-  //             margin: new EdgeInsets.symmetric(vertical: 16.0),
-  //             alignment: FractionalOffset.centerLeft,
-  //             child: new Image(
-  //               image: new AssetImage("assets/images/steg.png"),
-  //               height: 92.0,
-  //               width: 92.0,
-  //             ),
-  //           ),
-  //           //arrow
-  //           new Container(
-  //             margin: new EdgeInsets.symmetric(vertical: 16.0),
-  //             alignment: FractionalOffset.centerRight,
-  //             child: new Icon(
-  //               Icons.arrow_forward_ios,
-  //               color: Colors.grey[700],
-  //             ),
-  //           ),
-  //           //dots
-  //           new Container(
-  //             margin: new EdgeInsets.symmetric(vertical: 16.0),
-  //             alignment: FractionalOffset.topRight,
-  //             child: new Icon(
-  //               Icons.threesixty_rounded,
-  //               color: Colors.grey[700],
-  //             ),
-  //           ),
-  //         ],
-  //       ));
-  // }
-
-  Widget customDialog(
-      String title, String description, String image, Widget content) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      child: Stack(
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.only(left: 20, top: 65, right: 20, bottom: 20),
-            margin: EdgeInsets.only(top: 45),
-            decoration: BoxDecoration(
-                shape: BoxShape.rectangle,
-                color: Colors.orange[50],
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black,
-                      offset: Offset(0, 10),
-                      blurRadius: 10),
-                ]),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  title,
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-                ),
-                SizedBox(
-                  height: 8,
-                ),
-                Text(
-                  description,
-                  style: TextStyle(fontSize: 14),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                content,
-              ],
-            ),
-          ), // bottom part
-          Positioned(
-            left: 20,
-            right: 20,
-            child: CircleAvatar(
-              backgroundColor: Colors.transparent,
-              radius: 45,
-              child: CircleAvatar(
-                backgroundColor: Colors.orange,
-                radius: 40.0,
-                backgroundImage:
-                    NetworkImage(URL_BACKEND + "providerImg/" + image),
-              ),
-            ),
-          ) // top part
-        ],
       ),
     );
   }

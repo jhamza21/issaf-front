@@ -106,7 +106,7 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
   // Check if form is valid
   bool validateAndSave() {
     final form = _formKey.currentState;
-    if (form.validate() && validateImage()) return true;
+    if (form.validate()) return true;
     return false;
   }
 
@@ -215,9 +215,10 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           CircleAvatar(
-              child: _selectedImage == null && widget.provider == null
-                  ? Text(getTranslate(context, "INSERT_IMAGE") + "*")
-                  : SizedBox.shrink(),
+              child: _selectedImage != null ||
+                      (widget.provider != null && widget.provider.image != null)
+                  ? SizedBox.shrink()
+                  : Text(getTranslate(context, "INSERT_IMAGE")),
               backgroundColor: Colors.orange[200],
               radius: 80,
               backgroundImage: _selectedImage != null

@@ -38,7 +38,7 @@ class Service {
         providerId = json['provider_id'] ?? null,
         userId = json['admin_id'] ?? null,
         status = json['status'] ?? '',
-        image = json['image'] ?? '';
+        image = json['image'] ?? null;
   static List<Service> listFromJson(List<dynamic> json) {
     return json == null
         ? []

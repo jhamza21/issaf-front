@@ -116,17 +116,13 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
     return false;
   }
 
-  bool validateImage() {
-    if (widget.service == null && _selectedImage == null) return false;
-
-    return true;
-  }
-
   // Check if form is valid
   bool validateAndSave() {
     final form = _formKey.currentState;
-    if (form.validate() && validateImage()) return true;
-    return false;
+    if (form.validate())
+      return true;
+    else
+      return false;
   }
 
   Widget showSaveService() {
@@ -233,9 +229,10 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           CircleAvatar(
-              child: _selectedImage == null && widget.service == null
-                  ? Text(getTranslate(context, "INSERT_IMAGE") + "*")
-                  : SizedBox.shrink(),
+              child: _selectedImage != null ||
+                      (widget.service != null && widget.service.image != null)
+                  ? SizedBox.shrink()
+                  : Text(getTranslate(context, "INSERT_IMAGE")),
               backgroundColor: Colors.orange[200],
               radius: 80,
               backgroundImage: _selectedImage != null

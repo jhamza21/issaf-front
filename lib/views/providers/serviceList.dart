@@ -168,12 +168,20 @@ class _ServiceListState extends State<ServiceList> {
           subtitle: Text(service.description),
           leading: CircleAvatar(
             backgroundColor: Colors.orange,
+            child: service.image == null
+                ? Text(
+                    service.title[0].toUpperCase(),
+                    style: TextStyle(color: Colors.white),
+                  )
+                : SizedBox.shrink(),
             radius: 30.0,
-            backgroundImage:
-                NetworkImage(URL_BACKEND + "serviceImg/" + service.image),
+            backgroundImage: service.image != null
+                ? NetworkImage(URL_BACKEND + "serviceImg/" + service.image)
+                : null,
           ),
           trailing: Icon(
             Icons.circle,
+            size: 15,
             color: service.userId == null ? Colors.red : Colors.green,
           ),
         ),

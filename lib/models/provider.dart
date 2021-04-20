@@ -25,7 +25,7 @@ class Provider {
         mobile = json['mobile'] ?? '',
         email = json['email'] ?? '',
         url = json['url'] ?? '',
-        image = json['image'] ?? '';
+        image = json['image'] ?? null;
   static List<Provider> listFromJson(List<dynamic> json) {
     return json == null
         ? []

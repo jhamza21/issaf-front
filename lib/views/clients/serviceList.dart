@@ -56,42 +56,97 @@ class _ServiceListState extends State<ServiceList> {
     }
   }
 
+  Widget _getOpenDays(Service service) {
+    List<Widget> list = new List<Widget>();
+    list.add(Icon(Icons.calendar_today));
+    list.add(Text(" : "));
+    for (var i = 0; i < service.openDays.length; i++) {
+      list.add(
+          new Text(getTranslate(context, service.openDays[i].toUpperCase())));
+      list.add(Text(", "));
+    }
+    return new Row(children: list);
+  }
+
   Widget serviceCard(Service service) {
     return GestureDetector(
       onTap: () => _selectService(service),
-      child: Container(
-        decoration: BoxDecoration(
-            color: Colors.grey[300],
-            borderRadius: BorderRadius.all(
-              Radius.circular(20.0),
-            )),
+      child: Card(
+        color: Colors.orange[50],
         child: ListTile(
+          dense: true,
           title: Text(
             service.title,
-            style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 15.0),
           ),
           subtitle: Text(
             service.description,
-            style: TextStyle(
-                color: Colors.blueGrey,
-                fontWeight: FontWeight.w600,
-                fontSize: 15.0),
-            overflow: TextOverflow.ellipsis,
           ),
           leading: CircleAvatar(
             backgroundColor: Colors.orange,
+            child: service.image == null
+                ? Text(
+                    service.title[0].toUpperCase(),
+                    style: TextStyle(color: Colors.white),
+                  )
+                : SizedBox.shrink(),
             radius: 30.0,
-            backgroundImage:
-                NetworkImage(URL_BACKEND + "serviceImg/" + service.image),
+            backgroundImage: service.image != null
+                ? NetworkImage(URL_BACKEND + "serviceImg/" + service.image)
+                : null,
           ),
-          trailing: Icon(
-            Icons.circle,
-            color: service.userId != null && service.status == "OPENED"
-                ? Colors.green
-                : Colors.red,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: BoxConstraints(),
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return customDialog(
+                              service.title,
+                              service.description,
+                              service.image != null
+                                  ? "serviceImg/" + service.image
+                                  : null,
+                              Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.timer_outlined),
+                                      Expanded(
+                                          child: Text(" : " +
+                                              service.workStartTime
+                                                  .substring(0, 5)))
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.timer_off),
+                                      Expanded(
+                                          child: Text(" : " +
+                                              service.workEndTime
+                                                  .substring(0, 5)))
+                                    ],
+                                  ),
+                                  _getOpenDays(service)
+                                ],
+                              ));
+                        });
+                  },
+                  icon: Icon(
+                    Icons.info,
+                    size: 17,
+                  )),
+              SizedBox(
+                width: 15,
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 15,
+              ),
+            ],
           ),
         ),
       ),
@@ -111,7 +166,8 @@ class _ServiceListState extends State<ServiceList> {
             appBar: AppBar(
               centerTitle: true,
               elevation: 0.0,
-              title: Text(getTranslate(context, "E-SAFFS")),
+              title:
+                  Text(widget.provider.title, style: TextStyle(fontSize: 17)),
               leading: IconButton(
                 icon: Icon(Icons.arrow_back),
                 onPressed: () => widget.callback(0),

@@ -59,6 +59,70 @@ inputTextDecorationRectangle(Icon prefixIcon, String hintText, String errorText,
   );
 }
 
+Widget customDialog(
+    String title, String description, String image, Widget content) {
+  return Dialog(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+    ),
+    elevation: 0,
+    backgroundColor: Colors.transparent,
+    child: Stack(
+      children: <Widget>[
+        Container(
+          padding: EdgeInsets.only(
+              left: 20, top: image != null ? 50 : 20, right: 20, bottom: 20),
+          margin: EdgeInsets.only(top: 45),
+          decoration: BoxDecoration(
+              shape: BoxShape.rectangle,
+              color: Colors.orange[50],
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black, offset: Offset(0, 10), blurRadius: 10),
+              ]),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                title,
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+              ),
+              SizedBox(
+                height: 8,
+              ),
+              Text(
+                description,
+                style: TextStyle(fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              content,
+            ],
+          ),
+        ), // bottom part
+        image != null
+            ? Positioned(
+                left: 20,
+                right: 20,
+                child: CircleAvatar(
+                  backgroundColor: Colors.transparent,
+                  radius: 45,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.orange,
+                    radius: 40.0,
+                    backgroundImage: NetworkImage(URL_BACKEND + image),
+                  ),
+                ),
+              )
+            : SizedBox.shrink() // top part
+      ],
+    ),
+  );
+}
+
 //RETURN TRANSLATED VALUE
 String getTranslate(BuildContext context, String key) {
   return AppLocalizations.of(context).getTranslatedValue(key);
