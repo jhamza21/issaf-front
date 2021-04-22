@@ -55,6 +55,53 @@ class _ServiceListState extends State<ServiceList> {
     }
   }
 
+  void _deleteService(Service service) {
+    Navigator.of(context).pop();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text(getTranslate(context, "DELETE") + "?"),
+          content: new Text(getTranslate(context, "DELETE_CONFIRMATION") +
+              service.title +
+              " ?"),
+          actions: <Widget>[
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "NO")),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "YES")),
+              onPressed: () async {
+                try {
+                  var prefs = await SharedPreferences.getInstance();
+                  var res = await ServiceService()
+                      .deleteService(prefs.getString('token'), service.id);
+                  assert(res.statusCode == 204);
+                  Navigator.of(context).pop();
+                  _fetchServices();
+                  final snackBar = SnackBar(
+                    content: Text(getTranslate(context, "SUCCESS_DELETE")),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                } catch (e) {
+                  final snackBar = SnackBar(
+                    content: Text(getTranslate(context, "FAIL_DELETE")),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   _showPopupMenu(Service service) async {
     final RenderBox overlay = Overlay.of(context).context.findRenderObject();
     await showMenu(
@@ -83,57 +130,8 @@ class _ServiceListState extends State<ServiceList> {
                 Icons.delete,
               ),
               label: Text(getTranslate(context, "DELETE")),
-              onPressed: () async {
-                Navigator.of(context).pop();
-
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: new Text(getTranslate(context, "DELETE") + "?"),
-                      content: new Text(
-                          getTranslate(context, "DELETE_CONFIRMATION") +
-                              service.title +
-                              " ?"),
-                      actions: <Widget>[
-                        // ignore: deprecated_member_use
-                        new FlatButton(
-                          child: new Text(getTranslate(context, "NO")),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        // ignore: deprecated_member_use
-                        new FlatButton(
-                          child: new Text(getTranslate(context, "YES")),
-                          onPressed: () async {
-                            try {
-                              var prefs = await SharedPreferences.getInstance();
-                              var res = await ServiceService().deleteService(
-                                  prefs.getString('token'), service.id);
-                              assert(res.statusCode == 204);
-                              Navigator.of(context).pop();
-                              _fetchServices();
-                              final snackBar = SnackBar(
-                                content: Text(
-                                    getTranslate(context, "SUCCESS_DELETE")),
-                              );
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(snackBar);
-                            } catch (e) {
-                              final snackBar = SnackBar(
-                                content:
-                                    Text(getTranslate(context, "FAIL_DELETE")),
-                              );
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(snackBar);
-                            }
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
+              onPressed: () {
+                _deleteService(service);
               },
             ),
           ),

@@ -116,7 +116,6 @@ class _LoginSignUpState extends State<LoginSignUp> {
             });
           }
         } catch (error) {
-          print(error);
           setState(() {
             _isLoading = false;
             _error = errorHandler("ERROR_SERVER", context);

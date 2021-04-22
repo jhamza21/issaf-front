@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/service.dart';
+import 'package:issaf/services/ticketService.dart';
 
 class ServiceDetails extends StatefulWidget {
   final Service service;
@@ -13,9 +16,66 @@ class ServiceDetails extends StatefulWidget {
 
 class _ServiceDetailsState extends State<ServiceDetails> {
   String _selectedDate = new DateFormat("yyyy-MM-dd").format(DateTime.now());
-  String _selectedTime;
-  bool _isLoading = false;
-  List<String> _times = ["08:00", "08:30", "09:00", "10:00"];
+  String _selectedTime, _error;
+  bool _isLoading = false, _isFetchingTimes;
+  List<String> _times;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAvailableTimes();
+  }
+
+  void _fetchAvailableTimes() async {
+    try {
+      setState(() {
+        _isFetchingTimes = true;
+        _error = null;
+      });
+      _times = null;
+      var prefs = await SharedPreferences.getInstance();
+      var res = await TicketService().fetchAvailableTicketsByDat(
+          prefs.getString('token'),
+          _selectedDate,
+          widget.service.id.toString());
+      assert(res.statusCode == 200);
+      setState(() {
+        _times = (json.decode(res.body) as List<dynamic>).cast<String>();
+        _selectedTime = _times[0];
+        _isFetchingTimes = false;
+      });
+    } catch (e) {
+      setState(() {
+        _times = null;
+        _isFetchingTimes = false;
+      });
+      _error = getTranslate(context, "ERROR_SERVER");
+    }
+  }
+
+//book ticket
+  void _getTicket() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+      var prefs = await SharedPreferences.getInstance();
+      var res = await TicketService().addTicket(prefs.getString('token'),
+          _selectedDate, _selectedTime, widget.service.id);
+      assert(res.statusCode == 201);
+      final snackBar = SnackBar(
+        content: Text(getTranslate(context, "SUCCESS_ADD")),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      widget.callback(0);
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _error = getTranslate(context, "ERROR_SERVER");
+      });
+    }
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime d = await showDatePicker(
@@ -27,6 +87,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
     if (d != null)
       setState(() {
         _selectedDate = new DateFormat("yyyy-MM-dd").format(d);
+        _fetchAvailableTimes();
       });
   }
 
@@ -58,22 +119,27 @@ class _ServiceDetailsState extends State<ServiceDetails> {
         SizedBox(
           width: 20,
         ),
-        DropdownButton(
-          dropdownColor: Colors.orange[50],
-          value: _times[0],
-          onChanged: (String value) {
-            setState(() {
-              _selectedTime = value;
-            });
-          },
-          underline: SizedBox(),
-          items: _times
-              .map<DropdownMenuItem<String>>((_time) => DropdownMenuItem(
-                    value: _time,
-                    child: Text(_time),
-                  ))
-              .toList(),
-        ),
+        _isFetchingTimes
+            ? circularProgressIndicator
+            : DropdownButton(
+                dropdownColor: Colors.orange[50],
+                value: _selectedTime,
+                onChanged: (String value) {
+                  setState(() {
+                    _selectedTime = value;
+                  });
+                },
+                underline: SizedBox(),
+                items: _times != null
+                    ? _times
+                        .map<DropdownMenuItem<String>>(
+                            (_time) => DropdownMenuItem(
+                                  value: _time,
+                                  child: Text(_time),
+                                ))
+                        .toList()
+                    : null,
+              ),
       ],
     );
   }
@@ -92,10 +158,26 @@ class _ServiceDetailsState extends State<ServiceDetails> {
           color: Colors.orange[600],
           label: Text("Prendre ce ticket".toUpperCase(),
               style: new TextStyle(fontSize: 15.0, color: Colors.black)),
-          onPressed: () {},
+          onPressed: () {
+            _getTicket();
+          },
         ),
       ),
     );
+  }
+
+  Widget _showErrorMessage() {
+    if (_error != null)
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+        child: Text(
+          _error,
+          style: TextStyle(
+              fontSize: 15.0, color: Colors.red, fontWeight: FontWeight.w400),
+        ),
+      );
+    else
+      return SizedBox.shrink();
   }
 
   @override
@@ -137,6 +219,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
             SizedBox(
               height: 10,
             ),
+            _showErrorMessage(),
             _showPrimaryButton()
           ],
         ));

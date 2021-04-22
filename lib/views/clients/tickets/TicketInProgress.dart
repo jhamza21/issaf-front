@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/ticket.dart';
+import 'package:issaf/services/ticketService.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TicketInProgress extends StatefulWidget {
   @override
@@ -9,41 +13,80 @@ class TicketInProgress extends StatefulWidget {
 
 class _TicketInProgressState extends State<TicketInProgress> {
   bool _isLoading = true;
-  List<Ticket> _tickets = [];
+  String _error;
+  List<Ticket> _tickets;
 
   void _fetchTickets() async {
     try {
-      // var prefs = await SharedPreferences.getInstance();
-      // final response =
-      //     await ProviderService().fetchProviders(prefs.getString('token'));
-
-      // assert(response.statusCode == 200);
-      // final jsonData = json.decode(response.body);
-      // _providers = Provider.listFromJson(jsonData);
-      // reorderProviders();
-
-      _tickets.add(Ticket(
-          date: "Demain à 12h",
-          description: "Accés au magasin",
-          id: 0,
-          number: 1,
-          title: "Carrefour",
-          status: Status.IN_PROGRESS));
-      _tickets.add(Ticket(
-          date: "2021-10-10 à 10:55",
-          description: "Simple coiffure",
-          id: 1,
-          number: 7,
-          title: "Coiffeur Guigos",
-          status: Status.IN_PROGRESS));
+      var prefs = await SharedPreferences.getInstance();
+      final response =
+          await TicketService().fetchTickets(prefs.getString('token'));
+      assert(response.statusCode == 200);
+      final jsonData = json.decode(response.body);
+      _tickets = Ticket.listFromJson(jsonData);
       setState(() {
         _isLoading = false;
       });
     } catch (error) {
       setState(() {
         _isLoading = false;
+        _error = getTranslate(context, "ERROR_SERVER");
       });
     }
+  }
+
+  void _deleteTicket(int id) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text(getTranslate(context, "DELETE") + "?"),
+          content:
+              new Text(getTranslate(context, "DELETE_CONFIRMATION") + " ?"),
+          actions: <Widget>[
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "NO")),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "YES")),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  var prefs = await SharedPreferences.getInstance();
+                  final response = await TicketService()
+                      .deleteTicket(prefs.getString('token'), id);
+                  assert(response.statusCode == 204);
+                  _fetchTickets();
+                  final snackBar = SnackBar(
+                    content: Text(getTranslate(context, "SUCCESS_DELETE")),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  setState(() {
+                    _isLoading = false;
+                  });
+                } catch (error) {
+                  final snackBar = SnackBar(
+                    content: Text(getTranslate(context, "FAIL_DELETE")),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  setState(() {
+                    _isLoading = false;
+                  });
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -89,10 +132,22 @@ class _TicketInProgressState extends State<TicketInProgress> {
                     Column(
                       children: [
                         Text("Vous avez un rendez-vous"),
-                        Text(
-                          ticket.date,
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        )
+                        Row(
+                          children: [
+                            Text(
+                              ticket.date,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              " à ",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              ticket.time.substring(0, 5),
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )
+                          ],
+                        ),
                       ],
                     )
                   ],
@@ -112,7 +167,9 @@ class _TicketInProgressState extends State<TicketInProgress> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      _deleteTicket(ticket.id);
+                    },
                     icon: Icon(Icons.remove_circle),
                     label: Text("Annuler")),
                 TextButton.icon(
@@ -131,16 +188,26 @@ class _TicketInProgressState extends State<TicketInProgress> {
   Widget build(BuildContext context) {
     return _isLoading
         ? Center(child: circularProgressIndicator)
-        : _tickets.length == 0
+        : _error != null
             ? Center(
-                child: Text(getTranslate(context, "NO_RESULT_FOUND")),
+                child: Text(
+                  _error,
+                  style: TextStyle(
+                      fontSize: 15.0,
+                      color: Colors.red,
+                      fontWeight: FontWeight.w400),
+                ),
               )
-            : ListView.builder(
-                padding: EdgeInsets.all(8),
-                itemCount: _tickets.length,
-                itemBuilder: (context, index) {
-                  return ticketCard(_tickets[index]);
-                },
-              );
+            : _tickets.length == 0
+                ? Center(
+                    child: Text(getTranslate(context, "NO_RESULT_FOUND")),
+                  )
+                : ListView.builder(
+                    padding: EdgeInsets.all(8),
+                    itemCount: _tickets.length,
+                    itemBuilder: (context, index) {
+                      return ticketCard(_tickets[index]);
+                    },
+                  );
   }
 }

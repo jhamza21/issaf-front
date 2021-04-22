@@ -70,6 +70,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
           final response = await RequestService().fetchRequestByServiceId(
               prefs.getString('token'), widget.service.id);
           if (response.statusCode == 200) {
+            print(response.body);
             final jsonData = json.decode(response.body);
             var _request = ModelRequest.Request.fromJson(jsonData);
             if (_request.status == "REFUSED") {
@@ -413,8 +414,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
           _avgTimePerClient = value;
         }),
         decoration: InputDecoration(
-            labelText: getTranslate(context, "TIME_PER_CLIENT"),
-            helperText: getTranslate(context, "TIME_PER_CLIENT_NOTICE")),
+            labelText: getTranslate(context, "TIME_PER_CLIENT")),
       ),
       padding: const EdgeInsets.all(16),
     );

@@ -82,6 +82,67 @@ class _ProvidersListState extends State<ProvidersList> {
     changePage(1);
   }
 
+  void _showProviderInfo(Provider provider) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return customDialog(
+              provider.title,
+              provider.description,
+              provider.image != null ? "providerImg/" + provider.image : null,
+              Column(
+                children: [
+                  provider.email != ''
+                      ? Row(
+                          children: [
+                            Icon(Icons.email),
+                            Expanded(child: Text(" : " + provider.email))
+                          ],
+                        )
+                      : SizedBox.shrink(),
+                  provider.mobile != ''
+                      ? Row(
+                          children: [
+                            Icon(Icons.phone),
+                            Text(" : " +
+                                provider.mobile.split("/")[1] +
+                                provider.mobile.split("/")[2])
+                          ],
+                        )
+                      : SizedBox.shrink(),
+                  provider.url != ''
+                      ? Row(
+                          children: [
+                            Icon(Icons.web),
+                            Expanded(child: Text(" : " + provider.url))
+                          ],
+                        )
+                      : SizedBox.shrink(),
+                ],
+              ));
+        });
+  }
+
+  void _likeOrUnlikeProvider(Provider provider) async {
+    var prefs = await SharedPreferences.getInstance();
+    if (_favoriteProviders.contains(provider.id.toString())) {
+      //Remove favorite provider
+      setState(() {
+        _favoriteProviders.remove(provider.id.toString());
+        sortedProviders();
+      });
+      prefs.setStringList("favorite", _favoriteProviders);
+    } else {
+      //Add favorite provider
+      var prefs = await SharedPreferences.getInstance();
+      setState(() {
+        _favoriteProviders.add(provider.id.toString());
+        sortedProviders();
+      });
+      prefs.setStringList("favorite", _favoriteProviders);
+    }
+  }
+
   Widget providerCard(Provider provider) {
     return GestureDetector(
       onTap: () => _selectProvider(provider),
@@ -110,58 +171,16 @@ class _ProvidersListState extends State<ProvidersList> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(),
-                  onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return customDialog(
-                              provider.title,
-                              provider.description,
-                              provider.image != null
-                                  ? "providerImg/" + provider.image
-                                  : null,
-                              Column(
-                                children: [
-                                  provider.email != null
-                                      ? Row(
-                                          children: [
-                                            Icon(Icons.email),
-                                            Expanded(
-                                                child: Text(
-                                                    " : " + provider.email))
-                                          ],
-                                        )
-                                      : SizedBox.shrink(),
-                                  provider.mobile != null
-                                      ? Row(
-                                          children: [
-                                            Icon(Icons.phone),
-                                            Text(" : " +
-                                                provider.mobile.split("/")[1] +
-                                                provider.mobile.split("/")[2])
-                                          ],
-                                        )
-                                      : SizedBox.shrink(),
-                                  provider.url != null
-                                      ? Row(
-                                          children: [
-                                            Icon(Icons.web),
-                                            Expanded(
-                                                child:
-                                                    Text(" : " + provider.url))
-                                          ],
-                                        )
-                                      : SizedBox.shrink(),
-                                ],
-                              ));
-                        });
-                  },
-                  icon: Icon(
-                    Icons.info,
-                    size: 17,
-                  )),
+                padding: EdgeInsets.zero,
+                constraints: BoxConstraints(),
+                icon: Icon(
+                  Icons.info,
+                  size: 17,
+                ),
+                onPressed: () {
+                  _showProviderInfo(provider);
+                },
+              ),
               SizedBox(
                 width: 8,
               ),
@@ -175,24 +194,8 @@ class _ProvidersListState extends State<ProvidersList> {
                   size: 17,
                   color: Colors.deepOrange,
                 ),
-                onPressed: () async {
-                  var prefs = await SharedPreferences.getInstance();
-                  if (_favoriteProviders.contains(provider.id.toString())) {
-                    //Remove favorite provider
-                    setState(() {
-                      _favoriteProviders.remove(provider.id.toString());
-                      sortedProviders();
-                    });
-                    prefs.setStringList("favorite", _favoriteProviders);
-                  } else {
-                    //Add favorite provider
-                    var prefs = await SharedPreferences.getInstance();
-                    setState(() {
-                      _favoriteProviders.add(provider.id.toString());
-                      sortedProviders();
-                    });
-                    prefs.setStringList("favorite", _favoriteProviders);
-                  }
+                onPressed: () {
+                  _likeOrUnlikeProvider(provider);
                 },
               ),
             ],

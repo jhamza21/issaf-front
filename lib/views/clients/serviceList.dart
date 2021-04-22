@@ -57,6 +57,7 @@ class _ServiceListState extends State<ServiceList> {
   }
 
   Widget _getOpenDays(Service service) {
+    // ignore: deprecated_member_use
     List<Widget> list = new List<Widget>();
     list.add(Icon(Icons.calendar_today));
     list.add(Text(" : "));
@@ -66,6 +67,38 @@ class _ServiceListState extends State<ServiceList> {
       list.add(Text(", "));
     }
     return new Row(children: list);
+  }
+
+  void _showServiceInfo(Service service) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return customDialog(
+              service.title,
+              service.description,
+              service.image != null ? "serviceImg/" + service.image : null,
+              Column(
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.timer_outlined),
+                      Expanded(
+                          child: Text(
+                              " : " + service.workStartTime.substring(0, 5)))
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Icon(Icons.timer_off),
+                      Expanded(
+                          child:
+                              Text(" : " + service.workEndTime.substring(0, 5)))
+                    ],
+                  ),
+                  _getOpenDays(service)
+                ],
+              ));
+        });
   }
 
   Widget serviceCard(Service service) {
@@ -98,47 +131,16 @@ class _ServiceListState extends State<ServiceList> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(),
-                  onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return customDialog(
-                              service.title,
-                              service.description,
-                              service.image != null
-                                  ? "serviceImg/" + service.image
-                                  : null,
-                              Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(Icons.timer_outlined),
-                                      Expanded(
-                                          child: Text(" : " +
-                                              service.workStartTime
-                                                  .substring(0, 5)))
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.timer_off),
-                                      Expanded(
-                                          child: Text(" : " +
-                                              service.workEndTime
-                                                  .substring(0, 5)))
-                                    ],
-                                  ),
-                                  _getOpenDays(service)
-                                ],
-                              ));
-                        });
-                  },
-                  icon: Icon(
-                    Icons.info,
-                    size: 17,
-                  )),
+                padding: EdgeInsets.zero,
+                constraints: BoxConstraints(),
+                icon: Icon(
+                  Icons.info,
+                  size: 17,
+                ),
+                onPressed: () {
+                  _showServiceInfo(service);
+                },
+              ),
               SizedBox(
                 width: 15,
               ),

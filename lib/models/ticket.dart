@@ -2,13 +2,15 @@ class Ticket {
   int id;
   int number;
   String date;
+  String time;
   String title;
   String description;
-  Status status;
+  String status;
   Ticket(
       {this.id,
       this.number,
       this.date,
+      this.time,
       this.title,
       this.description,
       this.status});
@@ -17,6 +19,7 @@ class Ticket {
       : id = json['id'],
         number = json['number'] ?? null,
         date = json['date'] ?? '',
+        time = json['time'] ?? '',
         title = json['title'] ?? '',
         description = json['description'] ?? '',
         status = json['status'] ?? '';
@@ -27,5 +30,3 @@ class Ticket {
         : json.map((value) => Ticket.fromJson(value)).toList();
   }
 }
-
-enum Status { IN_PROGRESS, DONE, DELAYED, CANCELED }

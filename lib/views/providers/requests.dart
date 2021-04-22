@@ -75,6 +75,52 @@ class _RequestsState extends State<Requests> {
     }
   }
 
+  void _deleteNotification(int id, String confirmationMsg) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text(getTranslate(context, "DELETE") + "?"),
+          content: new Text(confirmationMsg),
+          actions: <Widget>[
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "NO")),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "YES")),
+              onPressed: () async {
+                try {
+                  var prefs = await SharedPreferences.getInstance();
+                  var res = await RequestService()
+                      .deleteRequest(prefs.getString('token'), id);
+                  assert(res.statusCode == 204);
+                  final snackBar = SnackBar(
+                    content: Text(getTranslate(context, "SUCCESS_DELETE")),
+                  );
+                  widget.callback();
+                  _fetchRequests();
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                } catch (e) {
+                  Navigator.of(context).pop();
+                  final snackBar = SnackBar(
+                    content: Text(getTranslate(context, "FAIL_DELETE")),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Card requestCard(int id, String sender, String serviceName, String receiver,
       String date, String status) {
     String _subtitle, _confirmation;
@@ -109,53 +155,7 @@ class _RequestsState extends State<Requests> {
               color: Colors.red,
             ),
             onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: new Text(getTranslate(context, "DELETE") + "?"),
-                    content: new Text(_confirmation),
-                    actions: <Widget>[
-                      // ignore: deprecated_member_use
-                      new FlatButton(
-                        child: new Text(getTranslate(context, "NO")),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      // ignore: deprecated_member_use
-                      new FlatButton(
-                        child: new Text(getTranslate(context, "YES")),
-                        onPressed: () async {
-                          try {
-                            var prefs = await SharedPreferences.getInstance();
-                            var res = await RequestService()
-                                .deleteRequest(prefs.getString('token'), id);
-                            assert(res.statusCode == 204);
-                            final snackBar = SnackBar(
-                              content:
-                                  Text(getTranslate(context, "SUCCESS_DELETE")),
-                            );
-                            widget.callback();
-                            _fetchRequests();
-                            Navigator.of(context).pop();
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(snackBar);
-                          } catch (e) {
-                            Navigator.of(context).pop();
-                            final snackBar = SnackBar(
-                              content:
-                                  Text(getTranslate(context, "FAIL_DELETE")),
-                            );
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(snackBar);
-                          }
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
+              _deleteNotification(id, _confirmation);
             },
           ),
         ),

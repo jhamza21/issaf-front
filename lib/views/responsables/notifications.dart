@@ -63,6 +63,100 @@ class _NotificationsState extends State<Notifications> {
     }
   }
 
+  void _refuseRequest(int id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text(getTranslate(context, "REFUSE")),
+          content: new Text(getTranslate(context, "REFUSE_CONFIRMATION")),
+          actions: <Widget>[
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "NO")),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "YES")),
+              onPressed: () async {
+                try {
+                  var prefs = await SharedPreferences.getInstance();
+                  var res = await RequestService()
+                      .refuseRequest(prefs.getString('token'), id);
+                  assert(res.statusCode == 200);
+                  final snackBar = SnackBar(
+                    content:
+                        Text(getTranslate(context, "SUCCESS_REFUSE_REQUEST")),
+                  );
+                  Navigator.of(context).pop();
+                  _fetchRequests();
+                  widget.callback();
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                } catch (e) {
+                  Navigator.of(context).pop();
+                  final snackBar = SnackBar(
+                    content: Text(getTranslate(context, "ERROR_SERVER")),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _acceptRequest(int id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text(getTranslate(context, "ACCEPT")),
+          content: new Text(getTranslate(context, "ACCEPT_CONFIRMATION")),
+          actions: <Widget>[
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "NO")),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "YES")),
+              onPressed: () async {
+                try {
+                  var prefs = await SharedPreferences.getInstance();
+                  var res = await RequestService()
+                      .acceptRequest(prefs.getString('token'), id);
+                  assert(res.statusCode == 200);
+                  final snackBar = SnackBar(
+                    content:
+                        Text(getTranslate(context, "SUCCESS_ACCEPT_REQUEST")),
+                  );
+                  Navigator.of(context).pop();
+                  _fetchRequests();
+                  widget.callback();
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                } catch (e) {
+                  Navigator.of(context).pop();
+                  final snackBar = SnackBar(
+                    content: Text(getTranslate(context, "ERROR_SERVER")),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Card requestCard(int id, String sender, String serviceName, String date) {
     return Card(
       color: Colors.orange[50],
@@ -82,57 +176,8 @@ class _NotificationsState extends State<Notifications> {
                     Icons.remove_circle,
                     color: Colors.red[600],
                   ),
-                  onPressed: () async {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: new Text(getTranslate(context, "REFUSE")),
-                          content: new Text(
-                              getTranslate(context, "REFUSE_CONFIRMATION")),
-                          actions: <Widget>[
-                            // ignore: deprecated_member_use
-                            new FlatButton(
-                              child: new Text(getTranslate(context, "NO")),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                            // ignore: deprecated_member_use
-                            new FlatButton(
-                              child: new Text(getTranslate(context, "YES")),
-                              onPressed: () async {
-                                try {
-                                  var prefs =
-                                      await SharedPreferences.getInstance();
-                                  var res = await RequestService()
-                                      .refuseRequest(
-                                          prefs.getString('token'), id);
-                                  assert(res.statusCode == 200);
-                                  final snackBar = SnackBar(
-                                    content: Text(getTranslate(
-                                        context, "SUCCESS_REFUSE_REQUEST")),
-                                  );
-                                  Navigator.of(context).pop();
-                                  _fetchRequests();
-                                  widget.callback();
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(snackBar);
-                                } catch (e) {
-                                  Navigator.of(context).pop();
-                                  final snackBar = SnackBar(
-                                    content: Text(
-                                        getTranslate(context, "ERROR_SERVER")),
-                                  );
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(snackBar);
-                                }
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    );
+                  onPressed: () {
+                    _refuseRequest(id);
                   },
                 ),
                 IconButton(
@@ -140,57 +185,8 @@ class _NotificationsState extends State<Notifications> {
                     Icons.check_circle,
                     color: Colors.green[800],
                   ),
-                  onPressed: () async {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: new Text(getTranslate(context, "ACCEPT")),
-                          content: new Text(
-                              getTranslate(context, "ACCEPT_CONFIRMATION")),
-                          actions: <Widget>[
-                            // ignore: deprecated_member_use
-                            new FlatButton(
-                              child: new Text(getTranslate(context, "NO")),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                            // ignore: deprecated_member_use
-                            new FlatButton(
-                              child: new Text(getTranslate(context, "YES")),
-                              onPressed: () async {
-                                try {
-                                  var prefs =
-                                      await SharedPreferences.getInstance();
-                                  var res = await RequestService()
-                                      .acceptRequest(
-                                          prefs.getString('token'), id);
-                                  assert(res.statusCode == 200);
-                                  final snackBar = SnackBar(
-                                    content: Text(getTranslate(
-                                        context, "SUCCESS_ACCEPT_REQUEST")),
-                                  );
-                                  Navigator.of(context).pop();
-                                  _fetchRequests();
-                                  widget.callback();
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(snackBar);
-                                } catch (e) {
-                                  Navigator.of(context).pop();
-                                  final snackBar = SnackBar(
-                                    content: Text(
-                                        getTranslate(context, "ERROR_SERVER")),
-                                  );
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(snackBar);
-                                }
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    );
+                  onPressed: () {
+                    _acceptRequest(id);
                   },
                 ),
               ],
