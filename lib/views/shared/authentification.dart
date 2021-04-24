@@ -108,7 +108,6 @@ class _LoginSignUpState extends State<LoginSignUp> {
               ),
             );
           } else {
-            print(jsonData["error"]);
             var error = jsonData["errors"] as Map<String, dynamic>;
             setState(() {
               _isLoading = false;
@@ -449,8 +448,8 @@ class _LoginSignUpState extends State<LoginSignUp> {
           ),
           DropdownButton(
             dropdownColor: Colors.orange[50],
-            hint: Text(getTranslate(context, _role)),
-            onChanged: (String value) {
+            value: Text(getTranslate(context, _role)),
+            onChanged: (value) {
               setState(() {
                 _role = value;
               });

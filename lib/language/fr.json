@@ -120,7 +120,15 @@
     "UPDATE_SERVICE":"Modifier un E-SAFF",
     "RECEIVED":"Reçues",
     "SENDED":"Envoyées",
-    "REQUESTS":"Invitations"
+    "REQUESTS":"Invitations",
+    "EVENT_REQUIRE_PROVIDER":"Ajoutez les informations de votre service !",
+    "BREAK_TIMES":"Temps de pause",
+    "HOOLIDAYS":"Jours fériés",
+    "INVALID_BREAK_TIME":"Temps de pause invalide !",
+    "INSERT_TIME_BREAK_END":"Insérez la fin du pause",
+    "INSERT_TIME_BREAK_START":"Insérez le début du pause",
+    "DUPLICATED_HOOLIDAYS":"Vous avez déjà ajouté cette date !"
+
 
 
 

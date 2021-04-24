@@ -143,9 +143,9 @@ BoxDecoration mainBoxDecorationProvider = BoxDecoration(
 
 //CIRCULAR PROGRESS INDICATOR
 SizedBox circularProgressIndicator = SizedBox(
-  height: 20.0,
-  width: 20.0,
+  height: 15.0,
+  width: 15.0,
   child: CircularProgressIndicator(
-    valueColor: new AlwaysStoppedAnimation<Color>(Colors.black),
+    valueColor: new AlwaysStoppedAnimation<Color>(Colors.orange),
   ),
 );

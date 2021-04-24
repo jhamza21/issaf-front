@@ -38,7 +38,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
       _error;
 
   double _avgTimePerClient = 10;
-  List<String> _openDays = [];
+  List<String> _openDays = [], _hoolidays = [], _breaks = [];
   File _selectedImage;
   bool _isFetchingUser = false, _requestStatus = false;
 
@@ -60,6 +60,8 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
         _workStartTime = widget.service.workStartTime.substring(0, 5);
         _workEndTime = widget.service.workEndTime.substring(0, 5);
         _openDays = widget.service.openDays;
+        _hoolidays = widget.service.hoolidays;
+        _breaks = widget.service.breakTimes;
         _status = widget.service.status;
         var prefs = await SharedPreferences.getInstance();
         if (widget.service.userId != null) {
@@ -70,7 +72,6 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
           final response = await RequestService().fetchRequestByServiceId(
               prefs.getString('token'), widget.service.id);
           if (response.statusCode == 200) {
-            print(response.body);
             final jsonData = json.decode(response.body);
             var _request = ModelRequest.Request.fromJson(jsonData);
             if (_request.status == "REFUSED") {
@@ -91,7 +92,6 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
           _isFetchingUser = false;
         });
       } catch (e) {
-        print(e);
         widget.callback(0);
       }
   }
@@ -112,6 +112,8 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
         _workStartTime != service.workStartTime.substring(0, 5) ||
         _workEndTime != service.workEndTime.substring(0, 5) ||
         _openDays != service.openDays ||
+        _hoolidays != service.hoolidays ||
+        _breaks != service.breakTimes ||
         _status != service.status ||
         _selectedImage != null) return true;
     return false;
@@ -149,6 +151,8 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                       _workStartTime,
                       _workEndTime,
                       _openDays,
+                      _hoolidays,
+                      _breaks,
                       _status,
                       _selectedImage);
                   if (res.statusCode == 201 || res.statusCode == 200) {
@@ -165,14 +169,12 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                   } else {
                     final jsonData =
                         json.decode(await res.stream.bytesToString());
-                    print(jsonData);
                     setState(() {
                       _isLoading = false;
                       _error = getTranslate(context, jsonData["error"]);
                     });
                   }
                 } catch (e) {
-                  print(e);
                   setState(() {
                     _isLoading = false;
                     _error = getTranslate(context, "ERROR_SERVER");
@@ -334,10 +336,13 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
 
   Widget showTitle(text) {
     return Padding(
-      padding: const EdgeInsets.only(top: 15.0),
-      child: Text(
-        text,
-        style: TextStyle(fontWeight: FontWeight.bold),
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: Container(
+        alignment: Alignment.topLeft,
+        child: Text(
+          "- " + text + " :",
+          style: TextStyle(fontWeight: FontWeight.w400),
+        ),
       ),
     );
   }
@@ -465,6 +470,156 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
     );
   }
 
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime d = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2030),
+    );
+    if (d != null) {
+      String _date = new DateFormat("yyyy-MM-dd").format(d);
+      if (_hoolidays.contains(_date)) {
+        final snackBar = SnackBar(
+          content: Text(getTranslate(context, "DUPLICATED_HOOLIDAYS")),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      } else
+        setState(() {
+          _hoolidays.add(_date);
+        });
+    }
+  }
+
+  Widget _showHoolidaysInput(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20.0, 5.0, 15.0, 0.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          DropdownButton(
+            dropdownColor: Colors.orange[50],
+            value: _hoolidays.length > 0
+                ? _hoolidays[_hoolidays.length - 1]
+                : null,
+            icon: Icon(
+              Icons.arrow_drop_down,
+            ),
+            onChanged: (v) {},
+            underline: SizedBox(),
+            items: _hoolidays
+                .map<DropdownMenuItem<String>>((date) => DropdownMenuItem(
+                      value: date,
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () {
+                              setState(() {
+                                _hoolidays.remove(date);
+                              });
+                            },
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(date),
+                          SizedBox(
+                            width: 20,
+                          ),
+                        ],
+                      ),
+                    ))
+                .toList(),
+          ),
+          IconButton(
+            icon: Icon(Icons.add_circle),
+            onPressed: () {
+              _selectDate(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _selectBreakTime(BuildContext context) async {
+    TimeOfDay selectedTime = TimeOfDay.now();
+    TimeOfDay _s = await showTimePicker(
+        context: context,
+        initialTime: selectedTime,
+        helpText: getTranslate(context, "INSERT_TIME_BREAK_START"));
+    String _break;
+    if (_s != null) _break = _s.format(context) + " à ";
+    TimeOfDay _e = await showTimePicker(
+        context: context,
+        initialTime: selectedTime,
+        helpText: getTranslate(context, "INSERT_TIME_BREAK_END"));
+    if (_e != null) {
+      if ((_s.hour + _s.minute / 60.0) >= (_e.hour + _e.minute / 60.0)) {
+        final snackBar = SnackBar(
+          content: Text(getTranslate(context, "INVALID_BREAK_TIME")),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      } else {
+        _break += _e.format(context);
+        setState(() {
+          _breaks.add(_break);
+        });
+      }
+    }
+  }
+
+  Widget _showTimeBreaksInput(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20.0, 0.0, 15.0, 0.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          DropdownButton(
+            dropdownColor: Colors.orange[50],
+            value: _breaks.length > 0 ? _breaks[_breaks.length - 1] : null,
+            icon: Icon(
+              Icons.arrow_drop_down,
+            ),
+            onChanged: (v) {},
+            underline: SizedBox(),
+            items: _breaks
+                .map<DropdownMenuItem<String>>((_break) => DropdownMenuItem(
+                      value: _break,
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () {
+                              setState(() {
+                                _breaks.remove(_break);
+                              });
+                            },
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(_break),
+                          SizedBox(
+                            width: 20,
+                          ),
+                        ],
+                      ),
+                    ))
+                .toList(),
+          ),
+          IconButton(
+            icon: Icon(Icons.add_circle),
+            onPressed: () {
+              _selectBreakTime(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -497,7 +652,11 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                       showTitle(getTranslate(context, "WORK_TIME")),
                       showWorkTimeInput(context),
                       showDayPicker(),
-                      showStatusInput(),
+                      showTitle(getTranslate(context, "HOOLIDAYS")),
+                      _showHoolidaysInput(context),
+                      showTitle(getTranslate(context, "BREAK_TIMES")),
+                      _showTimeBreaksInput(context),
+                      // showStatusInput(),
                       showError(),
                       showSaveService()
                     ],

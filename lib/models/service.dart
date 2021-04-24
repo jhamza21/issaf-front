@@ -7,6 +7,9 @@ class Service {
   String workStartTime;
   String workEndTime;
   List<String> openDays;
+  List<String> hoolidays;
+  List<String> breakTimes;
+
   int providerId;
   int userId;
   String status;
@@ -21,6 +24,8 @@ class Service {
       this.workStartTime,
       this.workEndTime,
       this.openDays,
+      this.hoolidays,
+      this.breakTimes,
       this.providerId,
       this.userId,
       this.status,
@@ -34,7 +39,12 @@ class Service {
         counter = json['counter'] ?? null,
         workStartTime = json['work_start_time'] ?? '',
         workEndTime = json['work_end_time'] ?? '',
-        openDays = json['open_days'].cast<String>() ?? null,
+        openDays = json['open_days'].cast<String>() ?? [],
+        hoolidays =
+            json['hoolidays'] != null ? json['hoolidays'].cast<String>() : [],
+        breakTimes = json['break_times'] != null
+            ? json['break_times'].cast<String>()
+            : [],
         providerId = json['provider_id'] ?? null,
         userId = json['admin_id'] ?? null,
         status = json['status'] ?? '',

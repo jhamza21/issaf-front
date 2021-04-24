@@ -21,7 +21,7 @@ class AddUpdateProvider extends StatefulWidget {
 
 class _AddUpdateProviderState extends State<AddUpdateProvider> {
   bool _isLoading = false;
-  String _title, _description, _email, _mobile, _siteWeb, _image, _error;
+  String _title, _description, _email, _mobile, _siteWeb, _error;
   File _selectedImage;
   final _formKey = new GlobalKey<FormState>();
 
@@ -37,7 +37,6 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
       _description = widget.provider.description;
       _mobile = widget.provider.mobile;
       _email = widget.provider.email;
-      _image = widget.provider.image;
       _siteWeb = widget.provider.url;
     }
   }

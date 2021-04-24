@@ -329,7 +329,6 @@ class _ProfileState extends State<Profile> {
                     });
                   }
                 } catch (e) {
-                  print(e);
                   setState(() {
                     _isLoading = false;
                     _error = getTranslate(context, "ERROR_SERVER");

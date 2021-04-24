@@ -46,6 +46,8 @@ class ServiceService {
       String workStartTime,
       String workEndTime,
       List<String> openDays,
+      List<String> hoolidays,
+      List<String> breaks,
       String status,
       File image) async {
     var url;
@@ -73,7 +75,17 @@ class ServiceService {
         request.fields['open_days[' + i.toString() + ']'] =
             openDays[i].toString();
     }
-    if (status != null) request.fields['status'] = status;
+    if (hoolidays != null) {
+      for (int i = 0; i < hoolidays.length; i++)
+        request.fields['hoolidays[' + i.toString() + ']'] =
+            hoolidays[i].toString();
+    }
+    if (breaks != null) {
+      for (int i = 0; i < breaks.length; i++)
+        request.fields['break_times[' + i.toString() + ']'] =
+            breaks[i].toString();
+    }
+    request.fields['status'] = "OPENED";
 
     return await request.send();
   }

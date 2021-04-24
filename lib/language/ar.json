@@ -120,7 +120,15 @@
     "UPDATE_SERVICE":"تعديل صاف",
     "RECEIVED":"الواردة",
     "SENDED":"المرسلة",
-    "REQUESTS":"الدعوات"
+    "REQUESTS":"الدعوات",
+    "EVENT_REQUIRE_PROVIDER":"أضف معلومات خدمتك!",
+    "BREAK_TIMES":"أوقات الاستراحة",
+    "HOOLIDAYS":"أيام العطل",
+    "INVALID_BREAK_TIME":"وقت الاستراحة غير صالح!",
+    "INSERT_TIME_BREAK_END":"أدخل نهاية الاستراحة",
+    "INSERT_TIME_BREAK_START":"أدخل بداية الاستراحة",
+    "DUPLICATED_HOOLIDAYS":"لقد أضفت هذا التاريخ بالفعل!"
+
 
 
 

@@ -172,10 +172,6 @@ class _TicketInProgressState extends State<TicketInProgress> {
                     },
                     icon: Icon(Icons.remove_circle),
                     label: Text("Annuler")),
-                TextButton.icon(
-                    onPressed: () {},
-                    icon: Icon(Icons.repeat),
-                    label: Text("Replanifier"))
               ],
             ),
           )

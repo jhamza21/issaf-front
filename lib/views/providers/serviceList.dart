@@ -48,7 +48,6 @@ class _ServiceListState extends State<ServiceList> {
         _isLoading = false;
       });
     } catch (error) {
-      print(error);
       setState(() {
         _isLoading = false;
       });
@@ -205,8 +204,16 @@ class _ServiceListState extends State<ServiceList> {
                 IconButton(
                   icon: Icon(Icons.add),
                   onPressed: () {
-                    _selectedService = null;
-                    changePage(1);
+                    if (widget.provider == null) {
+                      final snackBar = SnackBar(
+                        content: Text(
+                            getTranslate(context, "EVENT_REQUIRE_PROVIDER")),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    } else {
+                      _selectedService = null;
+                      changePage(1);
+                    }
                   },
                 )
               ],
