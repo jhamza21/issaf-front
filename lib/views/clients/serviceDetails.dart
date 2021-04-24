@@ -38,13 +38,15 @@ class _ServiceDetailsState extends State<ServiceDetails> {
           prefs.getString('token'),
           _selectedDate,
           widget.service.id.toString());
+      print(res.body);
       assert(res.statusCode == 200);
       setState(() {
         _times = (json.decode(res.body) as List<dynamic>).cast<String>();
-        _selectedTime = _times[0];
+        if (_times.length > 0) _selectedTime = _times[0];
         _isFetchingTimes = false;
       });
     } catch (e) {
+      print(e);
       setState(() {
         _times = null;
         _isFetchingTimes = false;

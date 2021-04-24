@@ -550,22 +550,25 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
         initialTime: selectedTime,
         helpText: getTranslate(context, "INSERT_TIME_BREAK_START"));
     String _break;
-    if (_s != null) _break = _s.format(context) + " à ";
-    TimeOfDay _e = await showTimePicker(
-        context: context,
-        initialTime: selectedTime,
-        helpText: getTranslate(context, "INSERT_TIME_BREAK_END"));
-    if (_e != null) {
-      if ((_s.hour + _s.minute / 60.0) >= (_e.hour + _e.minute / 60.0)) {
-        final snackBar = SnackBar(
-          content: Text(getTranslate(context, "INVALID_BREAK_TIME")),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      } else {
-        _break += _e.format(context);
-        setState(() {
-          _breaks.add(_break);
-        });
+
+    if (_s != null) {
+      _break = _s.format(context) + " à ";
+      TimeOfDay _e = await showTimePicker(
+          context: context,
+          initialTime: selectedTime,
+          helpText: getTranslate(context, "INSERT_TIME_BREAK_END"));
+      if (_e != null) {
+        if ((_s.hour + _s.minute / 60.0) >= (_e.hour + _e.minute / 60.0)) {
+          final snackBar = SnackBar(
+            content: Text(getTranslate(context, "INVALID_BREAK_TIME")),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        } else {
+          _break += _e.format(context);
+          setState(() {
+            _breaks.add(_break);
+          });
+        }
       }
     }
   }
