@@ -222,7 +222,7 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
               radius: 80,
               backgroundImage: _selectedImage != null
                   ? FileImage(_selectedImage)
-                  : widget.provider != null
+                  : widget.provider != null && widget.provider.image != null
                       ? NetworkImage(
                           URL_BACKEND + "providerImg/" + widget.provider.image)
                       : null),

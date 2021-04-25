@@ -252,7 +252,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
               radius: 80,
               backgroundImage: _selectedImage != null
                   ? FileImage(_selectedImage)
-                  : widget.service != null
+                  : widget.service != null && widget.service.image != null
                       ? NetworkImage(
                           URL_BACKEND + "serviceImg/" + widget.service.image)
                       : null),

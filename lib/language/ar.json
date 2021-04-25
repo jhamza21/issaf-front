@@ -136,7 +136,7 @@
     "UNDONE":"غير منجز",
     "BOOK_TICKET":"حجز هذه التذكرة",
     "BOOK_TIKCET_MSG":"اريد ان امر في",
-    "A":"عند",
+    "A":" عند ",
     "TICKET_MSG":"لديك موعد",
     "TICKET_NUMBER":"رقم التذكرة",
     "ERROR_DUPLICATED_TICKET":"لديك بالفعل تذكرة قيد التقدم!",

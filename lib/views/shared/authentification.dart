@@ -448,7 +448,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
           ),
           DropdownButton(
             dropdownColor: Colors.orange[50],
-            value: Text(getTranslate(context, _role)),
+            value: _role,
             onChanged: (value) {
               setState(() {
                 _role = value;

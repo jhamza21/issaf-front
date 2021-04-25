@@ -27,6 +27,13 @@ class _HandleServiceState extends State<HandleService> {
       var prefs = await SharedPreferences.getInstance();
       var response =
           await ServiceService().getServiceByAdmin(prefs.getString('token'));
+      if (response.statusCode == 404) {
+        _error = getTranslate(context, "REGISTE_TO_SERVER");
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
       assert(response.statusCode == 200);
       var jsonData = json.decode(response.body);
       Service _service = Service.fromJson(jsonData);

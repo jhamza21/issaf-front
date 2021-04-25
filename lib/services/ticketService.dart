@@ -25,7 +25,7 @@ class TicketService {
 
   //add ticket
   Future<http.Response> addTicket(
-      String token, String date, String time, int serviceId) async {
+      String token, String date, String time, int number, int serviceId) async {
     var url = URL_BACKEND + "tickets?api_token=" + token;
     return await http.post(url,
         headers: {
@@ -35,6 +35,7 @@ class TicketService {
         body: json.encode({
           "date": date,
           "time": time,
+          "number": number,
           "service_id": serviceId,
         }));
   }

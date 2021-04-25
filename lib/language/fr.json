@@ -136,7 +136,7 @@
     "UNDONE":"Défait",
     "BOOK_TICKET":"Réserver ce ticket",
     "BOOK_TIKCET_MSG":"Je souhaite passer le :",
-    "A":"à",
+    "A":" à ",
     "TICKET_MSG":"Vous avez un rendez-vous",
     "TICKET_NUMBER":"Ticket nᵒ",
     "ERROR_DUPLICATED_TICKET":"Vous avez déjà un ticket en cours !",

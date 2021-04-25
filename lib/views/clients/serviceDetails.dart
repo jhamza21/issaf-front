@@ -61,8 +61,12 @@ class _ServiceDetailsState extends State<ServiceDetails> {
         _error = null;
       });
       var prefs = await SharedPreferences.getInstance();
-      var res = await TicketService().addTicket(prefs.getString('token'),
-          _selectedDate, _selectedTime, widget.service.id);
+      var res = await TicketService().addTicket(
+          prefs.getString('token'),
+          _selectedDate,
+          _selectedTime,
+          _times.indexOf(_selectedTime) + 1,
+          widget.service.id);
       if (res.statusCode == 201) {
         final snackBar = SnackBar(
           content: Text(getTranslate(context, "SUCCESS_ADD")),
