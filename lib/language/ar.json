@@ -127,7 +127,9 @@
     "INVALID_BREAK_TIME":"وقت الاستراحة غير صالح!",
     "INSERT_TIME_BREAK_END":"أدخل نهاية الاستراحة",
     "INSERT_TIME_BREAK_START":"أدخل بداية الاستراحة",
-    "DUPLICATED_HOOLIDAYS":"لقد أضفت هذا التاريخ بالفعل!"
+    "DUPLICATED_HOOLIDAYS":"لقد أضفت هذا التاريخ بالفعل!",
+    "INVALID_DAYS":"حدد أيام العمل"
+
 
 
 

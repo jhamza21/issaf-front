@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
 
 class SelectDays extends StatefulWidget {
+  //handle error
+  final bool isError;
   //handle initial value
   final List<String> initialValue;
   // [onSelect] callBack to handle the Selected days
@@ -27,6 +29,7 @@ class SelectDays extends StatefulWidget {
   final double padding;
   SelectDays({
     this.initialValue,
+    this.isError = false,
     @required this.onSelect,
     this.backgroundColor,
     this.daysFillColor,
@@ -146,54 +149,71 @@ class _SelectDaysState extends State<SelectDays> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: widget.boxDecoration == null
-          ? BoxDecoration(
-              color: _handleBackgroundColor,
-              borderRadius: BorderRadius.circular(0),
-            )
-          : widget.boxDecoration,
-      child: Padding(
-        padding: EdgeInsets.all(widget.padding),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: _days.map(
-            (day) {
-              return Expanded(
-                child: RawMaterialButton(
-                  fillColor:
-                      day.isSelected == true ? _handleDaysFillColor : null,
-                  shape: CircleBorder(
-                    side: widget.border
-                        ? BorderSide(
-                            color: _handleBorderColorOfDays,
-                            width: 2.0,
-                          )
-                        : BorderSide.none,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      day.toggleIsSelected();
-                    });
-                    _getSelectedWeekDays(day.isSelected, day.dayName);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      getTranslate(context, day.dayName.toUpperCase()),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                        color: _handleTextColor(day.isSelected),
+    return Column(
+      children: [
+        Container(
+          decoration: widget.boxDecoration == null
+              ? BoxDecoration(
+                  color: _handleBackgroundColor,
+                  borderRadius: BorderRadius.circular(0),
+                )
+              : widget.boxDecoration,
+          child: Padding(
+            padding: EdgeInsets.all(widget.padding),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: _days.map(
+                (day) {
+                  return Expanded(
+                    child: RawMaterialButton(
+                      fillColor:
+                          day.isSelected == true ? _handleDaysFillColor : null,
+                      shape: CircleBorder(
+                        side: widget.border
+                            ? BorderSide(
+                                color: _handleBorderColorOfDays,
+                                width: 2.0,
+                              )
+                            : BorderSide.none,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          day.toggleIsSelected();
+                        });
+                        _getSelectedWeekDays(day.isSelected, day.dayName);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          getTranslate(context, day.dayName.toUpperCase()),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: _handleTextColor(day.isSelected),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              );
-            },
-          ).toList(),
+                  );
+                },
+              ).toList(),
+            ),
+          ),
         ),
-      ),
+        widget.isError
+            ? Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(10.0, 5.0, 0.0, 0.0),
+                    child: Text(
+                      getTranslate(context, "INVALID_DAYS"),
+                      style: TextStyle(color: Colors.red, fontSize: 12),
+                    ),
+                  ),
+                ],
+              )
+            : SizedBox.shrink()
+      ],
     );
   }
 }

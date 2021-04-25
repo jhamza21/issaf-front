@@ -40,7 +40,8 @@ class Service {
         workStartTime = json['work_start_time'] ?? '',
         workEndTime = json['work_end_time'] ?? '',
         openDays = json['open_days'].cast<String>() ?? [],
-        hoolidays = json['hoolidays'].cast<String>() ?? [],
+        hoolidays =
+            json['hoolidays'] != null ? json['hoolidays'].cast<String>() : [],
         breakTimes = json['break_times'] != null
             ? json['break_times'].cast<String>()
             : [],

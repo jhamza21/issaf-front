@@ -70,21 +70,23 @@ class ServiceService {
     if (workStartTime != null)
       request.fields['work_start_time'] = workStartTime;
     if (workEndTime != null) request.fields['work_end_time'] = workEndTime;
-    if (openDays != null) {
-      for (int i = 0; i < openDays.length; i++)
-        request.fields['open_days[' + i.toString() + ']'] =
-            openDays[i].toString();
-    }
-    if (hoolidays != null) {
+    //open days
+    for (int i = 0; i < openDays.length; i++)
+      request.fields['open_days[' + i.toString() + ']'] =
+          openDays[i].toString();
+    //hoolidays
+    if (hoolidays.length > 0) {
       for (int i = 0; i < hoolidays.length; i++)
         request.fields['hoolidays[' + i.toString() + ']'] =
             hoolidays[i].toString();
     }
-    if (breaks != null) {
+    //break times
+    if (breaks.length > 0) {
       for (int i = 0; i < breaks.length; i++)
         request.fields['break_times[' + i.toString() + ']'] =
             breaks[i].toString();
     }
+
     request.fields['status'] = "OPENED";
 
     return await request.send();

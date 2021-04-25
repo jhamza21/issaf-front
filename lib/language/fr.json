@@ -127,7 +127,8 @@
     "INVALID_BREAK_TIME":"Temps de pause invalide !",
     "INSERT_TIME_BREAK_END":"Insérez la fin du pause",
     "INSERT_TIME_BREAK_START":"Insérez le début du pause",
-    "DUPLICATED_HOOLIDAYS":"Vous avez déjà ajouté cette date !"
+    "DUPLICATED_HOOLIDAYS":"Vous avez déjà ajouté cette date !",
+    "INVALID_DAYS":"Sélectionnez les jours de travail"
 
 
 

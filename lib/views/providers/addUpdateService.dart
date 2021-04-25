@@ -40,7 +40,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
   double _avgTimePerClient = 10;
   List<String> _openDays = [], _hoolidays = [], _breaks = [];
   File _selectedImage;
-  bool _isFetchingUser = false, _requestStatus = false;
+  bool _isFetchingUser = false, _requestStatus = false, _errorDays = false;
 
   @override
   void initState() {
@@ -103,87 +103,100 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
     return User.fromJson(jsonData).username;
   }
 
-  bool checkServiceChanged(Service service) {
-    if (service == null) return true;
-    if (_title != service.title ||
-        _username != _prevUsername ||
-        _description != service.description ||
-        _avgTimePerClient != service.timePerClient ||
-        _workStartTime != service.workStartTime.substring(0, 5) ||
-        _workEndTime != service.workEndTime.substring(0, 5) ||
-        _openDays != service.openDays ||
-        _hoolidays != service.hoolidays ||
-        _breaks != service.breakTimes ||
-        _status != service.status ||
-        _selectedImage != null) return true;
-    return false;
-  }
+  // bool checkServiceChanged(Service service) {
+  //   if (service == null) return true;
+  //   if (_title != service.title ||
+  //       _username != _prevUsername ||
+  //       _description != service.description ||
+  //       _avgTimePerClient != service.timePerClient ||
+  //       _workStartTime != service.workStartTime.substring(0, 5) ||
+  //       _workEndTime != service.workEndTime.substring(0, 5) ||
+  //       _openDays != service.openDays ||
+  //       _hoolidays != service.hoolidays ||
+  //       _breaks != service.breakTimes ||
+  //       _status != service.status ||
+  //       _selectedImage != null) return true;
+  //   return true;
+  // }
 
   // Check if form is valid
   bool validateAndSave() {
     final form = _formKey.currentState;
-    if (form.validate())
+    if (form.validate() && validateDays())
       return true;
     else
       return false;
   }
 
+  // validate days
+  bool validateDays() {
+    setState(() {
+      _errorDays = false;
+    });
+    if (_openDays.length > 0)
+      return true;
+    else {
+      setState(() {
+        _errorDays = true;
+      });
+      return false;
+    }
+  }
+
   Widget showSaveService() {
-    return checkServiceChanged(widget.service)
-        ? TextButton.icon(
-            onPressed: () async {
-              if (!_isLoading && validateAndSave())
-                try {
-                  setState(() {
-                    _error = null;
-                    _isLoading = true;
-                  });
-                  var prefs = await SharedPreferences.getInstance();
-                  var res = await ServiceService().addUpdateService(
-                      prefs.getString('token'),
-                      widget.service != null ? widget.service.id : null,
-                      widget.provider.id,
-                      _prevUsername != _username ? _username : null,
-                      _title,
-                      _description,
-                      _avgTimePerClient.toInt().toString(),
-                      "0",
-                      _workStartTime,
-                      _workEndTime,
-                      _openDays,
-                      _hoolidays,
-                      _breaks,
-                      _status,
-                      _selectedImage);
-                  if (res.statusCode == 201 || res.statusCode == 200) {
-                    final snackBar = SnackBar(
-                      content: Text(getTranslate(
-                          context,
-                          res.statusCode == 201
-                              ? "SUCCESS_ADD"
-                              : "SUCCESS_UPDATE")),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                    widget.fetchServices();
-                    widget.callback(0);
-                  } else {
-                    final jsonData =
-                        json.decode(await res.stream.bytesToString());
-                    setState(() {
-                      _isLoading = false;
-                      _error = getTranslate(context, jsonData["error"]);
-                    });
-                  }
-                } catch (e) {
-                  setState(() {
-                    _isLoading = false;
-                    _error = getTranslate(context, "ERROR_SERVER");
-                  });
-                }
-            },
-            icon: _isLoading ? circularProgressIndicator : Icon(Icons.save),
-            label: Text(getTranslate(context, "SAVE_CHANGES")))
-        : SizedBox.shrink();
+    return TextButton.icon(
+        onPressed: () async {
+          if (!_isLoading && validateAndSave())
+            try {
+              setState(() {
+                _error = null;
+                _isLoading = true;
+              });
+              var prefs = await SharedPreferences.getInstance();
+              var res = await ServiceService().addUpdateService(
+                  prefs.getString('token'),
+                  widget.service != null ? widget.service.id : null,
+                  widget.provider.id,
+                  _prevUsername != _username ? _username : null,
+                  _title,
+                  _description,
+                  _avgTimePerClient.toInt().toString(),
+                  "0",
+                  _workStartTime,
+                  _workEndTime,
+                  _openDays,
+                  _hoolidays,
+                  _breaks,
+                  _status,
+                  _selectedImage);
+              if (res.statusCode == 201 || res.statusCode == 200) {
+                final snackBar = SnackBar(
+                  content: Text(getTranslate(
+                      context,
+                      res.statusCode == 201
+                          ? "SUCCESS_ADD"
+                          : "SUCCESS_UPDATE")),
+                );
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                widget.fetchServices();
+                widget.callback(0);
+              } else {
+                final jsonData = json.decode(await res.stream.bytesToString());
+                setState(() {
+                  _isLoading = false;
+                  _error = getTranslate(context, jsonData["error"]);
+                });
+              }
+            } catch (e) {
+              print(e);
+              setState(() {
+                _isLoading = false;
+                _error = getTranslate(context, "ERROR_SERVER");
+              });
+            }
+        },
+        icon: _isLoading ? circularProgressIndicator : Icon(Icons.save),
+        label: Text(getTranslate(context, "SAVE_CHANGES")));
   }
 
   Widget showError() {
@@ -351,6 +364,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: SelectDays(
+        isError: _errorDays,
         border: false,
         initialValue: _openDays,
         boxDecoration: BoxDecoration(
