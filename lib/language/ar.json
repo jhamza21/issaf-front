@@ -128,7 +128,22 @@
     "INSERT_TIME_BREAK_END":"أدخل نهاية الاستراحة",
     "INSERT_TIME_BREAK_START":"أدخل بداية الاستراحة",
     "DUPLICATED_HOOLIDAYS":"لقد أضفت هذا التاريخ بالفعل!",
-    "INVALID_DAYS":"حدد أيام العمل"
+    "INVALID_DAYS":"حدد أيام العمل",
+    "REGISTE_TO_SERVER":"أنت لا تنتمي إلى أي صاف!",
+    "HOME":"إستقبال",
+    "CLIENT_NUMBER":"رقم الزبون",
+    "DONE":"منجز",
+    "UNDONE":"غير منجز",
+    "BOOK_TICKET":"حجز هذه التذكرة",
+    "BOOK_TIKCET_MSG":"اريد ان امر في",
+    "A":"عند",
+    "TICKET_MSG":"لديك موعد",
+    "TICKET_NUMBER":"رقم التذكرة",
+    "ERROR_DUPLICATED_TICKET":"لديك بالفعل تذكرة قيد التقدم!",
+    "TICKET_ALREADY_TAKED":"عذرا ، هذه التذكرة محجوزة بالفعل!"
+
+
+
 
 
 

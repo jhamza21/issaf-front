@@ -36,7 +36,7 @@ class Service {
         title = json['title'] ?? '',
         description = json['description'] ?? '',
         timePerClient = json['avg_time_per_client'] ?? null,
-        counter = json['counter'] ?? null,
+        counter = json['counter'] ?? 0,
         workStartTime = json['work_start_time'] ?? '',
         workEndTime = json['work_end_time'] ?? '',
         openDays = json['open_days'].cast<String>() ?? [],

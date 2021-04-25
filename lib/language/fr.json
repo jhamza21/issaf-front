@@ -128,7 +128,19 @@
     "INSERT_TIME_BREAK_END":"Insérez la fin du pause",
     "INSERT_TIME_BREAK_START":"Insérez le début du pause",
     "DUPLICATED_HOOLIDAYS":"Vous avez déjà ajouté cette date !",
-    "INVALID_DAYS":"Sélectionnez les jours de travail"
+    "INVALID_DAYS":"Sélectionnez les jours de travail",
+    "REGISTE_TO_SERVER":"Vous n'appartenez pas à aucun service !",
+    "HOME":"Accueil",
+    "CLIENT_NUMBER":"Client nᵒ",
+    "DONE":"Fait",
+    "UNDONE":"Défait",
+    "BOOK_TICKET":"Réserver ce ticket",
+    "BOOK_TIKCET_MSG":"Je souhaite passer le :",
+    "A":"à",
+    "TICKET_MSG":"Vous avez un rendez-vous",
+    "TICKET_NUMBER":"Ticket nᵒ",
+    "ERROR_DUPLICATED_TICKET":"Vous avez déjà un ticket en cours !",
+    "TICKET_ALREADY_TAKED":"Désolé, ce ticket est déjà réservé !"
 
 
 

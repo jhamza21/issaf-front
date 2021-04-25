@@ -38,7 +38,6 @@ class _ServiceDetailsState extends State<ServiceDetails> {
           prefs.getString('token'),
           _selectedDate,
           widget.service.id.toString());
-      print(res.body);
       assert(res.statusCode == 200);
       setState(() {
         _times = (json.decode(res.body) as List<dynamic>).cast<String>();
@@ -46,7 +45,6 @@ class _ServiceDetailsState extends State<ServiceDetails> {
         _isFetchingTimes = false;
       });
     } catch (e) {
-      print(e);
       setState(() {
         _times = null;
         _isFetchingTimes = false;
@@ -65,12 +63,18 @@ class _ServiceDetailsState extends State<ServiceDetails> {
       var prefs = await SharedPreferences.getInstance();
       var res = await TicketService().addTicket(prefs.getString('token'),
           _selectedDate, _selectedTime, widget.service.id);
-      assert(res.statusCode == 201);
-      final snackBar = SnackBar(
-        content: Text(getTranslate(context, "SUCCESS_ADD")),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      widget.callback(0);
+      if (res.statusCode == 201) {
+        final snackBar = SnackBar(
+          content: Text(getTranslate(context, "SUCCESS_ADD")),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        widget.callback(0);
+      } else {
+        setState(() {
+          _isLoading = false;
+          _error = getTranslate(context, json.decode(res.body)["error"]);
+        });
+      }
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -158,7 +162,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
               ? circularProgressIndicator
               : Icon(Icons.bookmark, color: Colors.black),
           color: Colors.orange[600],
-          label: Text("Prendre ce ticket".toUpperCase(),
+          label: Text(getTranslate(context, "BOOK_TICKET"),
               style: new TextStyle(fontSize: 15.0, color: Colors.black)),
           onPressed: () {
             _getTicket();
@@ -200,7 +204,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
               height: 60,
             ),
             Text(
-              "Je souhaite passer le :",
+              getTranslate(context, "BOOK_TIKCET_MSG"),
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(
@@ -211,7 +215,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
               height: 30,
             ),
             Text(
-              "à",
+              getTranslate(context, "A"),
               style: TextStyle(fontSize: 20),
             ),
             SizedBox(

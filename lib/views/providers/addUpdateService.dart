@@ -188,7 +188,6 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                 });
               }
             } catch (e) {
-              print(e);
               setState(() {
                 _isLoading = false;
                 _error = getTranslate(context, "ERROR_SERVER");
@@ -566,7 +565,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
     String _break;
 
     if (_s != null) {
-      _break = _s.format(context) + " à ";
+      _break = _s.format(context) + " -> ";
       TimeOfDay _e = await showTimePicker(
           context: context,
           initialTime: selectedTime,

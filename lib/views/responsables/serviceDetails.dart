@@ -5,9 +5,7 @@ import 'package:commons/commons.dart';
 import 'package:flutter_spinbox/material.dart';
 import 'package:issaf/models/service.dart';
 import 'package:issaf/constants.dart';
-import 'package:issaf/models/user.dart';
 import 'package:issaf/services/serviceService.dart';
-import 'package:issaf/services/userService.dart';
 import 'package:issaf/views/shared/selectDays.dart';
 
 class ServiceDetails extends StatefulWidget {
@@ -18,8 +16,7 @@ class ServiceDetails extends StatefulWidget {
 class _ServiceDetailsState extends State<ServiceDetails> {
   final _formKey = new GlobalKey<FormState>();
   bool _isLoading = true;
-  String _username,
-      _title,
+  String _title,
       _description,
       _workStartTime = "08:00",
       _workEndTime = "17:00",
@@ -28,7 +25,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
       _error;
 
   double _avgTimePerClient = 10;
-  List<String> _openDays = [];
+  List<String> _openDays = [], _hoolidays = [], _breaks = [];
 
   @override
   void initState() {
@@ -44,7 +41,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
 
       if (response.statusCode != 200) {
         setState(() {
-          _error = "Vous n'appartenez pas à aucun service !";
+          _error = getTranslate(context, "REGISTE_TO_SERVER");
           _isLoading = false;
         });
         return;
@@ -58,13 +55,11 @@ class _ServiceDetailsState extends State<ServiceDetails> {
       _workStartTime = _service.workStartTime.substring(0, 5);
       _workEndTime = _service.workEndTime.substring(0, 5);
       _openDays = _service.openDays;
+      _hoolidays = _service.hoolidays;
+      _breaks = _service.breakTimes;
       _image = _service.image;
       _status = _service.status;
-      response = await UserService()
-          .getUserById(prefs.getString('token'), _service.userId);
-      assert(response.statusCode == 200);
-      jsonData = json.decode(response.body);
-      _username = User.fromJson(jsonData).username;
+
       setState(() {
         _isLoading = false;
       });
@@ -159,10 +154,13 @@ class _ServiceDetailsState extends State<ServiceDetails> {
 
   Widget showTitle(text) {
     return Padding(
-      padding: const EdgeInsets.only(top: 15.0),
-      child: Text(
-        text,
-        style: TextStyle(fontWeight: FontWeight.bold),
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: Container(
+        alignment: Alignment.topLeft,
+        child: Text(
+          "- " + text + " :",
+          style: TextStyle(fontWeight: FontWeight.w400),
+        ),
       ),
     );
   }
@@ -189,26 +187,6 @@ class _ServiceDetailsState extends State<ServiceDetails> {
     );
   }
 
-  Widget showUsernameInput() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
-      child: new TextFormField(
-        enabled: false,
-        initialValue: _username,
-        keyboardType: TextInputType.text,
-        decoration: inputTextDecorationRectangle(
-            null, getTranslate(context, 'USERNAME_RECEIVER') + "*", null, null),
-        validator: (value) =>
-            value.isEmpty || value.length < 6 || value.length > 255
-                ? getTranslate(context, 'INVALID_USERNAME_LENGTH')
-                : null,
-        onChanged: (value) => setState(() {
-          _username = value.trim();
-        }),
-      ),
-    );
-  }
-
   Widget showTimePerClientInput() {
     return Padding(
       child: SpinBox(
@@ -217,8 +195,8 @@ class _ServiceDetailsState extends State<ServiceDetails> {
         value: _avgTimePerClient,
         onChanged: (value) => {},
         decoration: InputDecoration(
-            labelText: getTranslate(context, "TIME_PER_CLIENT"),
-            helperText: getTranslate(context, "TIME_PER_CLIENT_NOTICE")),
+          labelText: getTranslate(context, "TIME_PER_CLIENT"),
+        ),
       ),
       padding: const EdgeInsets.all(16),
     );
@@ -263,6 +241,58 @@ class _ServiceDetailsState extends State<ServiceDetails> {
     );
   }
 
+  Widget _showHoolidaysInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20.0, 5.0, 15.0, 0.0),
+      child: Row(
+        children: [
+          DropdownButton(
+            dropdownColor: Colors.orange[50],
+            value: _hoolidays.length > 0
+                ? _hoolidays[_hoolidays.length - 1]
+                : null,
+            icon: Icon(
+              Icons.arrow_drop_down,
+            ),
+            onChanged: (v) {},
+            underline: SizedBox(),
+            items: _hoolidays
+                .map<DropdownMenuItem<String>>((date) => DropdownMenuItem(
+                      value: date,
+                      child: Text(date),
+                    ))
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _showTimeBreaksInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20.0, 0.0, 15.0, 0.0),
+      child: Row(
+        children: [
+          DropdownButton(
+            dropdownColor: Colors.orange[50],
+            value: _breaks.length > 0 ? _breaks[_breaks.length - 1] : null,
+            icon: Icon(
+              Icons.arrow_drop_down,
+            ),
+            onChanged: (v) {},
+            underline: SizedBox(),
+            items: _breaks
+                .map<DropdownMenuItem<String>>((_break) => DropdownMenuItem(
+                      value: _break,
+                      child: Text(_break),
+                    ))
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -287,14 +317,17 @@ class _ServiceDetailsState extends State<ServiceDetails> {
                       child: Column(
                         children: <Widget>[
                           showImageInput(),
-                          showUsernameInput(),
                           showTitleInput(),
                           showDescriptionInput(),
                           showTimePerClientInput(),
                           showTitle(getTranslate(context, "WORK_TIME")),
                           showWorkTimeInput(context),
                           showDayPicker(),
-                          showStatusInput(),
+                          showTitle(getTranslate(context, "HOOLIDAYS")),
+                          _showHoolidaysInput(),
+                          showTitle(getTranslate(context, "BREAK_TIMES")),
+                          _showTimeBreaksInput(),
+                          //  showStatusInput(),
                         ],
                       ),
                     ),

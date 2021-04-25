@@ -131,7 +131,7 @@ class _TicketInProgressState extends State<TicketInProgress> {
                         )),
                     Column(
                       children: [
-                        Text("Vous avez un rendez-vous"),
+                        Text(getTranslate(context, "TICKET_MSG")),
                         Row(
                           children: [
                             Text(
@@ -139,7 +139,7 @@ class _TicketInProgressState extends State<TicketInProgress> {
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             Text(
-                              " à ",
+                              getTranslate(context, "A"),
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             Text(
@@ -153,7 +153,7 @@ class _TicketInProgressState extends State<TicketInProgress> {
                   ],
                 ),
                 Text(
-                  "Ticket Nᵒ",
+                  getTranslate(context, "TICKET_NUMBER"),
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
                 ),
                 Text(
@@ -171,7 +171,7 @@ class _TicketInProgressState extends State<TicketInProgress> {
                       _deleteTicket(ticket.id);
                     },
                     icon: Icon(Icons.remove_circle),
-                    label: Text("Annuler")),
+                    label: Text(getTranslate(context, "CANCEL"))),
               ],
             ),
           )
