@@ -4,7 +4,5 @@ import 'package:issaf/redux/users/state.dart';
 userReducer(UserState prevState, SetUserStateAction action) {
   final payload = action.userState;
   return prevState.copyWith(
-    isLoggedIn: payload.isLoggedIn,
-    user: payload.user,
-  );
+      isLoggedIn: payload.isLoggedIn, user: payload.user, role: payload.role);
 }

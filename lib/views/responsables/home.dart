@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:issaf/models/request.dart';
+import 'package:issaf/redux/users/state.dart';
 import 'package:issaf/services/requestService.dart';
 import 'package:issaf/views/responsables/handleService.dart';
 import 'package:issaf/views/responsables/notifications.dart';
@@ -11,6 +12,8 @@ import 'package:issaf/views/shared/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatefulWidget {
+  final UserState userState;
+  Home(this.userState);
   @override
   State<StatefulWidget> createState() => new _HomeState();
 }
@@ -50,7 +53,7 @@ class _HomeState extends State<Home> {
       HandleService(),
       Notifications(_fetchRequests),
       ServiceDetails(),
-      Profile()
+      Profile(widget.userState)
     ];
     return new Scaffold(
         bottomNavigationBar: CurvedNavigationBar(

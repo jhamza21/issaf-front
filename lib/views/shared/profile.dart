@@ -10,45 +10,54 @@ import 'package:issaf/services/userService.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_redux/flutter_redux.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/redux/store.dart';
 import 'package:issaf/redux/users/actions.dart';
 
 class Profile extends StatefulWidget {
+  final UserState userState;
+  Profile(this.userState);
   @override
   _ProfileState createState() => _ProfileState();
 }
 
 class _ProfileState extends State<Profile> {
   bool _isLoading = false, _showPasswordInput = false;
-  String _name, _mobile, _password, _email, _username, _sexe, _error;
+  String _name, _mobile, _password, _email, _username, _region, _error;
   final _formKey = new GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-    _isLoading = false;
+    initializeUserData();
+  }
+
+  void initializeUserData() {
+    _username = widget.userState.user.username;
+    _email = widget.userState.user.email;
+    _mobile = widget.userState.user.mobile;
+    _region = widget.userState.user.region;
+    _name = widget.userState.user.name;
   }
 
   bool checkFormChanged(User user) {
-    if ((_mobile != null && _mobile != user.mobile) ||
-        (_name != null && _name != user.name) ||
-        (_username != null && _username != user.username) ||
-        (_email != null && _email != user.email) ||
-        (_sexe != null && _sexe != user.sexe) ||
+    if (_name != user.name ||
+        _username != user.username ||
+        _email != user.email ||
+        _mobile != user.mobile ||
+        _region != user.region ||
         _password != null) return true;
     return false;
   }
 
-  Widget showMobileInput(previousMobile) {
+  Widget showMobileInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
       child: new IntlPhoneField(
         autoValidate: false,
         searchText: getTranslate(context, "SEARCH_BY_COUNTRY"),
-        initialCountryCode: previousMobile.split('/')[0],
-        initialValue: previousMobile.split('/')[2],
+        initialCountryCode: _mobile.split('/')[0],
+        initialValue: _mobile.split('/')[2],
         keyboardType: TextInputType.phone,
         decoration: inputTextDecorationRectangle(
             Icon(
@@ -73,11 +82,11 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget showNameInput(previousName) {
+  Widget showNameInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
       child: new TextFormField(
-        initialValue: previousName,
+        initialValue: _name,
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRectangle(
             Icon(Icons.supervised_user_circle),
@@ -95,56 +104,56 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  void _handleRadioButton(String value) {
-    setState(() {
-      _sexe = value;
-    });
-  }
+  // void _handleRadioButton(String value) {
+  //   setState(() {
+  //     _sexe = value;
+  //   });
+  // }
 
-  Widget showSexeInput(String sexe) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          Row(
-            children: [
-              new Radio(
-                  activeColor: Colors.black,
-                  value: "HOMME",
-                  groupValue: _sexe != null ? _sexe : sexe,
-                  onChanged: _handleRadioButton),
-              new Text(
-                getTranslate(context, "MEN"),
-                style: new TextStyle(fontSize: 16.0),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              new Radio(
-                  activeColor: Colors.black,
-                  value: "FEMME",
-                  groupValue: _sexe != null ? _sexe : sexe,
-                  onChanged: _handleRadioButton),
-              new Text(
-                getTranslate(context, "WOMAN"),
-                style: new TextStyle(
-                  fontSize: 16.0,
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
-    );
-  }
+  // Widget showSexeInput(String sexe) {
+  //   return Padding(
+  //     padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+  //     child: Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceAround,
+  //       children: <Widget>[
+  //         Row(
+  //           children: [
+  //             new Radio(
+  //                 activeColor: Colors.black,
+  //                 value: "HOMME",
+  //                 groupValue: _sexe != null ? _sexe : sexe,
+  //                 onChanged: _handleRadioButton),
+  //             new Text(
+  //               getTranslate(context, "MEN"),
+  //               style: new TextStyle(fontSize: 16.0),
+  //             ),
+  //           ],
+  //         ),
+  //         Row(
+  //           children: [
+  //             new Radio(
+  //                 activeColor: Colors.black,
+  //                 value: "FEMME",
+  //                 groupValue: _sexe != null ? _sexe : sexe,
+  //                 onChanged: _handleRadioButton),
+  //             new Text(
+  //               getTranslate(context, "WOMAN"),
+  //               style: new TextStyle(
+  //                 fontSize: 16.0,
+  //               ),
+  //             ),
+  //           ],
+  //         )
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  Widget showUsernameInput(previousUsername) {
+  Widget showUsernameInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
       child: new TextFormField(
-        initialValue: previousUsername,
+        initialValue: _username,
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRectangle(Icon(Icons.person),
             getTranslate(context, 'USERNAME') + "*", null, null),
@@ -159,11 +168,11 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget showEmailInput(previousEmail) {
+  Widget showEmailInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
       child: new TextFormField(
-        initialValue: previousEmail,
+        initialValue: _email,
         keyboardType: TextInputType.emailAddress,
         decoration: inputTextDecorationRectangle(Icon(Icons.email_rounded),
             getTranslate(context, 'EMAIL') + "*", null, null),
@@ -248,6 +257,42 @@ class _ProfileState extends State<Profile> {
     );
   }
 
+  Widget showProfileChange(String _role) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 6.0, 12.0, 0.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.login_outlined),
+              SizedBox(
+                width: 7.0,
+              ),
+              Text(
+                "Se connecter en tant que ",
+                style: TextStyle(fontSize: 15.0),
+              ),
+            ],
+          ),
+          DropdownButton(
+            onChanged: (String role) {
+              Redux.store.dispatch(SetUserStateAction(UserState(role: role)));
+            },
+            hint: Text(_role),
+            underline: SizedBox(),
+            items: ["CLIENT", "ADMIN", "PERSONNEL"]
+                .map<DropdownMenuItem<String>>((role) => DropdownMenuItem(
+                      value: role,
+                      child: Text(role),
+                    ))
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget showUrlToView(text) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 10.0, 12.0, 0.0),
@@ -285,8 +330,8 @@ class _ProfileState extends State<Profile> {
     return false;
   }
 
-  Widget showSaveButton(User user) {
-    return checkFormChanged(user)
+  Widget showSaveButton() {
+    return checkFormChanged(widget.userState.user)
         ? TextButton.icon(
             onPressed: () async {
               if (!_isLoading && validateAndSave())
@@ -298,13 +343,14 @@ class _ProfileState extends State<Profile> {
                   var prefs = await SharedPreferences.getInstance();
                   var res = await UserService().updateUser(
                       prefs.getString('token'),
-                      _username,
+                      _username == widget.userState.user.username
+                          ? null
+                          : _username,
                       _password,
                       _name,
-                      _sexe,
-                      "CLIENT",
-                      _email,
-                      _mobile);
+                      _email == widget.userState.user.email ? null : _email,
+                      _mobile,
+                      _region);
                   if (res.statusCode == 200) {
                     final snackBar = SnackBar(
                       content:
@@ -325,7 +371,8 @@ class _ProfileState extends State<Profile> {
                     final jsonData = json.decode(res.body);
                     setState(() {
                       _isLoading = false;
-                      _error = getTranslate(context, jsonData["error"]);
+                      _error = getTranslate(
+                          context, jsonData["error"].toUpperCase());
                     });
                   }
                 } catch (e) {
@@ -381,6 +428,36 @@ class _ProfileState extends State<Profile> {
         : SizedBox.shrink();
   }
 
+  Widget showRegionInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: DropdownButtonFormField(
+        decoration: inputTextDecorationRectangle(Icon(Icons.location_on),
+            getTranslate(context, 'REGION') + "*", null, null),
+        validator: (value) => value == null
+            ? getTranslate(context, "REQUIRED_USER_REGION")
+            : null,
+        isExpanded: true,
+        dropdownColor: Colors.orange[50],
+        value: _region,
+        onChanged: (value) {
+          setState(() {
+            _region = value;
+          });
+        },
+        icon: Icon(
+          Icons.arrow_drop_down,
+        ),
+        items: regions
+            .map<DropdownMenuItem<String>>((region) => DropdownMenuItem(
+                  value: region,
+                  child: Text(getTranslate(context, region)),
+                ))
+            .toList(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -392,34 +469,32 @@ class _ProfileState extends State<Profile> {
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          child: StoreConnector<AppState, AppState>(
-              converter: (store) => store.state,
-              builder: (context, state) {
-                return Column(
-                  children: <Widget>[
-                    showTitle(getTranslate(context, "PERSONAL_INFORMATIONS")),
-                    showUsernameInput(state.userState.user.username),
-                    showNameInput(state.userState.user.name),
-                    showEmailInput(state.userState.user.email),
-                    showMobileInput(state.userState.user.mobile),
-                    showSexeInput(state.userState.user.sexe),
-                    showPasswordInput(),
-                    showError(),
-                    showChangePassword(),
-                    showSaveButton(state.userState.user),
-                    showDivider(),
-                    showTitle(getTranslate(context, "USER_PREFERENCES")),
-                    showLanguageChange(),
-                    showDivider(),
-                    showTitle(getTranslate(context, "ABOUT")),
-                    showUrlToView(getTranslate(context, "GENERAL_CONDITIONS")),
-                    showUrlToView(getTranslate(context, "PRIVACY_POLICY")),
-                    showUrlToView(getTranslate(context, "CONTACT_US")),
-                    showDivider(),
-                    showLogout()
-                  ],
-                );
-              }),
+          child: Column(
+            children: <Widget>[
+              showTitle(getTranslate(context, "PERSONAL_INFORMATIONS")),
+              showUsernameInput(),
+              showNameInput(),
+              showEmailInput(),
+              showMobileInput(),
+              showRegionInput(),
+              //  showSexeInput(state.userState.user.sexe),
+              showPasswordInput(),
+              showError(),
+              showChangePassword(),
+              showSaveButton(),
+              showDivider(),
+              showTitle(getTranslate(context, "USER_PREFERENCES")),
+              showProfileChange(widget.userState.role),
+              showLanguageChange(),
+              showDivider(),
+              showTitle(getTranslate(context, "ABOUT")),
+              showUrlToView(getTranslate(context, "GENERAL_CONDITIONS")),
+              showUrlToView(getTranslate(context, "PRIVACY_POLICY")),
+              showUrlToView(getTranslate(context, "CONTACT_US")),
+              showDivider(),
+              showLogout()
+            ],
+          ),
         ),
       ),
     );

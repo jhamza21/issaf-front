@@ -18,7 +18,7 @@ class ServiceList extends StatefulWidget {
 
 @override
 class _ServiceListState extends State<ServiceList> {
-  Service _selectedService;
+  int _selectedService;
   List<Service> _services = [];
   bool _isLoading = true;
   int _currentIndex = 0;
@@ -40,14 +40,13 @@ class _ServiceListState extends State<ServiceList> {
       var prefs = await SharedPreferences.getInstance();
       final response = await ServiceService()
           .fetchServices(prefs.getString('token'), widget.provider.id);
-
       assert(response.statusCode == 200);
       final jsonData = json.decode(response.body)["services"];
       _services = Service.listFromJson(jsonData);
       setState(() {
         _isLoading = false;
       });
-    } catch (error) {
+    } catch (e) {
       setState(() {
         _isLoading = false;
       });
@@ -117,7 +116,7 @@ class _ServiceListState extends State<ServiceList> {
               label: Text(getTranslate(context, "UPDATE")),
               onPressed: () {
                 Navigator.of(context).pop();
-                _selectedService = service;
+                _selectedService = service.id;
                 changePage(1);
               },
             ),
@@ -143,7 +142,7 @@ class _ServiceListState extends State<ServiceList> {
               label: Text(getTranslate(context, "DETAILS")),
               onPressed: () {
                 Navigator.of(context).pop();
-                _selectedService = service;
+                _selectedService = service.id;
                 changePage(1);
               },
             ),
@@ -179,7 +178,11 @@ class _ServiceListState extends State<ServiceList> {
           trailing: Icon(
             Icons.circle,
             size: 15,
-            color: service.userId == null ? Colors.red : Colors.green,
+            color: service.status == "ACCEPTED"
+                ? Colors.green[800]
+                : service.status == "REFUSED"
+                    ? Colors.red[800]
+                    : Colors.grey,
           ),
         ),
       ),
@@ -231,7 +234,6 @@ class _ServiceListState extends State<ServiceList> {
                           return serviceCard(_services[index]);
                         },
                       ))
-        : AddUpdateService(
-            widget.provider, _selectedService, changePage, _fetchServices);
+        : AddUpdateService(_selectedService, changePage, _fetchServices);
   }
 }

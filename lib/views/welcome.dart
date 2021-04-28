@@ -12,11 +12,10 @@ class Welcome extends StatefulWidget {
 
 class _WelcomeState extends State<Welcome> {
   int _currentIndex = 0;
-  bool _isProvider = false;
 
-  Widget showProvidersButton() {
+  Widget showStartButton() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(0.0, 35.0, 0.0, 0.0),
+      padding: EdgeInsets.fromLTRB(0.0, 35.0, 0.0, 40.0),
       child: ButtonTheme(
         minWidth: 250,
         // ignore: deprecated_member_use
@@ -25,36 +24,11 @@ class _WelcomeState extends State<Welcome> {
           shape: new RoundedRectangleBorder(
               borderRadius: new BorderRadius.circular(30.0)),
           color: Colors.orange[300],
-          child: Text(getTranslate(context, "FOURNISSEUR"),
+          child: Text(getTranslate(context, "BEGIN"),
               style: new TextStyle(fontSize: 20.0, color: Colors.black)),
           onPressed: () {
             setState(() {
               _currentIndex = 1;
-              _isProvider = true;
-            });
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget showClientsButton() {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(0.0, 35.0, 0.0, 20.0),
-      child: ButtonTheme(
-        minWidth: 250,
-        // ignore: deprecated_member_use
-        child: RaisedButton(
-          elevation: 5.0,
-          shape: new RoundedRectangleBorder(
-              borderRadius: new BorderRadius.circular(30.0)),
-          color: Colors.orange[300],
-          child: Text(getTranslate(context, "CLIENT"),
-              style: new TextStyle(fontSize: 20.0, color: Colors.black)),
-          onPressed: () {
-            setState(() {
-              _currentIndex = 1;
-              _isProvider = false;
             });
           },
         ),
@@ -134,8 +108,7 @@ class _WelcomeState extends State<Welcome> {
               Spacer(),
               showLogo(),
               showWelcomeText(),
-              showProvidersButton(),
-              showClientsButton(),
+              showStartButton(),
             ],
           ),
         ),
@@ -152,7 +125,7 @@ class _WelcomeState extends State<Welcome> {
   Widget build(BuildContext context) {
     final List<Widget> _children = [
       welcome(),
-      LoginSignUp(changePage, _isProvider),
+      LoginSignUp(changePage),
     ];
 
     return _children[_currentIndex];

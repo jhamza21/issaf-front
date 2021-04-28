@@ -37,8 +37,7 @@ class ServiceService {
   Future<http.StreamedResponse> addUpdateService(
       String token,
       int id,
-      int providerId,
-      String username,
+      int userId,
       String title,
       String description,
       String avgTimePerClient,
@@ -56,10 +55,9 @@ class ServiceService {
     else
       url = URL_BACKEND + "services/" + id.toString() + "?api_token=" + token;
     var request = new http.MultipartRequest("POST", Uri.parse(url));
-    request.fields['provider_id'] = providerId.toString();
     if (image != null)
       request.files.add(await http.MultipartFile.fromPath('img', image.path));
-    if (username != null) request.fields['username_admin'] = username;
+    if (userId != null) request.fields['user_id'] = userId.toString();
 
     if (title != null) request.fields['title'] = title;
     if (description != null) request.fields['description'] = description;
@@ -86,9 +84,6 @@ class ServiceService {
         request.fields['break_times[' + i.toString() + ']'] =
             breaks[i].toString();
     }
-
-    request.fields['status'] = "OPENED";
-
     return await request.send();
   }
 }

@@ -2,9 +2,31 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:issaf/constants.dart';
+import 'package:issaf/models/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
-//login
+  //get all users
+  Future<List<User>> getUserSuggestions(String text) async {
+    try {
+      var prefs = await SharedPreferences.getInstance();
+
+      if (text != "") {
+        var url = URL_BACKEND +
+            "users/" +
+            text +
+            "?api_token=" +
+            prefs.getString('token');
+        var res = await http.get(url);
+        return User.listFromJson(json.decode(res.body));
+      } else
+        return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+//get user by username
   Future<http.Response> getUserByUsername(String token, String username) async {
     var url =
         URL_BACKEND + "getUserByUsername/" + username + "?api_token=" + token;
@@ -31,7 +53,7 @@ class UserService {
 
 //sign up
   Future<http.Response> signUp(String username, String password, String name,
-      String email, String mobile, String sexe, String role) async {
+      String email, String mobile, String region) async {
     var url = URL_BACKEND + "register";
     return await http.post(url,
         headers: {
@@ -45,30 +67,28 @@ class UserService {
           "name": name,
           "email": email,
           "mobile": mobile,
-          "sexe": sexe,
-          "role": role
+          "region": region
         }));
   }
 
 //update user data
   Future<http.Response> updateUser(
-      String token,
-      String username,
-      String password,
-      String name,
-      String sexe,
-      String role,
-      String email,
-      String mobile) async {
+    String token,
+    String username,
+    String password,
+    String name,
+    String email,
+    String mobile,
+    String region,
+  ) async {
     var url = URL_BACKEND + "updateAccount?api_token=" + token;
     Map<String, dynamic> data = {};
     if (username != null) data["username"] = username;
     if (password != null) data["password"] = password;
     if (name != null) data["name"] = name;
-    if (sexe != null) data["sexe"] = sexe;
-    if (role != null) data["role"] = role;
     if (email != null) data["email"] = email;
     if (mobile != null) data["mobile"] = mobile;
+    if (region != null) data["region"] = region;
 
     return await http.put(url,
         headers: {

@@ -7,9 +7,7 @@ import 'package:issaf/redux/store.dart';
 import 'package:issaf/redux/users/actions.dart';
 import 'package:issaf/redux/users/state.dart';
 import 'package:issaf/services/userService.dart';
-import 'package:issaf/views/clients/home.dart' as Client;
-import 'package:issaf/views/providers/home.dart' as Providers;
-import 'package:issaf/views/responsables/home.dart' as Responsable;
+import 'package:issaf/views/shared/home.dart';
 import 'package:issaf/views/waitingScreen.dart';
 import 'package:issaf/views/welcome.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,9 +35,7 @@ class _RootPageState extends State<RootPage> {
       Redux.store.dispatch(
         SetUserStateAction(
           UserState(
-            isLoggedIn: true,
-            user: User.fromJson(jsonData),
-          ),
+              isLoggedIn: true, user: User.fromJson(jsonData), role: "CLIENT"),
         ),
       );
       setState(() {
@@ -59,18 +55,12 @@ class _RootPageState extends State<RootPage> {
     return StoreConnector<AppState, AppState>(
       converter: (store) => store.state,
       builder: (context, state) {
-        if (_isLoading) {
+        if (_isLoading)
           return WaitingScreen();
-        } else if (state.userState.isLoggedIn) {
-          if (state.userState.user.role == "CLIENT")
-            return Client.Home();
-          else if (state.userState.user.role == "ADMIN_SERVICE")
-            return Providers.Home();
-          else
-            return Responsable.Home();
-        } else {
+        else if (state.userState.isLoggedIn)
+          return Home();
+        else
           return Welcome();
-        }
       },
     );
   }

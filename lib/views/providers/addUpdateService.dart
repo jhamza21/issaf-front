@@ -3,34 +3,30 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:commons/commons.dart';
 import 'package:flutter_spinbox/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:issaf/models/provider.dart' as ModelProvider;
 import 'package:issaf/models/service.dart';
-import 'package:issaf/models/request.dart' as ModelRequest;
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/user.dart';
-import 'package:issaf/services/requestService.dart';
 import 'package:issaf/services/serviceService.dart';
 import 'package:issaf/services/userService.dart';
 import 'package:issaf/views/shared/selectDays.dart';
 
 class AddUpdateService extends StatefulWidget {
-  final ModelProvider.Provider provider;
-  final Service service;
+  final int idService;
   final void Function(int) callback;
   final void Function() fetchServices;
-  AddUpdateService(
-      this.provider, this.service, this.callback, this.fetchServices);
+  AddUpdateService(this.idService, this.callback, this.fetchServices);
   @override
   _AddUpdateServiceState createState() => _AddUpdateServiceState();
 }
 
 class _AddUpdateServiceState extends State<AddUpdateService> {
   final _formKey = new GlobalKey<FormState>();
+  final TextEditingController _typeAheadController = TextEditingController();
   bool _isLoading = false;
-  String _username,
-      _prevUsername,
-      _title,
+  User _selectedUser;
+  String _title,
       _description,
       _workStartTime = "08:00",
       _workEndTime = "17:00",
@@ -40,7 +36,8 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
   double _avgTimePerClient = 10;
   List<String> _openDays = [], _hoolidays = [], _breaks = [];
   File _selectedImage;
-  bool _isFetchingUser = false, _requestStatus = false, _errorDays = false;
+  bool _isFetchingData = false, _errorDays = false;
+  Service _service;
 
   @override
   void initState() {
@@ -49,58 +46,33 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
   }
 
   void initializeServiceData() async {
-    if (widget.service != null)
+    if (widget.idService != null)
       try {
         setState(() {
-          _isFetchingUser = true;
+          _isFetchingData = true;
         });
-        _title = widget.service.title;
-        _description = widget.service.description;
-        _avgTimePerClient = widget.service.timePerClient.toDouble();
-        _workStartTime = widget.service.workStartTime.substring(0, 5);
-        _workEndTime = widget.service.workEndTime.substring(0, 5);
-        _openDays = widget.service.openDays;
-        _hoolidays = widget.service.hoolidays;
-        _breaks = widget.service.breakTimes;
-        _status = widget.service.status;
         var prefs = await SharedPreferences.getInstance();
-        if (widget.service.userId != null) {
-          _requestStatus = true;
-          _prevUsername = _username = await _getUsername(
-              prefs.getString('token'), widget.service.userId);
-        } else {
-          final response = await RequestService().fetchRequestByServiceId(
-              prefs.getString('token'), widget.service.id);
-          if (response.statusCode == 200) {
-            final jsonData = json.decode(response.body);
-            var _request = ModelRequest.Request.fromJson(jsonData);
-            if (_request.status == "REFUSED") {
-              _requestStatus = false;
-              _prevUsername = _username = await _getUsername(
-                  prefs.getString('token'), _request.senderId);
-            } else if (_request.status == null) {
-              _requestStatus = null;
-              _prevUsername = _username = await _getUsername(
-                  prefs.getString('token'), _request.receiverId);
-            }
-          } else {
-            _requestStatus = false;
-            _prevUsername = _username = null;
-          }
-        }
+        var res = await ServiceService()
+            .getServiceById(prefs.getString('token'), widget.idService);
+        assert(res.statusCode == 200);
+        _service = Service.fromJson(json.decode(res.body));
+        _title = _service.title;
+        _description = _service.description;
+        _avgTimePerClient = _service.timePerClient.toDouble();
+        _workStartTime = _service.workStartTime.substring(0, 5);
+        _workEndTime = _service.workEndTime.substring(0, 5);
+        _openDays = _service.openDays;
+        _hoolidays = _service.hoolidays;
+        _breaks = _service.breakTimes;
+        _status = _service.status;
+        _selectedUser = _service.user;
+        _typeAheadController.text = _selectedUser.username;
         setState(() {
-          _isFetchingUser = false;
+          _isFetchingData = false;
         });
       } catch (e) {
         widget.callback(0);
       }
-  }
-
-  Future<String> _getUsername(String token, int id) async {
-    final response = await UserService().getUserById(token, id);
-    assert(response.statusCode == 200);
-    final jsonData = json.decode(response.body);
-    return User.fromJson(jsonData).username;
   }
 
   // bool checkServiceChanged(Service service) {
@@ -155,9 +127,11 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
               var prefs = await SharedPreferences.getInstance();
               var res = await ServiceService().addUpdateService(
                   prefs.getString('token'),
-                  widget.service != null ? widget.service.id : null,
-                  widget.provider.id,
-                  _prevUsername != _username ? _username : null,
+                  widget.idService != null ? widget.idService : null,
+                  _service == null ||
+                          _service.user.username != _selectedUser.username
+                      ? _selectedUser.id
+                      : null,
                   _title,
                   _description,
                   _avgTimePerClient.toInt().toString(),
@@ -245,16 +219,16 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
         children: <Widget>[
           CircleAvatar(
               child: _selectedImage != null ||
-                      (widget.service != null && widget.service.image != null)
+                      (widget.idService != null && _service.image != null)
                   ? SizedBox.shrink()
                   : Text(getTranslate(context, "INSERT_IMAGE")),
               backgroundColor: Colors.orange[200],
               radius: 80,
               backgroundImage: _selectedImage != null
                   ? FileImage(_selectedImage)
-                  : widget.service != null && widget.service.image != null
+                  : widget.idService != null && _service.image != null
                       ? NetworkImage(
-                          URL_BACKEND + "serviceImg/" + widget.service.image)
+                          URL_BACKEND + "serviceImg/" + _service.image)
                       : null),
           Column(
             children: [
@@ -385,15 +359,16 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
   }
 
   GestureDetector _getSuffixIcon() {
-    if (widget.service == null)
+    if (widget.idService == null)
       return null;
     else
       return GestureDetector(
         child: Icon(
           Icons.circle,
-          color: _requestStatus == true
+          size: 15,
+          color: _service.status == "ACCEPTED"
               ? Colors.green[800]
-              : _requestStatus == false
+              : _service.status == "REFUSED"
                   ? Colors.red[800]
                   : Colors.grey,
         ),
@@ -402,24 +377,40 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
 
   Widget showUsernameInput() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
-      child: new TextFormField(
-        initialValue: _username,
-        keyboardType: TextInputType.text,
-        decoration: inputTextDecorationRectangle(
-            null,
-            getTranslate(context, 'USERNAME_RECEIVER') + "*",
-            null,
-            _getSuffixIcon()),
-        validator: (value) =>
-            value.isEmpty || value.length < 6 || value.length > 255
+        padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
+        child: new TypeAheadFormField(
+            validator: (value) => _selectedUser == null
                 ? getTranslate(context, 'INVALID_USERNAME_LENGTH')
                 : null,
-        onChanged: (value) => setState(() {
-          _username = value.trim();
-        }),
-      ),
-    );
+            textFieldConfiguration: TextFieldConfiguration(
+              controller: _typeAheadController,
+              decoration: inputTextDecorationRectangle(
+                  null,
+                  getTranslate(context, 'USERNAME_RECEIVER') + "*",
+                  null,
+                  _getSuffixIcon()),
+            ),
+            suggestionsCallback: UserService().getUserSuggestions,
+            hideSuggestionsOnKeyboardHide: false,
+            debounceDuration: Duration(milliseconds: 500),
+            noItemsFoundBuilder: (context) => Container(
+                  height: 100,
+                  child: Center(
+                    child: Text(getTranslate(context, "NO_RESULT_FOUND")),
+                  ),
+                ),
+            itemBuilder: (context, User user) {
+              return ListTile(
+                title: Text(user.name),
+                subtitle: Text(user.username),
+              );
+            },
+            onSuggestionSelected: (User user) {
+              _typeAheadController.text = user.username;
+              setState(() {
+                _selectedUser = user;
+              });
+            }));
   }
 
   Widget showTimePerClientInput() {
@@ -643,15 +634,18 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
       child: Scaffold(
         appBar: AppBar(
           elevation: 0,
-          title: Text(getTranslate(context,
-              widget.service == null ? "ADD_SERVICE" : "UPDATE_SERVICE")),
+          title: Text(widget.idService == null
+              ? getTranslate(context, "ADD_SERVICE")
+              : _isFetchingData
+                  ? "..."
+                  : _service.title),
           centerTitle: true,
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () => widget.callback(0),
           ),
         ),
-        body: _isFetchingUser
+        body: _isFetchingData
             ? Center(
                 child: circularProgressIndicator,
               )

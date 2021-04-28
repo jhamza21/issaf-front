@@ -1,3 +1,5 @@
+import 'package:issaf/models/user.dart';
+
 class Service {
   int id;
   String title;
@@ -13,6 +15,8 @@ class Service {
   int providerId;
   int userId;
   String status;
+
+  User user;
 
   String image;
   Service(
@@ -46,8 +50,9 @@ class Service {
             ? json['break_times'].cast<String>()
             : [],
         providerId = json['provider_id'] ?? null,
-        userId = json['admin_id'] ?? null,
+        userId = json['user_id'] ?? null,
         status = json['status'] ?? '',
+        user = json["user"] != null ? User.fromJson(json["user"]) : null,
         image = json['image'] ?? null;
   static List<Service> listFromJson(List<dynamic> json) {
     return json == null

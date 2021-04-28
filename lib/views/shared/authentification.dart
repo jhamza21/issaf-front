@@ -20,21 +20,13 @@ class LoginSignUp extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new _LoginSignUpState();
   final void Function(int) callback;
-  final bool isProvider;
-  LoginSignUp(this.callback, this.isProvider);
+  LoginSignUp(this.callback);
 }
 
 class _LoginSignUpState extends State<LoginSignUp> {
   final _formKey = new GlobalKey<FormState>();
-  String _username,
-      _password,
-      _name,
-      _email,
-      _sexe = "HOMME",
-      _mobile,
-      _role = "ADMIN_SERVICE",
-      _error;
-  bool _isLoginForm = true, _isLoading = false, _showPassword = false;
+  String _username, _password, _name, _email, _mobile, _region, _error;
+  bool _isLoginForm = true, _isLoading = false, _buildPassword = false;
 
   // Check if form is valid
   bool validateAndSave() {
@@ -63,9 +55,9 @@ class _LoginSignUpState extends State<LoginSignUp> {
             Redux.store.dispatch(
               SetUserStateAction(
                 UserState(
-                  isLoggedIn: true,
-                  user: User.fromJson(jsonData["data"]),
-                ),
+                    isLoggedIn: true,
+                    user: User.fromJson(jsonData["data"]),
+                    role: "CLIENT"),
               ),
             );
           } else {
@@ -88,23 +80,17 @@ class _LoginSignUpState extends State<LoginSignUp> {
             _isLoading = true;
           });
           var prefs = await SharedPreferences.getInstance();
-          final response = await UserService().signUp(
-              _username,
-              _password,
-              _name,
-              _email,
-              _mobile,
-              _sexe,
-              widget.isProvider ? _role : "CLIENT");
+          final response = await UserService()
+              .signUp(_username, _password, _name, _email, _mobile, _region);
           final jsonData = json.decode(response.body);
           if (response.statusCode == 201) {
             await prefs.setString('token', jsonData["data"]["api_token"]);
             Redux.store.dispatch(
               SetUserStateAction(
                 UserState(
-                  isLoggedIn: true,
-                  user: User.fromJson(jsonData["data"]),
-                ),
+                    isLoggedIn: true,
+                    user: User.fromJson(jsonData["data"]),
+                    role: "CLIENT"),
               ),
             );
           } else {
@@ -135,7 +121,87 @@ class _LoginSignUpState extends State<LoginSignUp> {
     });
   }
 
-  Widget _showForm() {
+  Widget buildSignInWithText() {
+    return Column(
+      children: <Widget>[
+        SizedBox(height: 20.0),
+        Text(
+          getTranslate(context, "OR"),
+          style: TextStyle(
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        SizedBox(height: 20.0),
+        Text(
+          getTranslate(context, "SIGN_IN_WITH"),
+          style: TextStyle(
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        SizedBox(height: 20.0),
+      ],
+    );
+  }
+
+  Widget buildSocialBtn() {
+    return GestureDetector(
+      onTap: () {},
+      child: Container(
+        height: 60.0,
+        width: 60.0,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              offset: Offset(0, 2),
+              blurRadius: 6.0,
+            ),
+          ],
+          image: DecorationImage(
+            image: AssetImage(
+              'assets/images/google.jpg',
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildSwitchFormBtn() {
+    return GestureDetector(
+      onTap: () => toggleFormMode(),
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: _isLoginForm
+                  ? getTranslate(context, "DONT_HAVE_ACCOUNT")
+                  : getTranslate(context, "HAVE_ACCOUNT"),
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 15.0,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            TextSpan(
+              text: _isLoginForm
+                  ? getTranslate(context, "SIGN_UP")
+                  : getTranslate(context, "LOGIN"),
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 15.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildForm() {
     return StoreConnector<AppState, AppState>(
         converter: (store) => store.state,
         builder: (context, state) {
@@ -144,23 +210,23 @@ class _LoginSignUpState extends State<LoginSignUp> {
             child: SingleChildScrollView(
               child: Column(
                 children: <Widget>[
-                  showLogo(),
-                  !_isLoginForm && widget.isProvider
-                      ? showRoleInput()
-                      : SizedBox(),
-                  !_isLoginForm ? showNameInput() : SizedBox(),
-                  showUserNameInput(),
-                  showPasswordInput(),
-                  !_isLoginForm ? showPasswordConfirmationInput() : SizedBox(),
-                  !_isLoginForm ? showEmailInput() : SizedBox(),
-                  !_isLoginForm ? showMobileInput() : SizedBox(),
-                  !_isLoginForm ? showSexeInput() : SizedBox(),
-                  showErrorMessage(),
+                  buildLogo(),
+                  !_isLoginForm ? buildNameInput() : SizedBox(),
+                  buildUserNameInput(),
+                  buildPasswordInput(),
+                  !_isLoginForm ? buildPasswordConfirmationInput() : SizedBox(),
+                  !_isLoginForm ? buildEmailInput() : SizedBox(),
+                  !_isLoginForm ? buildMobileInput() : SizedBox(),
+                  !_isLoginForm ? buildRegionInput() : SizedBox(),
+                  buildErrorMessage(),
                   !_isLoginForm
-                      ? showNotice(getTranslate(context, "REQUIRED_FIELD"))
+                      ? buildNotice(getTranslate(context, "REQUIRED_FIELD"))
                       : SizedBox(),
-                  showPrimaryButton(),
-                  showSecondaryButton(),
+                  buildSignInBtn(),
+                  _isLoginForm ? buildSignInWithText() : SizedBox.shrink(),
+                  _isLoginForm ? buildSocialBtn() : SizedBox.shrink(),
+                  SizedBox(height: 20.0),
+                  buildSwitchFormBtn(),
                 ],
               ),
             ),
@@ -168,7 +234,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
         });
   }
 
-  Widget showLogo() {
+  Widget buildLogo() {
     return Padding(
       padding: EdgeInsets.fromLTRB(0.0, 40.0, 0.0, 30.0),
       child: CircleAvatar(
@@ -179,52 +245,52 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
-  void _handleRadioButton(String value) {
-    setState(() {
-      _sexe = value;
-    });
-  }
+  // void _handleRadioButton(String value) {
+  //   setState(() {
+  //     _sexe = value;
+  //   });
+  // }
 
-  Widget showSexeInput() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          Row(
-            children: [
-              new Radio(
-                  activeColor: Colors.black,
-                  value: "HOMME",
-                  groupValue: _sexe,
-                  onChanged: _handleRadioButton),
-              new Text(
-                getTranslate(context, "MEN"),
-                style: new TextStyle(fontSize: 16.0),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              new Radio(
-                  activeColor: Colors.black,
-                  value: "FEMME",
-                  groupValue: _sexe,
-                  onChanged: _handleRadioButton),
-              new Text(
-                getTranslate(context, "WOMAN"),
-                style: new TextStyle(
-                  fontSize: 16.0,
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
-    );
-  }
+  // Widget buildSexeInput() {
+  //   return Padding(
+  //     padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+  //     child: Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceAround,
+  //       children: <Widget>[
+  //         Row(
+  //           children: [
+  //             new Radio(
+  //                 activeColor: Colors.black,
+  //                 value: "HOMME",
+  //                 groupValue: _sexe,
+  //                 onChanged: _handleRadioButton),
+  //             new Text(
+  //               getTranslate(context, "MEN"),
+  //               style: new TextStyle(fontSize: 16.0),
+  //             ),
+  //           ],
+  //         ),
+  //         Row(
+  //           children: [
+  //             new Radio(
+  //                 activeColor: Colors.black,
+  //                 value: "FEMME",
+  //                 groupValue: _sexe,
+  //                 onChanged: _handleRadioButton),
+  //             new Text(
+  //               getTranslate(context, "WOMAN"),
+  //               style: new TextStyle(
+  //                 fontSize: 16.0,
+  //               ),
+  //             ),
+  //           ],
+  //         )
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  Widget showUserNameInput() {
+  Widget buildUserNameInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
@@ -240,7 +306,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
-  Widget showEmailInput() {
+  Widget buildEmailInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
@@ -255,7 +321,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
-  Widget showMobileInput() {
+  Widget buildMobileInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: new IntlPhoneField(
@@ -280,20 +346,20 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
-  Widget showPasswordInput() {
+  Widget buildPasswordInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
-        obscureText: !_showPassword,
+        obscureText: !_buildPassword,
         decoration: inputTextDecorationRounded(
           Icon(Icons.lock_outline),
           getTranslate(context, 'PASSWORD') + "*",
           GestureDetector(
               child: Icon(
-                  !_showPassword ? Icons.visibility_off : Icons.visibility),
+                  !_buildPassword ? Icons.visibility_off : Icons.visibility),
               onTap: () {
                 setState(() {
-                  _showPassword = !_showPassword;
+                  _buildPassword = !_buildPassword;
                 });
               }),
         ),
@@ -305,9 +371,9 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
-  Widget showNameInput() {
+  Widget buildNameInput() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: new TextFormField(
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRounded(
@@ -323,20 +389,20 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
-  Widget showPasswordConfirmationInput() {
+  Widget buildPasswordConfirmationInput() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
-        obscureText: !_showPassword,
+        obscureText: !_buildPassword,
         decoration: inputTextDecorationRounded(
           Icon(Icons.lock_outline),
           getTranslate(context, 'PASSWORD_CONFIRMATION') + "*",
           GestureDetector(
               child: Icon(
-                  !_showPassword ? Icons.visibility_off : Icons.visibility),
+                  !_buildPassword ? Icons.visibility_off : Icons.visibility),
               onTap: () {
                 setState(() {
-                  _showPassword = !_showPassword;
+                  _buildPassword = !_buildPassword;
                 });
               }),
         ),
@@ -347,7 +413,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
-  Widget showPrimaryButton() {
+  Widget buildSignInBtn() {
     return Padding(
       padding: EdgeInsets.fromLTRB(0.0, 35.0, 0.0, 0.0),
       child: ButtonTheme(
@@ -372,18 +438,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
-  Widget showSecondaryButton() {
-    // ignore: deprecated_member_use
-    return new FlatButton(
-        child: new Text(
-            _isLoginForm
-                ? getTranslate(context, 'CREATE_AN_ACCOUNT')
-                : getTranslate(context, 'HAVE_ACCOUNT'),
-            style: new TextStyle(fontSize: 18.0, fontWeight: FontWeight.w300)),
-        onPressed: toggleFormMode);
-  }
-
-  Widget showErrorMessage() {
+  Widget buildErrorMessage() {
     if (_error != null)
       return Padding(
         padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
@@ -397,7 +452,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
       return SizedBox.shrink();
   }
 
-  Widget showNotice(String text) {
+  Widget buildNotice(String text) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: Row(
@@ -414,7 +469,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
-  Widget showLanguageChange() {
+  Widget buildLanguageChange() {
     var appLanguage = Provider.of<AppLanguage>(context);
     return DropdownButton(
       onChanged: (Language lang) {
@@ -437,35 +492,32 @@ class _LoginSignUpState extends State<LoginSignUp> {
     );
   }
 
-  Widget showRoleInput() {
+  Widget buildRegionInput() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12.0, 0, 12.0, 0.0),
-      child: Row(
-        children: [
-          Text(
-            getTranslate(context, "REGISTER_AS") + " : ",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          DropdownButton(
-            dropdownColor: Colors.orange[50],
-            value: _role,
-            onChanged: (value) {
-              setState(() {
-                _role = value;
-              });
-            },
-            icon: Icon(
-              Icons.arrow_downward,
-            ),
-            underline: SizedBox(),
-            items: ["ADMIN_SERVICE", "ADMIN_SAFF"]
-                .map<DropdownMenuItem<String>>((role) => DropdownMenuItem(
-                      value: role,
-                      child: Text(getTranslate(context, role)),
-                    ))
-                .toList(),
-          ),
-        ],
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: DropdownButtonFormField(
+        decoration: inputTextDecorationRounded(Icon(Icons.location_on),
+            getTranslate(context, 'REGION') + "*", null),
+        validator: (value) => value == null
+            ? getTranslate(context, "REQUIRED_USER_REGION")
+            : null,
+        isExpanded: true,
+        dropdownColor: Colors.orange[50],
+        value: _region,
+        onChanged: (value) {
+          setState(() {
+            _region = value;
+          });
+        },
+        icon: Icon(
+          Icons.arrow_drop_down,
+        ),
+        items: regions
+            .map<DropdownMenuItem<String>>((region) => DropdownMenuItem(
+                  value: region,
+                  child: Text(getTranslate(context, region)),
+                ))
+            .toList(),
       ),
     );
   }
@@ -474,8 +526,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(20.0),
-      decoration:
-          !widget.isProvider ? mainBoxDecoration : mainBoxDecorationProvider,
+      decoration: mainBoxDecoration,
       child: new Scaffold(
         appBar: AppBar(
           elevation: 0.0,
@@ -486,11 +537,11 @@ class _LoginSignUpState extends State<LoginSignUp> {
               },
               icon: Icon(Icons.arrow_back)),
           actions: [
-            showLanguageChange(),
+            buildLanguageChange(),
           ],
         ),
         backgroundColor: Colors.transparent,
-        body: _showForm(),
+        body: _buildForm(),
       ),
     );
   }

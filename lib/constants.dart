@@ -134,12 +134,6 @@ BoxDecoration mainBoxDecoration = BoxDecoration(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [Color(0xfffbb448), Color(0xffe46b10)]));
-//APPLICATION BACKGROUND COLOR GRADIENT FOR PROVIDER
-BoxDecoration mainBoxDecorationProvider = BoxDecoration(
-    gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Colors.white, Color(0xffe46b10)]));
 
 //CIRCULAR PROGRESS INDICATOR
 SizedBox circularProgressIndicator = SizedBox(
@@ -149,3 +143,36 @@ SizedBox circularProgressIndicator = SizedBox(
     valueColor: new AlwaysStoppedAnimation<Color>(Colors.orange),
   ),
 );
+
+final kLabelStyle = TextStyle(
+  color: Colors.black,
+  fontWeight: FontWeight.bold,
+  fontFamily: 'OpenSans',
+);
+
+final regions = [
+  "ARIANA",
+  "BEJA",
+  "BEN_AROUS",
+  "BIZERTE",
+  "GABES",
+  "GAFSA",
+  "JENDOUBA",
+  "KAIROUAN",
+  "KASSERINE",
+  "KEBILI",
+  "LE_KEF",
+  "MAHDIA",
+  "LA_MANOUBA",
+  "MEDNINE",
+  "MONASTIR",
+  "NABEUL",
+  "SFAX",
+  "SIDI_BOUZID",
+  "SILIANA",
+  "SOUSSE",
+  "TATAOUINE",
+  "TOZEUR",
+  "TUNIS",
+  "ZAGHOUAN"
+];

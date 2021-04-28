@@ -1,11 +1,14 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
+import 'package:issaf/redux/users/state.dart';
 import 'package:issaf/views/shared/profile.dart';
 import 'package:issaf/views/clients/providerList.dart';
 import 'package:issaf/views/clients/tickets/index.dart';
 
 class Home extends StatefulWidget {
+  final UserState userState;
+  Home(this.userState);
   @override
   State<StatefulWidget> createState() => new _HomeState();
 }
@@ -24,7 +27,7 @@ class _HomeState extends State<Home> {
     final List<Widget> _children = [
       ProvidersList(getTranslate(context, "PROVIDERS")),
       Tickets(),
-      Profile()
+      Profile(widget.userState)
     ];
     return new Scaffold(
         bottomNavigationBar: CurvedNavigationBar(

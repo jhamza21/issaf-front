@@ -21,7 +21,14 @@ class AddUpdateProvider extends StatefulWidget {
 
 class _AddUpdateProviderState extends State<AddUpdateProvider> {
   bool _isLoading = false;
-  String _title, _description, _email, _mobile, _siteWeb, _error;
+  String _type,
+      _title,
+      _description,
+      _email,
+      _mobile,
+      _siteWeb,
+      _region,
+      _error;
   File _selectedImage;
   final _formKey = new GlobalKey<FormState>();
 
@@ -33,20 +40,24 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
 
   void initializeProviderData() async {
     if (widget.provider != null) {
+      _type = widget.provider.type;
       _title = widget.provider.title;
       _description = widget.provider.description;
       _mobile = widget.provider.mobile;
       _email = widget.provider.email;
       _siteWeb = widget.provider.url;
+      _region = widget.provider.region;
     }
   }
 
   bool checkProviderChanged(ModelProvider.Provider provider) {
     if (provider == null) return true;
     if (_mobile != provider.mobile ||
+        _type != provider.type ||
         _title != provider.title ||
         _description != provider.description ||
         _email != provider.email ||
+        _region != provider.region ||
         _siteWeb != null && _siteWeb != provider.url ||
         _selectedImage != null) return true;
     return false;
@@ -96,6 +107,36 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
     );
   }
 
+  Widget showRegionInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 15.0),
+      child: DropdownButtonFormField(
+        decoration: inputTextDecorationRectangle(
+            null, getTranslate(context, 'REGION') + "*", null, null),
+        validator: (value) => value == null
+            ? getTranslate(context, "REQUIRED_USER_REGION")
+            : null,
+        isExpanded: true,
+        dropdownColor: Colors.orange[50],
+        value: _region,
+        onChanged: (value) {
+          setState(() {
+            _region = value;
+          });
+        },
+        icon: Icon(
+          Icons.arrow_drop_down,
+        ),
+        items: regions
+            .map<DropdownMenuItem<String>>((region) => DropdownMenuItem(
+                  value: region,
+                  child: Text(getTranslate(context, region)),
+                ))
+            .toList(),
+      ),
+    );
+  }
+
   bool validateImage() {
     if (widget.provider == null && _selectedImage == null) return false;
 
@@ -123,14 +164,15 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
                   var res = await ProviderService().addUpdateProvider(
                       prefs.getString('token'),
                       widget.provider != null ? widget.provider.id : null,
+                      _type,
                       _title,
                       _description,
                       ".........",
                       _email,
                       _mobile,
                       _siteWeb,
+                      _region,
                       _selectedImage);
-
                   if (res.statusCode == 201 || res.statusCode == 200) {
                     ModelProvider.Provider _resProvider =
                         ModelProvider.Provider.fromJson(
@@ -289,6 +331,45 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
     );
   }
 
+  Widget showTypeInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+      child: DropdownButtonFormField(
+        decoration: inputTextDecorationRectangle(
+            null, getTranslate(context, 'TYPE') + "*", null, null),
+        validator: (value) => value == null
+            ? getTranslate(context, "REQUIRED_PROVIDER_TYPE")
+            : null,
+        isExpanded: true,
+        dropdownColor: Colors.orange[50],
+        value: _type,
+        onChanged: (value) {
+          setState(() {
+            _type = value;
+          });
+        },
+        icon: Icon(
+          Icons.arrow_downward,
+        ),
+        items: [
+          "HEALTH",
+          "BEAUTY",
+          "MARKET",
+          "BANKING",
+          "GOUVERNMENT",
+          "AUTOMOBILE",
+          "TELECOMMUNICATION",
+          "OTHER"
+        ]
+            .map<DropdownMenuItem<String>>((type) => DropdownMenuItem(
+                  value: type,
+                  child: Text(getTranslate(context, type)),
+                ))
+            .toList(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -296,8 +377,9 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
       child: Scaffold(
         appBar: AppBar(
           elevation: 0,
-          title: Text(getTranslate(context,
-              widget.provider == null ? 'ADD_PROVIDER' : 'UPDATE_PROVIDER')),
+          title: Text(widget.provider == null
+              ? getTranslate(context, 'ADD_PROVIDER')
+              : widget.provider.title),
           centerTitle: true,
         ),
         body: Form(
@@ -306,11 +388,13 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
             child: Column(
               children: <Widget>[
                 showImageInput(),
+                showTypeInput(),
                 showTitleInput(),
                 showDescriptionInput(),
                 showEmailInput(),
                 showMobileInput(),
                 showSiteWebInput(),
+                showRegionInput(),
                 showError(),
                 showSaveProvider(),
               ],

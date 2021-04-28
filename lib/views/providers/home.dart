@@ -4,8 +4,6 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:issaf/models/provider.dart' as ModelProvider;
 import 'package:issaf/models/request.dart';
-import 'package:issaf/redux/store.dart';
-import 'package:issaf/redux/users/actions.dart';
 import 'package:issaf/redux/users/state.dart';
 import 'package:issaf/services/provideService.dart';
 import 'package:issaf/services/requestService.dart';
@@ -17,6 +15,8 @@ import 'package:issaf/views/waitingScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatefulWidget {
+  final UserState userState;
+  Home(this.userState);
   @override
   State<StatefulWidget> createState() => new _HomeState();
 }
@@ -61,18 +61,7 @@ class _HomeState extends State<Home> {
         _currentIndex = _provider == null ? 2 : 0;
         _isLoading = false;
       });
-    } catch (error) {
-      var prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', null);
-      Redux.store.dispatch(
-        SetUserStateAction(
-          UserState(
-            isLoggedIn: false,
-            user: null,
-          ),
-        ),
-      );
-    }
+    } catch (error) {}
   }
 
   void onTabTapped(int index) {
@@ -93,7 +82,7 @@ class _HomeState extends State<Home> {
       ServiceList(_provider),
       Notifications(_fetchRequests),
       AddUpdateProvider(_provider, setProvider),
-      Profile(),
+      Profile(widget.userState)
     ];
     return _isLoading
         ? WaitingScreen()

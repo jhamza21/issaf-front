@@ -20,12 +20,14 @@ class ProviderService {
   Future<http.StreamedResponse> addUpdateProvider(
       String token,
       int id,
+      String type,
       String title,
       String description,
       String address,
       String email,
       String mobile,
       String siteWeb,
+      String region,
       File image) async {
     var url;
     if (id != null)
@@ -35,11 +37,13 @@ class ProviderService {
     var request = new http.MultipartRequest("POST", Uri.parse(url));
     if (image != null)
       request.files.add(await http.MultipartFile.fromPath('img', image.path));
+    request.fields['type'] = type;
     request.fields['title'] = title;
     request.fields['description'] = description;
     request.fields['address'] = address;
     request.fields['email'] = email;
     request.fields['mobile'] = mobile;
+    request.fields['region'] = region;
     request.fields['url'] = siteWeb;
     return await request.send();
   }

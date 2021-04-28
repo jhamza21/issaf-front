@@ -2,28 +2,31 @@ class User {
   int id;
   String username;
   String name;
-  String role;
   String mobile;
   String email;
   String password;
-  String sexe;
+  String region;
   User(
       {this.id,
       this.username,
       this.name,
-      this.role,
       this.email,
       this.password,
-      this.sexe,
+      this.region,
       this.mobile});
 
   User.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         username = json['username'] ?? '',
         name = json['name'] ?? '',
-        role = json['role'] ?? '',
         mobile = json['mobile'] ?? '',
         email = json['email'] ?? '',
-        sexe = json['sexe'] ?? '',
+        region = json['region'] ?? '',
         password = json['password'] ?? '';
+
+  static List<User> listFromJson(List<dynamic> json) {
+    return json == null
+        ? []
+        : json.map((value) => User.fromJson(value)).toList();
+  }
 }
