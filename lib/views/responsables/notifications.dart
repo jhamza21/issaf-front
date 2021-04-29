@@ -3,11 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/request.dart';
-import 'package:issaf/models/service.dart';
-import 'package:issaf/models/user.dart';
 import 'package:issaf/services/requestService.dart';
-import 'package:issaf/services/serviceService.dart';
-import 'package:issaf/services/userService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Notifications extends StatefulWidget {
@@ -38,28 +34,10 @@ class _NotificationsState extends State<Notifications> {
       setState(() {
         _isLoading = false;
       });
-    } catch (error) {
+    } catch (e) {
       setState(() {
         _isLoading = false;
       });
-    }
-  }
-
-  Future<Map<String, dynamic>> getRequestData(Request request) async {
-    try {
-      var prefs = await SharedPreferences.getInstance();
-      var res = await UserService()
-          .getUserById(prefs.getString('token'), request.senderId);
-      assert(res.statusCode == 200);
-      User sender = User.fromJson(json.decode(res.body));
-
-      res = await ServiceService()
-          .getServiceById(prefs.getString('token'), request.serviceId);
-      assert(res.statusCode == 200);
-      Service service = Service.fromJson(json.decode(res.body));
-      return {"sender": sender, "service": service};
-    } catch (e) {
-      return null;
     }
   }
 
@@ -157,17 +135,18 @@ class _NotificationsState extends State<Notifications> {
     );
   }
 
-  Card requestCard(int id, String sender, String serviceName, String date) {
+  Card requestCard(Request request) {
     return Card(
       color: Colors.orange[50],
       child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: ListTile(
             title: Text(
-              date,
+              request.dateTime,
             ),
-            subtitle: Text(
-                sender + getTranslate(context, "INVITED_YOU") + serviceName),
+            subtitle: Text(request.sender.name +
+                getTranslate(context, "INVITED_YOU") +
+                request.service.title),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -177,7 +156,7 @@ class _NotificationsState extends State<Notifications> {
                     color: Colors.red[600],
                   ),
                   onPressed: () {
-                    _refuseRequest(id);
+                    _refuseRequest(request.id);
                   },
                 ),
                 IconButton(
@@ -186,7 +165,7 @@ class _NotificationsState extends State<Notifications> {
                     color: Colors.green[800],
                   ),
                   onPressed: () {
-                    _acceptRequest(id);
+                    _acceptRequest(request.id);
                   },
                 ),
               ],
@@ -213,24 +192,7 @@ class _NotificationsState extends State<Notifications> {
                     padding: EdgeInsets.all(8),
                     itemCount: _requests.length,
                     itemBuilder: (context, index) {
-                      return FutureBuilder(
-                        future: getRequestData(_requests[index]),
-                        builder: (context, snapshot) {
-                          return snapshot.connectionState ==
-                                      ConnectionState.done &&
-                                  snapshot.data != null
-                              ? requestCard(
-                                  _requests[index].id,
-                                  snapshot.data["sender"].name,
-                                  snapshot.data["service"].title,
-                                  _requests[index].dateTime)
-                              : Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child:
-                                      Center(child: circularProgressIndicator),
-                                );
-                        },
-                      );
+                      return requestCard(_requests[index]);
                     },
                   ));
   }

@@ -1,24 +1,27 @@
+import 'package:issaf/models/service.dart';
+import 'package:issaf/models/user.dart';
+
 class Request {
   int id;
   String dateTime;
-  int senderId;
-  int receiverId;
-  int serviceId;
+  User sender;
+  User receiver;
+  Service service;
   String status;
   Request(
       {this.id,
       this.dateTime,
-      this.senderId,
-      this.receiverId,
-      this.serviceId,
+      this.sender,
+      this.receiver,
+      this.service,
       this.status});
 
   Request.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         dateTime = json['date_time'] ?? '',
-        senderId = json['sender_id'] ?? '',
-        receiverId = json['receiver_id'] ?? '',
-        serviceId = json['service_id'] ?? '',
+        sender = User.fromJson(json['sender']),
+        receiver = User.fromJson(json['receiver']),
+        service = Service.fromJson(json['service']),
         status = json['status'] ?? null;
 
   static List<Request> listFromJson(List<dynamic> json) {

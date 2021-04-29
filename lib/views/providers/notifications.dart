@@ -3,11 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/request.dart';
-import 'package:issaf/models/service.dart';
-import 'package:issaf/models/user.dart';
 import 'package:issaf/services/requestService.dart';
-import 'package:issaf/services/serviceService.dart';
-import 'package:issaf/services/userService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Notifications extends StatefulWidget {
@@ -38,30 +34,10 @@ class _NotificationsState extends State<Notifications> {
       setState(() {
         _isLoading = false;
       });
-    } catch (error) {
+    } catch (e) {
       setState(() {
         _isLoading = false;
       });
-    }
-  }
-
-  Future<Map<String, dynamic>> getRequestData(Request request) async {
-    try {
-      User sender, receiver;
-      var prefs = await SharedPreferences.getInstance();
-
-      var res = await UserService()
-          .getUserById(prefs.getString('token'), request.receiverId);
-      assert(res.statusCode == 200);
-      receiver = User.fromJson(json.decode(res.body));
-
-      res = await ServiceService()
-          .getServiceById(prefs.getString('token'), request.serviceId);
-      assert(res.statusCode == 200);
-      Service service = Service.fromJson(json.decode(res.body));
-      return {"sender": sender, "service": service, "receiver": receiver};
-    } catch (e) {
-      return null;
     }
   }
 
@@ -111,15 +87,14 @@ class _NotificationsState extends State<Notifications> {
     );
   }
 
-  Card requestCard(int id, String sender, String serviceName, String receiver,
-      String date, String status) {
+  Card requestCard(Request request) {
     String _subtitle, _confirmation;
     _confirmation = getTranslate(context, "DELETE_REQUEST_CONFIRMATION");
-    _confirmation += receiver;
+    _confirmation += request.receiver.name;
     _confirmation += "?";
-    _subtitle = receiver;
+    _subtitle = request.receiver.name;
     _subtitle += getTranslate(context, "IS_INVITED_FOR");
-    _subtitle += serviceName;
+    _subtitle += request.service.title;
 
     return Card(
       color: Colors.orange[50],
@@ -127,17 +102,25 @@ class _NotificationsState extends State<Notifications> {
         padding: const EdgeInsets.all(8.0),
         child: ListTile(
           title: Text(
-            date,
+            request.dateTime,
           ),
           subtitle: Text(_subtitle),
-          trailing: IconButton(
+          leading: IconButton(
             icon: Icon(
               Icons.delete,
               color: Colors.red,
             ),
             onPressed: () {
-              _deleteNotification(id, _confirmation);
+              _deleteNotification(request.id, _confirmation);
             },
+          ),
+          trailing: Icon(
+            Icons.circle,
+            color: request.status == null
+                ? Colors.grey
+                : request.status == "ACCEPTED"
+                    ? Colors.green
+                    : Colors.red,
           ),
         ),
       ),
@@ -162,30 +145,7 @@ class _NotificationsState extends State<Notifications> {
                     padding: EdgeInsets.all(8),
                     itemCount: _requests.length,
                     itemBuilder: (context, index) {
-                      return FutureBuilder(
-                        future: getRequestData(_requests[index]),
-                        builder: (context, snapshot) {
-                          return snapshot.connectionState ==
-                                      ConnectionState.done &&
-                                  snapshot.data != null
-                              ? requestCard(
-                                  _requests[index].id,
-                                  snapshot.data["sender"] != null
-                                      ? snapshot.data["sender"].name
-                                      : null,
-                                  snapshot.data["service"].title,
-                                  snapshot.data["receiver"] != null
-                                      ? snapshot.data["receiver"].name
-                                      : null,
-                                  _requests[index].dateTime,
-                                  _requests[index].status)
-                              : Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child:
-                                      Center(child: circularProgressIndicator),
-                                );
-                        },
-                      );
+                      return requestCard(_requests[index]);
                     },
                   ));
   }
