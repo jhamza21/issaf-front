@@ -24,19 +24,19 @@ class AddUpdateService extends StatefulWidget {
 class _AddUpdateServiceState extends State<AddUpdateService> {
   final _formKey = new GlobalKey<FormState>();
   final TextEditingController _typeAheadController = TextEditingController();
-  bool _isLoading = false;
+  bool _isLoading = false, _isFetchingData = false;
   User _selectedUser;
   String _title,
       _description,
       _workStartTime = "08:00",
       _workEndTime = "17:00",
-      _status = "OPENED",
-      _error;
+      _error,
+      _errorTime,
+      _errorDays;
 
   double _avgTimePerClient = 10;
   List<String> _openDays = [], _hoolidays = [], _breaks = [];
   File _selectedImage;
-  bool _isFetchingData = false, _errorDays = false;
   Service _service;
 
   @override
@@ -64,7 +64,6 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
         _openDays = _service.openDays;
         _hoolidays = _service.hoolidays;
         _breaks = _service.breakTimes;
-        _status = _service.status;
         _selectedUser = _service.user;
         _typeAheadController.text = _selectedUser.username;
         setState(() {
@@ -78,7 +77,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
   // bool checkServiceChanged(Service service) {
   //   if (service == null) return true;
   //   if (_title != service.title ||
-  //       _username != _prevUsername ||
+  //       _selectedUser.id != service.userId ||
   //       _description != service.description ||
   //       _avgTimePerClient != service.timePerClient ||
   //       _workStartTime != service.workStartTime.substring(0, 5) ||
@@ -86,15 +85,14 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
   //       _openDays != service.openDays ||
   //       _hoolidays != service.hoolidays ||
   //       _breaks != service.breakTimes ||
-  //       _status != service.status ||
   //       _selectedImage != null) return true;
-  //   return true;
+  //   return false;
   // }
 
   // Check if form is valid
   bool validateAndSave() {
     final form = _formKey.currentState;
-    if (form.validate() && validateDays())
+    if (form.validate() && validateDays() && validateTime())
       return true;
     else
       return false;
@@ -103,13 +101,35 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
   // validate days
   bool validateDays() {
     setState(() {
-      _errorDays = false;
+      _errorDays = null;
     });
     if (_openDays.length > 0)
       return true;
     else {
       setState(() {
-        _errorDays = true;
+        _errorDays = getTranslate(context, "INVALID_DAYS");
+      });
+      return false;
+    }
+  }
+
+  // validate work time
+  bool validateTime() {
+    setState(() {
+      _errorTime = null;
+    });
+    TimeOfDay _startTime = TimeOfDay(
+        hour: int.parse(_workStartTime.split(":")[0]),
+        minute: int.parse(_workStartTime.split(":")[1]));
+    TimeOfDay _endTime = TimeOfDay(
+        hour: int.parse(_workEndTime.split(":")[0]),
+        minute: int.parse(_workEndTime.split(":")[1]));
+    if ((_startTime.hour + _startTime.minute / 60.0) <
+        (_endTime.hour + _endTime.minute / 60.0))
+      return true;
+    else {
+      setState(() {
+        _errorTime = getTranslate(context, "INVALID_WORK_TIME");
       });
       return false;
     }
@@ -141,7 +161,6 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                   _openDays,
                   _hoolidays,
                   _breaks,
-                  _status,
                   _selectedImage);
               if (res.statusCode == 201 || res.statusCode == 200) {
                 final snackBar = SnackBar(
@@ -310,11 +329,24 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
   Widget showWorkTimeInput(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      child: Column(
         children: [
-          _showTimePicker(true, context),
-          _showTimePicker(false, context)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _showTimePicker(true, context),
+              _showTimePicker(false, context)
+            ],
+          ),
+          _errorTime != null
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 12.0, 0, 0.0),
+                  child: Text(
+                    _errorTime,
+                    style: TextStyle(color: Colors.red, fontSize: 12),
+                  ),
+                )
+              : SizedBox.shrink()
         ],
       ),
     );
@@ -337,7 +369,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: SelectDays(
-        isError: _errorDays,
+        errorText: _errorDays,
         border: false,
         initialValue: _openDays,
         boxDecoration: BoxDecoration(
@@ -429,50 +461,50 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
     );
   }
 
-  void _handleRadioButton(String value) {
-    setState(() {
-      _status = value;
-    });
-  }
+  // void _handleRadioButton(String value) {
+  //   setState(() {
+  //     _status = value;
+  //   });
+  // }
 
-  Widget showStatusInput() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          Row(
-            children: [
-              new Radio(
-                  activeColor: Colors.black,
-                  value: "OPENED",
-                  groupValue: _status,
-                  onChanged: _handleRadioButton),
-              new Text(
-                getTranslate(context, "OPENED"),
-                style: new TextStyle(fontSize: 16.0),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              new Radio(
-                  activeColor: Colors.black,
-                  value: "CLOSED",
-                  groupValue: _status,
-                  onChanged: _handleRadioButton),
-              new Text(
-                getTranslate(context, "CLOSED"),
-                style: new TextStyle(
-                  fontSize: 16.0,
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
-    );
-  }
+  // Widget showStatusInput() {
+  //   return Padding(
+  //     padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
+  //     child: Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceAround,
+  //       children: <Widget>[
+  //         Row(
+  //           children: [
+  //             new Radio(
+  //                 activeColor: Colors.black,
+  //                 value: "OPENED",
+  //                 groupValue: _status,
+  //                 onChanged: _handleRadioButton),
+  //             new Text(
+  //               getTranslate(context, "OPENED"),
+  //               style: new TextStyle(fontSize: 16.0),
+  //             ),
+  //           ],
+  //         ),
+  //         Row(
+  //           children: [
+  //             new Radio(
+  //                 activeColor: Colors.black,
+  //                 value: "CLOSED",
+  //                 groupValue: _status,
+  //                 onChanged: _handleRadioButton),
+  //             new Text(
+  //               getTranslate(context, "CLOSED"),
+  //               style: new TextStyle(
+  //                 fontSize: 16.0,
+  //               ),
+  //             ),
+  //           ],
+  //         )
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime d = await showDatePicker(

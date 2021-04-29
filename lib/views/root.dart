@@ -29,13 +29,18 @@ class _RootPageState extends State<RootPage> {
   Future<void> _checkLoggedInUser() async {
     try {
       var prefs = await SharedPreferences.getInstance();
+
       final response = await UserService().checkToken(prefs.getString('token'));
       final jsonData = json.decode(response.body);
       assert(jsonData["id"] != null);
       Redux.store.dispatch(
         SetUserStateAction(
           UserState(
-              isLoggedIn: true, user: User.fromJson(jsonData), role: "CLIENT"),
+              isLoggedIn: true,
+              user: User.fromJson(jsonData),
+              role: prefs.getString("role") != null
+                  ? prefs.getString("role")
+                  : "CLIENT"),
         ),
       );
       setState(() {

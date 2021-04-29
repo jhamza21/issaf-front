@@ -245,9 +245,12 @@ class _ProfileState extends State<Profile> {
             items: Language.languageList()
                 .map<DropdownMenuItem<Language>>((lang) => DropdownMenuItem(
                       value: lang,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: <Widget>[Text(lang.flag), Text(lang.name)],
+                      child: Container(
+                        width: 100,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: <Widget>[Text(lang.flag), Text(lang.name)],
+                        ),
                       ),
                     ))
                 .toList(),
@@ -270,23 +273,35 @@ class _ProfileState extends State<Profile> {
                 width: 7.0,
               ),
               Text(
-                "Se connecter en tant que ",
+                getTranslate(context, "CONNECT_AS"),
                 style: TextStyle(fontSize: 15.0),
               ),
             ],
           ),
-          DropdownButton(
-            onChanged: (String role) {
-              Redux.store.dispatch(SetUserStateAction(UserState(role: role)));
-            },
-            hint: Text(_role),
-            underline: SizedBox(),
-            items: ["CLIENT", "ADMIN", "PERSONNEL"]
-                .map<DropdownMenuItem<String>>((role) => DropdownMenuItem(
-                      value: role,
-                      child: Text(role),
-                    ))
-                .toList(),
+          Container(
+            child: DropdownButton(
+              onChanged: (role) async {
+                var prefs = await SharedPreferences.getInstance();
+                await prefs.setString("role", role);
+                Redux.store.dispatch(SetUserStateAction(UserState(role: role)));
+              },
+              hint: Text(
+                getTranslate(context, _role),
+              ),
+              underline: SizedBox(),
+              items: ["CLIENT", "ADMIN_SAFF", "ADMIN_SERVICE"]
+                  .map<DropdownMenuItem<String>>((role) => DropdownMenuItem(
+                        value: role,
+                        child: Container(
+                          width: 100,
+                          child: Text(
+                            getTranslate(context, role),
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ))
+                  .toList(),
+            ),
           ),
         ],
       ),

@@ -27,7 +27,7 @@ class _TicketInProgressState extends State<TicketInProgress> {
       setState(() {
         _isLoading = false;
       });
-    } catch (error) {
+    } catch (e) {
       setState(() {
         _isLoading = false;
         _error = getTranslate(context, "ERROR_SERVER");
@@ -188,10 +188,7 @@ class _TicketInProgressState extends State<TicketInProgress> {
             ? Center(
                 child: Text(
                   _error,
-                  style: TextStyle(
-                      fontSize: 15.0,
-                      color: Colors.red,
-                      fontWeight: FontWeight.w400),
+                  style: TextStyle(fontSize: 14.0, color: Colors.red),
                 ),
               )
             : _tickets.length == 0

@@ -351,16 +351,7 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
         icon: Icon(
           Icons.arrow_downward,
         ),
-        items: [
-          "HEALTH",
-          "BEAUTY",
-          "MARKET",
-          "BANKING",
-          "GOUVERNMENT",
-          "AUTOMOBILE",
-          "TELECOMMUNICATION",
-          "OTHER"
-        ]
+        items: providers
             .map<DropdownMenuItem<String>>((type) => DropdownMenuItem(
                   value: type,
                   child: Text(getTranslate(context, type)),

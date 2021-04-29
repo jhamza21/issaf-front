@@ -18,7 +18,7 @@ class _HomeState extends State<Home> {
         builder: (context, state) {
           if (state.userState.role == "CLIENT")
             return Clients.Home(state.userState);
-          else if (state.userState.role == "ADMIN")
+          else if (state.userState.role == "ADMIN_SERVICE")
             return Providers.Home(state.userState);
           else
             return Responsibles.Home(state.userState);

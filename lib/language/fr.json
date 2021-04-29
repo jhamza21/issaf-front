@@ -179,5 +179,9 @@
     "TATAOUINE":"Tatouine",
     "TOZEUR":"Tozeur",
     "TUNIS":"Tunis",
-    "ZAGHOUAN":"Zaghouan"
+    "ZAGHOUAN":"Zaghouan",
+    "INVALID_WORK_TIME":"Temps de travail invalide",
+    "CONNECT_AS":"Se connecter en tant que",
+    "NOTIFICATIONS":"Notifications",
+    "FILTER_WITH":"Filtrer par : "
 }

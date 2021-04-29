@@ -39,6 +39,8 @@ class _ServiceListState extends State<ServiceList> {
       assert(response.statusCode == 200);
       final jsonData = json.decode(response.body)["services"];
       _services = Service.listFromJson(jsonData);
+      //filter active services
+      _services.removeWhere((element) => element.status != "ACCEPTED");
       setState(() {
         _isLoading = false;
       });
@@ -50,10 +52,8 @@ class _ServiceListState extends State<ServiceList> {
   }
 
   void _selectService(Service service) {
-    if (service.userId != null && service.status == "OPENED") {
-      _selectedService = service;
-      changePage(1);
-    }
+    _selectedService = service;
+    changePage(1);
   }
 
   Widget _getOpenDays(Service service) {

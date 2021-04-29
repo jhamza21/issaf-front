@@ -3,7 +3,7 @@ import 'package:issaf/constants.dart';
 
 class SelectDays extends StatefulWidget {
   //handle error
-  final bool isError;
+  final String errorText;
   //handle initial value
   final List<String> initialValue;
   // [onSelect] callBack to handle the Selected days
@@ -29,7 +29,7 @@ class SelectDays extends StatefulWidget {
   final double padding;
   SelectDays({
     this.initialValue,
-    this.isError = false,
+    this.errorText,
     @required this.onSelect,
     this.backgroundColor,
     this.daysFillColor,
@@ -200,13 +200,13 @@ class _SelectDaysState extends State<SelectDays> {
             ),
           ),
         ),
-        widget.isError
+        widget.errorText != null
             ? Row(
                 children: [
                   Padding(
                     padding: const EdgeInsets.fromLTRB(10.0, 5.0, 0.0, 0.0),
                     child: Text(
-                      getTranslate(context, "INVALID_DAYS"),
+                      widget.errorText,
                       style: TextStyle(color: Colors.red, fontSize: 12),
                     ),
                   ),

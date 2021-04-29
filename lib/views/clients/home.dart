@@ -25,7 +25,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> _children = [
-      ProvidersList(getTranslate(context, "PROVIDERS")),
+      ProvidersList(getTranslate(context, "PROVIDERS"), widget.userState),
       Tickets(),
       Profile(widget.userState)
     ];

@@ -176,3 +176,13 @@ final regions = [
   "TUNIS",
   "ZAGHOUAN"
 ];
+final providers = [
+  "HEALTH",
+  "BEAUTY",
+  "MARKET",
+  "BANKING",
+  "GOUVERNMENT",
+  "AUTOMOBILE",
+  "TELECOMMUNICATION",
+  "OTHER"
+];

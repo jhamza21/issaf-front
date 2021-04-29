@@ -47,7 +47,6 @@ class ServiceService {
       List<String> openDays,
       List<String> hoolidays,
       List<String> breaks,
-      String status,
       File image) async {
     var url;
     if (id == null)

@@ -4,13 +4,15 @@ import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/provider.dart';
+import 'package:issaf/redux/users/state.dart';
 import 'package:issaf/services/provideService.dart';
 import 'package:issaf/views/clients/serviceList.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProvidersList extends StatefulWidget {
   final String title;
-  ProvidersList(this.title);
+  final UserState userState;
+  ProvidersList(this.title, this.userState);
   @override
   _ProvidersListState createState() => _ProvidersListState();
 }
@@ -21,11 +23,11 @@ class _ProvidersListState extends State<ProvidersList> {
   int _currentIndex = 0;
   Provider _selectedProvider;
   Icon cusIcon = Icon(Icons.search);
-  List<String> _favoriteProviders = [];
-  List<Provider> _orderedProviders = [];
-  List<Provider> _providers = [];
+  List<String> _favoriteProvidersIds = [];
+  List<Provider> _orderedProviders = [], _providers = [];
   String _searchText;
-  bool _isLoading = true;
+  bool _isLoading = true, _filterByRegion = true, _filterByType = false;
+  String _region, _type = "HEALTH";
 
   void changePage(int index) {
     setState(() {
@@ -37,13 +39,14 @@ class _ProvidersListState extends State<ProvidersList> {
   void initState() {
     super.initState();
     cusSearchBar = Text(widget.title);
+    _region = widget.userState.user.region;
     _fetchFavorites();
     _fetchProviders();
   }
 
   void _fetchFavorites() async {
     var prefs = await SharedPreferences.getInstance();
-    _favoriteProviders = prefs.getStringList("favorite") ?? [];
+    _favoriteProvidersIds = prefs.getStringList("favorite") ?? [];
   }
 
   void _fetchProviders() async {
@@ -56,7 +59,7 @@ class _ProvidersListState extends State<ProvidersList> {
       final jsonData = json.decode(response.body);
       _providers = Provider.listFromJson(jsonData);
 
-      sortedProviders();
+      filterProviders();
       setState(() {
         _isLoading = false;
       });
@@ -67,13 +70,35 @@ class _ProvidersListState extends State<ProvidersList> {
     }
   }
 
-  sortedProviders() {
+  filterProviders() {
+    setState(() {
+      _isLoading = true;
+    });
     _orderedProviders = [];
-    _providers.forEach((element) {
-      if (_favoriteProviders.contains(element.id.toString()))
+    List<Provider> _filtredByRegion = [], filtredByType = [];
+    //filter by region
+    if (_filterByRegion) {
+      _providers.forEach((element) {
+        if (element.region == _region) _filtredByRegion.add(element);
+      });
+    } else
+      _filtredByRegion = _providers;
+    //filter by type
+    if (_filterByType) {
+      _filtredByRegion.forEach((element) {
+        if (element.type == _type) filtredByType.add(element);
+      });
+    } else
+      filtredByType = _filtredByRegion;
+    //sort providers
+    filtredByType.forEach((element) {
+      if (_favoriteProvidersIds.contains(element.id.toString()))
         _orderedProviders.insert(0, element);
       else
         _orderedProviders.add(element);
+    });
+    setState(() {
+      _isLoading = false;
     });
   }
 
@@ -125,21 +150,21 @@ class _ProvidersListState extends State<ProvidersList> {
 
   void _likeOrUnlikeProvider(Provider provider) async {
     var prefs = await SharedPreferences.getInstance();
-    if (_favoriteProviders.contains(provider.id.toString())) {
+    if (_favoriteProvidersIds.contains(provider.id.toString())) {
       //Remove favorite provider
       setState(() {
-        _favoriteProviders.remove(provider.id.toString());
-        sortedProviders();
+        _favoriteProvidersIds.remove(provider.id.toString());
+        filterProviders();
       });
-      prefs.setStringList("favorite", _favoriteProviders);
+      prefs.setStringList("favorite", _favoriteProvidersIds);
     } else {
       //Add favorite provider
       var prefs = await SharedPreferences.getInstance();
       setState(() {
-        _favoriteProviders.add(provider.id.toString());
-        sortedProviders();
+        _favoriteProvidersIds.add(provider.id.toString());
+        filterProviders();
       });
-      prefs.setStringList("favorite", _favoriteProviders);
+      prefs.setStringList("favorite", _favoriteProvidersIds);
     }
   }
 
@@ -188,7 +213,7 @@ class _ProvidersListState extends State<ProvidersList> {
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(),
                 icon: Icon(
-                  _favoriteProviders.contains(provider.id.toString())
+                  _favoriteProvidersIds.contains(provider.id.toString())
                       ? Icons.star
                       : Icons.star_border,
                   size: 17,
@@ -211,6 +236,12 @@ class _ProvidersListState extends State<ProvidersList> {
           centerTitle: true,
           elevation: 0.0,
           title: cusSearchBar,
+          leading: IconButton(
+            icon: Icon(Icons.filter_alt),
+            onPressed: () {
+              showFilterDialog();
+            },
+          ),
           actions: [
             IconButton(
                 icon: cusIcon,
@@ -226,7 +257,7 @@ class _ProvidersListState extends State<ProvidersList> {
                         style: TextStyle(color: Colors.white, fontSize: 16.0),
                         onChanged: (val) {
                           setState(() {
-                            _searchText = val;
+                            _searchText = val.trim();
                           });
                         },
                       );
@@ -262,6 +293,99 @@ class _ProvidersListState extends State<ProvidersList> {
                         return providerCard(_orderedProviders[index]);
                     },
                   ));
+  }
+
+  showFilterDialog() {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(getTranslate(context, "FILTER_WITH")),
+              content: Container(
+                height: 100,
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Checkbox(
+                            value: _filterByRegion,
+                            onChanged: (v) {
+                              setState(() {
+                                _filterByRegion = v;
+                              });
+                            }),
+                        Text(
+                          getTranslate(context, "REGION") + " : ",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              color:
+                                  _filterByRegion ? Colors.black : Colors.grey),
+                        ),
+                        DropdownButton<String>(
+                          value: _region,
+                          underline: SizedBox.shrink(),
+                          items: regions.map((region) {
+                            return new DropdownMenuItem<String>(
+                              value: region,
+                              child: new Text(getTranslate(context, region)),
+                            );
+                          }).toList(),
+                          onChanged: !_filterByRegion
+                              ? null
+                              : (x) {
+                                  setState(() {
+                                    _region = x;
+                                  });
+                                },
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _filterByType,
+                          onChanged: (v) {
+                            setState(() {
+                              _filterByType = v;
+                            });
+                          },
+                        ),
+                        Text(
+                          getTranslate(context, "TYPE") + " : ",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              color:
+                                  _filterByType ? Colors.black : Colors.grey),
+                        ),
+                        DropdownButton<String>(
+                          value: _type,
+                          underline: SizedBox.shrink(),
+                          items: providers.map((provider) {
+                            return new DropdownMenuItem<String>(
+                              value: provider,
+                              child: new Text(getTranslate(context, provider)),
+                            );
+                          }).toList(),
+                          onChanged: !_filterByType
+                              ? null
+                              : (x) {
+                                  setState(() {
+                                    _region = x;
+                                  });
+                                },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    ).then((value) => filterProviders());
   }
 
   @override
