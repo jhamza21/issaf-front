@@ -24,7 +24,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   ModelProvider.Provider _provider;
   int _currentIndex = 0;
-  bool _notificationOn = false;
+  int _notifications = 0;
   bool _isLoading = true;
 
   @override
@@ -34,15 +34,21 @@ class _HomeState extends State<Home> {
     _fetchRequests();
   }
 
+  setNotifications(int number) {
+    setState(() {
+      _notifications = number;
+    });
+  }
+
   void _fetchRequests() async {
     try {
       var prefs = await SharedPreferences.getInstance();
-      final response = await RequestService()
-          .fetchReceivedRequests(prefs.getString('token'));
+      final response =
+          await RequestService().fetchSendedRequests(prefs.getString('token'));
       assert(response.statusCode == 200);
       final jsonData = json.decode(response.body);
       setState(() {
-        _notificationOn = Request.listFromJson(jsonData).length > 0;
+        _notifications = Request.listFromJson(jsonData).length;
       });
     } catch (e) {}
   }
@@ -80,7 +86,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     final List<Widget> _children = [
       ServiceList(_provider),
-      Notifications(_fetchRequests),
+      Notifications(setNotifications),
       AddUpdateProvider(_provider, setProvider),
       Profile(widget.userState)
     ];
@@ -104,11 +110,11 @@ class _HomeState extends State<Home> {
                   Stack(
                     children: [
                       Icon(
-                        Icons.notifications,
+                        Icons.send,
                         size: 20,
                         color: Colors.black,
                       ),
-                      _notificationOn
+                      _notifications > 0
                           ? new Positioned(
                               top: 0.0,
                               right: 0.0,
@@ -122,7 +128,7 @@ class _HomeState extends State<Home> {
                     ],
                   ),
                   Icon(
-                    Icons.settings,
+                    Icons.admin_panel_settings,
                     size: 20,
                     color: Colors.black,
                   ),

@@ -7,7 +7,7 @@ import 'package:issaf/services/requestService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Notifications extends StatefulWidget {
-  final void Function() callback;
+  final void Function(int) callback;
   Notifications(this.callback);
   @override
   _NotificationsState createState() => _NotificationsState();
@@ -23,7 +23,10 @@ class _NotificationsState extends State<Notifications> {
     _fetchRequests();
   }
 
-  void _fetchRequests() async {
+  Future<void> _fetchRequests() async {
+    setState(() {
+      _isLoading = true;
+    });
     try {
       var prefs = await SharedPreferences.getInstance();
       final response = await RequestService()
@@ -31,6 +34,7 @@ class _NotificationsState extends State<Notifications> {
       assert(response.statusCode == 200);
       final jsonData = json.decode(response.body);
       _requests = Request.listFromJson(jsonData);
+      _requests.removeWhere((element) => element.status != null);
       setState(() {
         _isLoading = false;
       });
@@ -70,8 +74,8 @@ class _NotificationsState extends State<Notifications> {
                         Text(getTranslate(context, "SUCCESS_REFUSE_REQUEST")),
                   );
                   Navigator.of(context).pop();
-                  _fetchRequests();
-                  widget.callback();
+                  await _fetchRequests();
+                  widget.callback(_requests.length);
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 } catch (e) {
                   Navigator.of(context).pop();
@@ -117,8 +121,8 @@ class _NotificationsState extends State<Notifications> {
                         Text(getTranslate(context, "SUCCESS_ACCEPT_REQUEST")),
                   );
                   Navigator.of(context).pop();
-                  _fetchRequests();
-                  widget.callback();
+                  await _fetchRequests();
+                  widget.callback(_requests.length);
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 } catch (e) {
                   Navigator.of(context).pop();
@@ -142,11 +146,17 @@ class _NotificationsState extends State<Notifications> {
           padding: const EdgeInsets.all(8.0),
           child: ListTile(
             title: Text(
-              request.dateTime,
+              request.dateTime.substring(0, 11) +
+                  getTranslate(context, "A") +
+                  request.dateTime.substring(11, 16),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
             ),
-            subtitle: Text(request.sender.name +
-                getTranslate(context, "INVITED_YOU") +
-                request.service.title),
+            subtitle: Text(
+              request.sender.name +
+                  getTranslate(context, "INVITED_YOU") +
+                  request.service.title,
+              style: TextStyle(fontSize: 13),
+            ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -180,6 +190,10 @@ class _NotificationsState extends State<Notifications> {
         appBar: AppBar(
           centerTitle: true,
           title: Text(getTranslate(context, "REQUESTS")),
+          actions: [
+            IconButton(
+                onPressed: () => _fetchRequests(), icon: Icon(Icons.refresh))
+          ],
           elevation: 0,
         ),
         body: _isLoading

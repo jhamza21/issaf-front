@@ -6,15 +6,15 @@ import 'package:issaf/constants.dart';
 import 'package:issaf/models/service.dart';
 import 'package:issaf/services/ticketService.dart';
 
-class ServiceDetails extends StatefulWidget {
+class BookTicket extends StatefulWidget {
   final Service service;
   final void Function(int) callback;
-  ServiceDetails(this.service, this.callback);
+  BookTicket(this.service, this.callback);
   @override
-  _ServiceDetailsState createState() => _ServiceDetailsState();
+  _BookTicketState createState() => _BookTicketState();
 }
 
-class _ServiceDetailsState extends State<ServiceDetails> {
+class _BookTicketState extends State<BookTicket> {
   String _selectedDate = new DateFormat("yyyy-MM-dd").format(DateTime.now());
   String _selectedTime, _error;
   bool _isLoading = false, _isFetchingTimes;
@@ -190,6 +190,18 @@ class _ServiceDetailsState extends State<ServiceDetails> {
       return SizedBox.shrink();
   }
 
+  Widget _showNotice() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 40.0),
+      child: Text(
+        getTranslate(context, "TICKET_NOTICE"),
+        textAlign: TextAlign.justify,
+        style: TextStyle(
+            fontSize: 15.0, color: Colors.black, fontWeight: FontWeight.w500),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -230,7 +242,9 @@ class _ServiceDetailsState extends State<ServiceDetails> {
               height: 10,
             ),
             _showErrorMessage(),
-            _showPrimaryButton()
+            _showPrimaryButton(),
+            Spacer(),
+            _showNotice(),
           ],
         ));
   }

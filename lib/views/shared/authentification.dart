@@ -57,7 +57,9 @@ class _LoginSignUpState extends State<LoginSignUp> {
                 UserState(
                     isLoggedIn: true,
                     user: User.fromJson(jsonData["data"]),
-                    role: "CLIENT"),
+                    role: prefs.getString("role") != null
+                        ? prefs.getString("role")
+                        : "CLIENT"),
               ),
             );
           } else {
@@ -90,9 +92,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
                 UserState(
                     isLoggedIn: true,
                     user: User.fromJson(jsonData["data"]),
-                    role: prefs.getString("role") != null
-                        ? prefs.getString("role")
-                        : "CLIENT"),
+                    role: "CLIENT"),
               ),
             );
           } else {

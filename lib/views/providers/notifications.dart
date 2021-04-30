@@ -7,7 +7,7 @@ import 'package:issaf/services/requestService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Notifications extends StatefulWidget {
-  final void Function() callback;
+  final void Function(int) callback;
   Notifications(this.callback);
   @override
   _NotificationsState createState() => _NotificationsState();
@@ -23,8 +23,11 @@ class _NotificationsState extends State<Notifications> {
     _fetchRequests();
   }
 
-  void _fetchRequests() async {
+  Future<void> _fetchRequests() async {
     try {
+      setState(() {
+        _isLoading = true;
+      });
       var prefs = await SharedPreferences.getInstance();
       final response =
           await RequestService().fetchSendedRequests(prefs.getString('token'));
@@ -68,8 +71,8 @@ class _NotificationsState extends State<Notifications> {
                   final snackBar = SnackBar(
                     content: Text(getTranslate(context, "SUCCESS_DELETE")),
                   );
-                  widget.callback();
-                  _fetchRequests();
+                  await _fetchRequests();
+                  widget.callback(_requests.length);
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 } catch (e) {
@@ -93,21 +96,33 @@ class _NotificationsState extends State<Notifications> {
     _confirmation += request.receiver.name;
     _confirmation += "?";
     _subtitle = request.receiver.name;
-    _subtitle += getTranslate(context, "IS_INVITED_FOR");
+    _subtitle += getTranslate(
+        context,
+        request.status == null
+            ? "IS_INVITED_FOR"
+            : request.status == "ACCEPTED"
+                ? "HAS_ACCEPTED"
+                : "HAS_REFUSED");
     _subtitle += request.service.title;
 
     return Card(
-      color: Colors.orange[50],
+      color: Colors.white70,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListTile(
           title: Text(
-            request.dateTime,
+            request.dateTime.substring(0, 11) +
+                getTranslate(context, "A") +
+                request.dateTime.substring(11, 16),
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
           ),
-          subtitle: Text(_subtitle),
+          subtitle: Text(
+            _subtitle,
+            style: TextStyle(fontSize: 13),
+          ),
           leading: IconButton(
             icon: Icon(
-              Icons.delete,
+              Icons.delete_sweep,
               color: Colors.red,
             ),
             onPressed: () {
@@ -116,6 +131,7 @@ class _NotificationsState extends State<Notifications> {
           ),
           trailing: Icon(
             Icons.circle,
+            size: 15,
             color: request.status == null
                 ? Colors.grey
                 : request.status == "ACCEPTED"
@@ -133,7 +149,11 @@ class _NotificationsState extends State<Notifications> {
         appBar: AppBar(
           centerTitle: true,
           elevation: 0,
-          title: Text(getTranslate(context, "NOTIFICATIONS")),
+          actions: [
+            IconButton(
+                onPressed: () => _fetchRequests(), icon: Icon(Icons.refresh))
+          ],
+          title: Text(getTranslate(context, "REQUESTS")),
         ),
         body: _isLoading
             ? Center(child: circularProgressIndicator)

@@ -65,7 +65,8 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
         _hoolidays = _service.hoolidays;
         _breaks = _service.breakTimes;
         _selectedUser = _service.user;
-        _typeAheadController.text = _selectedUser.username;
+        _typeAheadController.text =
+            _selectedUser != null ? _selectedUser.username : null;
         setState(() {
           _isFetchingData = false;
         });
@@ -148,10 +149,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
               var res = await ServiceService().addUpdateService(
                   prefs.getString('token'),
                   widget.idService != null ? widget.idService : null,
-                  _service == null ||
-                          _service.user.username != _selectedUser.username
-                      ? _selectedUser.id
-                      : null,
+                  _selectedUser.id,
                   _title,
                   _description,
                   _avgTimePerClient.toInt().toString(),

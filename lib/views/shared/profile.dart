@@ -7,6 +7,8 @@ import 'package:issaf/language/language.dart';
 import 'package:issaf/models/user.dart';
 import 'package:issaf/redux/users/state.dart';
 import 'package:issaf/services/userService.dart';
+import 'package:issaf/views/shared/contactUs.dart';
+import 'package:issaf/views/shared/faq.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,6 +27,13 @@ class _ProfileState extends State<Profile> {
   bool _isLoading = false, _showPasswordInput = false;
   String _name, _mobile, _password, _email, _username, _region, _error;
   final _formKey = new GlobalKey<FormState>();
+  int _currentIndex = 0;
+
+  changePage(int n) {
+    setState(() {
+      _currentIndex = n;
+    });
+  }
 
   @override
   void initState() {
@@ -296,7 +305,8 @@ class _ProfileState extends State<Profile> {
                           width: 100,
                           child: Text(
                             getTranslate(context, role),
-                            style: TextStyle(fontSize: 14),
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ))
@@ -308,13 +318,16 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget showUrlToView(text) {
+  Widget showUrlToView(text, n) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 10.0, 12.0, 0.0),
-      child: Row(
-        children: [
-          Text(text),
-        ],
+      child: GestureDetector(
+        onTap: () => changePage(n),
+        child: Row(
+          children: [
+            Text(text),
+          ],
+        ),
       ),
     );
   }
@@ -473,8 +486,7 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget profile() {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -503,9 +515,9 @@ class _ProfileState extends State<Profile> {
               showLanguageChange(),
               showDivider(),
               showTitle(getTranslate(context, "ABOUT")),
-              showUrlToView(getTranslate(context, "GENERAL_CONDITIONS")),
-              showUrlToView(getTranslate(context, "PRIVACY_POLICY")),
-              showUrlToView(getTranslate(context, "CONTACT_US")),
+              showUrlToView(getTranslate(context, "FAQ"), 1),
+              showUrlToView(getTranslate(context, "PRIVACY_POLICY"), 2),
+              showUrlToView(getTranslate(context, "CONTACT_US"), 3),
               showDivider(),
               showLogout()
             ],
@@ -513,5 +525,16 @@ class _ProfileState extends State<Profile> {
         ),
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _currentIndex == 0
+        ? profile()
+        : _currentIndex == 1
+            ? Faq(changePage)
+            : _currentIndex == 2
+                ? profile()
+                : ContactUs(changePage);
   }
 }

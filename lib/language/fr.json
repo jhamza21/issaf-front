@@ -44,7 +44,7 @@
     "USER_PREFERENCES":"Préférence utilisateur",
     "ABOUT":"À propos",
     "LANGUAGE":"Langue",
-    "GENERAL_CONDITIONS":"Conditions générales d'utilisation",
+    "FAQ":"Questions fréquemment posées (FAQ)",
     "PRIVACY_POLICY":"Politique de confidentialité",
     "CONTACT_US":"Contactez-nous",
     "MY_TICKETS": "Mes tickets",
@@ -134,7 +134,7 @@
     "CLIENT_NUMBER":"Client nᵒ",
     "DONE":"Fait",
     "UNDONE":"Défait",
-    "BOOK_TICKET":"Réserver ce ticket",
+    "BOOK_TICKET":"Prendre ce ticket",
     "BOOK_TIKCET_MSG":"Je souhaite passer le :",
     "A":" à ",
     "TICKET_MSG":"Vous avez un rendez-vous",
@@ -183,5 +183,6 @@
     "INVALID_WORK_TIME":"Temps de travail invalide",
     "CONNECT_AS":"Se connecter en tant que",
     "NOTIFICATIONS":"Notifications",
-    "FILTER_WITH":"Filtrer par : "
+    "FILTER_WITH":"Filtrer par : ",
+    "TICKET_NOTICE": "NB : Le temps indiqué sur le ticket est approximatif, vous serez notifier avant deux tickets de votre tour ! "
 }

@@ -31,7 +31,9 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
-              primaryColor: Colors.orange[400], primarySwatch: Colors.orange),
+              scaffoldBackgroundColor: Colors.white,
+              primaryColor: Colors.orange[400],
+              primarySwatch: Colors.orange),
           locale: model.appLocale,
           supportedLocales: [
             const Locale('ar', 'TN'), // Arab

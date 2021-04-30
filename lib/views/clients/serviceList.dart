@@ -5,7 +5,7 @@ import 'package:issaf/constants.dart';
 import 'package:issaf/models/provider.dart';
 import 'package:issaf/models/service.dart';
 import 'package:issaf/services/serviceService.dart';
-import 'package:issaf/views/clients/serviceDetails.dart';
+import 'package:issaf/views/clients/bookTicket.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ServiceList extends StatefulWidget {
@@ -188,6 +188,6 @@ class _ServiceListState extends State<ServiceList> {
                           return serviceCard(_services[index]);
                         },
                       ))
-        : ServiceDetails(_selectedService, changePage);
+        : BookTicket(_selectedService, changePage);
   }
 }

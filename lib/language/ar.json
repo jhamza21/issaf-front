@@ -44,7 +44,7 @@
     "USER_PREFERENCES":"تفضيلات المستخدم",
     "ABOUT":"حول",
     "LANGUAGE":"اللغة",
-    "GENERAL_CONDITIONS":"شروط الخدمة",
+    "FAQ":"أسئلة مكررة",
     "PRIVACY_POLICY":"سياسة الخصوصية",
     "CONTACT_US":"اتصل بنا",
     "MY_TICKETS": "تذاكري",
@@ -183,7 +183,8 @@
     "INVALID_WORK_TIME":"وقت العمل غير صالح",
     "CONNECT_AS":"تسجيل الدخول ك",
     "NOTIFICATIONS":"إشعارات",
-    "FILTER_WITH":"تصفية حسب :"
+    "FILTER_WITH":"تصفية حسب :",
+    "TICKET_NOTICE": "ملاحظة: الوقت المشار إليه على التذكرة تقريبي ، سيتم إخطارك بتذكرتين قبل جولتك!"
 
 
 

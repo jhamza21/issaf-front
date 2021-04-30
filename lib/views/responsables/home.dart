@@ -20,7 +20,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int _currentIndex = 0;
-  bool _notificationOn = false;
+  int _notifications = 0;
 
   @override
   void initState() {
@@ -35,10 +35,18 @@ class _HomeState extends State<Home> {
           .fetchReceivedRequests(prefs.getString('token'));
       assert(response.statusCode == 200);
       final jsonData = json.decode(response.body);
+      List<Request> _requests = Request.listFromJson(jsonData);
+      _requests.removeWhere((element) => element.status != null);
       setState(() {
-        _notificationOn = Request.listFromJson(jsonData).length > 0;
+        _notifications = _requests.length;
       });
     } catch (e) {}
+  }
+
+  setNotifications(int number) {
+    setState(() {
+      _notifications = number;
+    });
   }
 
   void onTabTapped(int index) {
@@ -51,7 +59,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     final List<Widget> _children = [
       HandleService(),
-      Notifications(_fetchRequests),
+      Notifications(setNotifications),
       ServiceDetails(),
       Profile(widget.userState)
     ];
@@ -73,11 +81,11 @@ class _HomeState extends State<Home> {
               Stack(
                 children: [
                   Icon(
-                    Icons.notifications,
+                    Icons.transit_enterexit,
                     size: 20,
                     color: Colors.black,
                   ),
-                  _notificationOn
+                  _notifications > 0
                       ? new Positioned(
                           top: 0.0,
                           right: 0.0,

@@ -372,7 +372,7 @@ class _ProvidersListState extends State<ProvidersList> {
                               ? null
                               : (x) {
                                   setState(() {
-                                    _region = x;
+                                    _type = x;
                                   });
                                 },
                         ),

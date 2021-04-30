@@ -56,7 +56,7 @@ class ServiceService {
     var request = new http.MultipartRequest("POST", Uri.parse(url));
     if (image != null)
       request.files.add(await http.MultipartFile.fromPath('img', image.path));
-    if (userId != null) request.fields['user_id'] = userId.toString();
+    if (id != null) request.fields['user_id'] = userId.toString();
 
     if (title != null) request.fields['title'] = title;
     if (description != null) request.fields['description'] = description;
