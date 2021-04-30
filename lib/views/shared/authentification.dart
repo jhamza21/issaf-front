@@ -479,7 +479,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
       },
       icon: Icon(
         Icons.language,
-        color: Colors.black45,
+        color: Colors.black,
       ),
       underline: SizedBox(),
       items: Language.languageList()

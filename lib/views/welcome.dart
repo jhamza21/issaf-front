@@ -39,11 +39,18 @@ class _WelcomeState extends State<Welcome> {
   Widget showWelcomeText() {
     return Padding(
       padding: EdgeInsets.fromLTRB(0.0, 25.0, 0.0, 10.0),
-      child: Text(
-        getTranslate(context, "WELCOME_MSG"),
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
+      child: Container(
+        height: 25,
+        decoration:
+            new BoxDecoration(color: Colors.grey.shade200.withOpacity(0.8)),
+        child: Center(
+          child: Text(
+            getTranslate(context, "WELCOME_MSG"),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ),
     );
@@ -55,7 +62,7 @@ class _WelcomeState extends State<Welcome> {
       child: CircleAvatar(
         backgroundColor: Colors.transparent,
         radius: 48.0,
-        child: Image.asset('assets/images/logo.png'),
+        child: Image.asset('assets/images/logo2.png'),
       ),
     );
   }
@@ -67,7 +74,7 @@ class _WelcomeState extends State<Welcome> {
           ? Alignment.topRight
           : Alignment.topLeft,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(5, 15, 5, 0),
+        padding: const EdgeInsets.fromLTRB(5, 30, 5, 0),
         child: DropdownButton(
           onChanged: (Language lang) {
             appLanguage.changeLanguage(lang.languageCode);
