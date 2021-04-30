@@ -2,7 +2,7 @@
     package="com.example.issaf">
     <uses-permission android:name="android.permission.INTERNET" />
    <application
-        android:label="issaf"
+        android:label="E-SAFF"
         android:usesCleartextTraffic="true" 
         android:icon="@mipmap/ic_launcher">
         <activity
