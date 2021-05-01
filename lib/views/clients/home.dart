@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/redux/users/state.dart';
 import 'package:issaf/views/shared/profile.dart';
-import 'package:issaf/views/clients/providerList.dart';
-import 'package:issaf/views/clients/tickets/index.dart';
+import 'package:issaf/views/clients/providers.dart';
+import 'package:issaf/views/clients/tickets.dart';
 
 class Home extends StatefulWidget {
   final UserState userState;

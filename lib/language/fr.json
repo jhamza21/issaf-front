@@ -184,5 +184,8 @@
     "CONNECT_AS":"Se connecter en tant que",
     "NOTIFICATIONS":"Notifications",
     "FILTER_WITH":"Filtrer par : ",
-    "TICKET_NOTICE": "NB : Le temps indiqué sur le ticket est approximatif, vous serez notifier avant deux tickets de votre tour ! "
+    "TICKET_NOTICE": "NB : Le temps indiqué sur le ticket est approximatif, vous serez notifier avant deux tickets de votre tour ! ",
+    "RESCHEDULE":"Replanifier",
+    "TICKET_DONE":"Votre rendez vous c'est bien passé",
+    "TICKET_UNDONE":"Vous n'êtes pas venu(e) !"
 }

@@ -9,7 +9,9 @@ import 'package:issaf/services/ticketService.dart';
 class BookTicket extends StatefulWidget {
   final Service service;
   final void Function(int) callback;
-  BookTicket(this.service, this.callback);
+
+  final void Function() fetchTickets;
+  BookTicket(this.service, this.callback, this.fetchTickets);
   @override
   _BookTicketState createState() => _BookTicketState();
 }
@@ -61,17 +63,27 @@ class _BookTicketState extends State<BookTicket> {
         _error = null;
       });
       var prefs = await SharedPreferences.getInstance();
-      var res = await TicketService().addTicket(
-          prefs.getString('token'),
-          _selectedDate,
-          _selectedTime,
-          _times.indexOf(_selectedTime) + 1,
-          widget.service.id);
-      if (res.statusCode == 201) {
+      var res;
+      if (widget.fetchTickets != null)
+        res = await TicketService().reschudleTicket(
+            prefs.getString('token'),
+            _selectedDate,
+            _selectedTime,
+            _times.indexOf(_selectedTime) + 1,
+            widget.service.id);
+      else
+        res = await TicketService().addTicket(
+            prefs.getString('token'),
+            _selectedDate,
+            _selectedTime,
+            _times.indexOf(_selectedTime) + 1,
+            widget.service.id);
+      if (res.statusCode == 201 || res.statusCode == 200) {
         final snackBar = SnackBar(
           content: Text(getTranslate(context, "SUCCESS_ADD")),
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        if (widget.fetchTickets != null) widget.fetchTickets();
         widget.callback(0);
       } else {
         setState(() {
@@ -80,6 +92,7 @@ class _BookTicketState extends State<BookTicket> {
         });
       }
     } catch (e) {
+      print(e);
       setState(() {
         _isLoading = false;
         _error = getTranslate(context, "ERROR_SERVER");

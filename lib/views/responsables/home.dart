@@ -7,7 +7,7 @@ import 'package:issaf/redux/users/state.dart';
 import 'package:issaf/services/requestService.dart';
 import 'package:issaf/views/responsables/handleService.dart';
 import 'package:issaf/views/responsables/notifications.dart';
-import 'package:issaf/views/responsables/serviceDetails.dart';
+import 'package:issaf/views/responsables/service.dart';
 import 'package:issaf/views/shared/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

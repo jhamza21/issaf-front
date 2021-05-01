@@ -4,17 +4,32 @@ import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/ticket.dart';
 import 'package:issaf/services/ticketService.dart';
+import 'package:issaf/views/clients/bookTicket.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class TicketInProgress extends StatefulWidget {
+class Tickets extends StatefulWidget {
   @override
-  _TicketInProgressState createState() => _TicketInProgressState();
+  _TicketsState createState() => _TicketsState();
 }
 
-class _TicketInProgressState extends State<TicketInProgress> {
+class _TicketsState extends State<Tickets> {
   bool _isLoading = true;
   String _error;
   List<Ticket> _tickets;
+  int _currentIndex = 0;
+  Ticket _selectedTicket;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTickets();
+  }
+
+  void changePage(int i) {
+    setState(() {
+      _currentIndex = i;
+    });
+  }
 
   void _fetchTickets() async {
     try {
@@ -89,13 +104,7 @@ class _TicketInProgressState extends State<TicketInProgress> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchTickets();
-  }
-
-  Card ticketCard(Ticket ticket) {
+  Card ticketCardInProgress(Ticket ticket) {
     return Card(
       child: Column(
         children: [
@@ -108,10 +117,10 @@ class _TicketInProgressState extends State<TicketInProgress> {
                 Column(
                   children: [
                     Text(
-                      ticket.title,
+                      ticket.service.title,
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    Text(ticket.description),
+                    Text(ticket.service.description),
                   ],
                 ),
               ],
@@ -172,6 +181,13 @@ class _TicketInProgressState extends State<TicketInProgress> {
                     },
                     icon: Icon(Icons.remove_circle),
                     label: Text(getTranslate(context, "CANCEL"))),
+                TextButton.icon(
+                    onPressed: () {
+                      _selectedTicket = ticket;
+                      changePage(1);
+                    },
+                    icon: Icon(Icons.restore_rounded),
+                    label: Text(getTranslate(context, "RESCHEDULE"))),
               ],
             ),
           )
@@ -180,8 +196,44 @@ class _TicketInProgressState extends State<TicketInProgress> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Card ticketCardOld(Ticket ticket) {
+    return Card(
+      color: Colors.white70,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ListTile(
+          title: Text(
+            ticket.service.title,
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+          ),
+          subtitle: Text(
+            getTranslate(context,
+                ticket.status == "DONE" ? "TICKET_DONE" : "TICKET_UNDONE"),
+            style: TextStyle(fontSize: 13),
+          ),
+          leading: IconButton(
+              icon: Icon(
+                Icons.delete_rounded,
+                color: Colors.red,
+              ),
+              onPressed: () {
+                _deleteTicket(ticket.id);
+              }),
+          trailing: Icon(
+            Icons.circle,
+            size: 15,
+            color: ticket.status == "DONE" ? Colors.green : Colors.red,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget ticketsInProgress() {
+    List<Ticket> _ticketsInProgress = _tickets;
+    if (_ticketsInProgress != null)
+      _ticketsInProgress
+          .removeWhere((element) => element.status != "IN_PROGRESS");
     return _isLoading
         ? Center(child: circularProgressIndicator)
         : _error != null
@@ -191,16 +243,71 @@ class _TicketInProgressState extends State<TicketInProgress> {
                   style: TextStyle(fontSize: 14.0, color: Colors.red),
                 ),
               )
-            : _tickets.length == 0
+            : _ticketsInProgress.length == 0
                 ? Center(
                     child: Text(getTranslate(context, "NO_RESULT_FOUND")),
                   )
                 : ListView.builder(
                     padding: EdgeInsets.all(8),
-                    itemCount: _tickets.length,
+                    itemCount: _ticketsInProgress.length,
                     itemBuilder: (context, index) {
-                      return ticketCard(_tickets[index]);
+                      return ticketCardInProgress(_ticketsInProgress[index]);
                     },
                   );
+  }
+
+  Widget ticketsOld() {
+    List<Ticket> _ticketsOld = _tickets;
+    if (_ticketsOld != null)
+      _ticketsOld.removeWhere((element) => element.status == "IN_PROGRESS");
+    return _isLoading
+        ? Center(child: circularProgressIndicator)
+        : _error != null
+            ? Center(
+                child: Text(
+                  _error,
+                  style: TextStyle(fontSize: 14.0, color: Colors.red),
+                ),
+              )
+            : _ticketsOld.length == 0
+                ? Center(
+                    child: Text(getTranslate(context, "NO_RESULT_FOUND")),
+                  )
+                : ListView.builder(
+                    padding: EdgeInsets.all(8),
+                    itemCount: _ticketsOld.length,
+                    itemBuilder: (context, index) {
+                      return ticketCardOld(_ticketsOld[index]);
+                    },
+                  );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _currentIndex == 0
+        ? DefaultTabController(
+            length: 2,
+            child: Container(
+              decoration: mainBoxDecoration,
+              child: Scaffold(
+                appBar: AppBar(
+                  elevation: 0,
+                  title: Text(getTranslate(context, 'MY_TICKETS')),
+                  centerTitle: true,
+                  bottom: TabBar(
+                    indicatorColor: Colors.white,
+                    tabs: [
+                      Tab(child: Text(getTranslate(context, "IN_PROGRESS"))),
+                      Tab(child: Text(getTranslate(context, "HISTORICAL"))),
+                    ],
+                  ),
+                ),
+                body: TabBarView(
+                  children: [ticketsInProgress(), ticketsOld()],
+                ),
+              ),
+            ),
+          )
+        : BookTicket(_selectedTicket.service, changePage, _fetchTickets);
   }
 }

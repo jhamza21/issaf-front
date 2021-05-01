@@ -9,7 +9,7 @@ import 'package:issaf/services/provideService.dart';
 import 'package:issaf/services/requestService.dart';
 import 'package:issaf/views/providers/notifications.dart';
 import 'package:issaf/views/providers/addUpdateProvider.dart';
-import 'package:issaf/views/providers/serviceList.dart';
+import 'package:issaf/views/providers/services.dart';
 import 'package:issaf/views/shared/profile.dart';
 import 'package:issaf/views/waitingScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';

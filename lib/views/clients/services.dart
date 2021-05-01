@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ServiceList extends StatefulWidget {
   final Provider provider;
   final void Function(int) callback;
+
   ServiceList(this.provider, this.callback);
 
   @override
@@ -188,6 +189,6 @@ class _ServiceListState extends State<ServiceList> {
                           return serviceCard(_services[index]);
                         },
                       ))
-        : BookTicket(_selectedService, changePage);
+        : BookTicket(_selectedService, changePage, null);
   }
 }

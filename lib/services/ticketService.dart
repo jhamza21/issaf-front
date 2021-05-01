@@ -40,6 +40,23 @@ class TicketService {
         }));
   }
 
+  //add ticket
+  Future<http.Response> reschudleTicket(
+      String token, String date, String time, int number, int serviceId) async {
+    var url = URL_BACKEND + "tickets?api_token=" + token;
+    return await http.put(url,
+        headers: {
+          "content-type": "application/json",
+          "Accept": "application/json"
+        },
+        body: json.encode({
+          "date": date,
+          "time": time,
+          "number": number,
+          "service_id": serviceId,
+        }));
+  }
+
   //delete ticket
   Future<http.Response> deleteTicket(String token, int id) async {
     var url = URL_BACKEND + "tickets/" + id.toString() + "?api_token=" + token;

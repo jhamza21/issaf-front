@@ -6,7 +6,7 @@ import 'package:issaf/constants.dart';
 import 'package:issaf/models/provider.dart';
 import 'package:issaf/redux/users/state.dart';
 import 'package:issaf/services/provideService.dart';
-import 'package:issaf/views/clients/serviceList.dart';
+import 'package:issaf/views/clients/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProvidersList extends StatefulWidget {
