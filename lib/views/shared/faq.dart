@@ -36,7 +36,7 @@ class _FaqState extends State<Faq> {
         ),
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: Icon(Icons.navigate_before),
           onPressed: () => widget.callback(0),
         ),
       ),

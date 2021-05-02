@@ -537,7 +537,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
               onPressed: () {
                 widget.callback(0);
               },
-              icon: Icon(Icons.arrow_back)),
+              icon: Icon(Icons.navigate_before)),
           actions: [
             buildLanguageChange(),
           ],

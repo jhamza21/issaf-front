@@ -110,8 +110,9 @@ class _TicketsOldState extends State<TicketsOld> {
             style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
           ),
           subtitle: Text(
-            getTranslate(context,
-                ticket.status == "DONE" ? "TICKET_DONE" : "TICKET_UNDONE"),
+            ticket.date +
+                getTranslate(context, "A") +
+                ticket.time.substring(0, 5),
             style: TextStyle(fontSize: 13),
           ),
           leading: IconButton(

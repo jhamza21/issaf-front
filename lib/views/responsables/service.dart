@@ -41,7 +41,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
 
       if (response.statusCode != 200) {
         setState(() {
-          _error = getTranslate(context, "REGISTE_TO_SERVER");
+          _error = getTranslate(context, "REGISTER_TO_SERVER");
           _isLoading = false;
         });
         return;

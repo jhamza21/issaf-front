@@ -110,7 +110,7 @@ class _HomeState extends State<Home> {
                   Stack(
                     children: [
                       Icon(
-                        Icons.send,
+                        Icons.notifications,
                         size: 20,
                         color: Colors.black,
                       ),
@@ -119,7 +119,7 @@ class _HomeState extends State<Home> {
                               top: 0.0,
                               right: 0.0,
                               child: new Icon(
-                                Icons.brightness_1,
+                                Icons.circle,
                                 size: 10.0,
                                 color: Colors.red,
                               ),

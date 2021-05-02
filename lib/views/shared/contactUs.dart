@@ -116,7 +116,7 @@ class _ContactUsState extends State<ContactUs> {
         ),
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: Icon(Icons.navigate_before),
           onPressed: () => widget.callback(0),
         ),
       ),

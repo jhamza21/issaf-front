@@ -23,7 +23,6 @@ class ProviderService {
       String type,
       String title,
       String description,
-      String address,
       String email,
       String mobile,
       String siteWeb,
@@ -40,7 +39,6 @@ class ProviderService {
     request.fields['type'] = type;
     request.fields['title'] = title;
     request.fields['description'] = description;
-    request.fields['address'] = address;
     request.fields['email'] = email;
     request.fields['mobile'] = mobile;
     request.fields['region'] = region;

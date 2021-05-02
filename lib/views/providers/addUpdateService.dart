@@ -153,7 +153,6 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                   _title,
                   _description,
                   _avgTimePerClient.toInt().toString(),
-                  "0",
                   _workStartTime,
                   _workEndTime,
                   _openDays,
@@ -671,7 +670,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                   : _service.title),
           centerTitle: true,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: Icon(Icons.navigate_before),
             onPressed: () => widget.callback(0),
           ),
         ),

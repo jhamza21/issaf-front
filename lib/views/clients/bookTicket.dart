@@ -223,7 +223,7 @@ class _BookTicketState extends State<BookTicket> {
           elevation: 0.0,
           title: Text(widget.service.title),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: Icon(Icons.navigate_before),
             onPressed: () => widget.callback(0),
           ),
         ),

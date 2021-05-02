@@ -167,7 +167,6 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
                       _type,
                       _title,
                       _description,
-                      ".........",
                       _email,
                       _mobile,
                       _siteWeb,

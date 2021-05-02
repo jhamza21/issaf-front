@@ -14,7 +14,8 @@ class HandleService extends StatefulWidget {
 class _HandleServiceState extends State<HandleService> {
   bool _isLoading = true;
   String _error;
-  int _counter;
+  Service _service;
+  int _counter = 0;
 
   @override
   void initState() {
@@ -28,7 +29,7 @@ class _HandleServiceState extends State<HandleService> {
       var response =
           await ServiceService().getServiceByAdmin(prefs.getString('token'));
       if (response.statusCode == 404) {
-        _error = getTranslate(context, "REGISTE_TO_SERVER");
+        _error = getTranslate(context, "REGISTER_TO_SERVER");
         setState(() {
           _isLoading = false;
         });
@@ -36,7 +37,7 @@ class _HandleServiceState extends State<HandleService> {
       }
       assert(response.statusCode == 200);
       var jsonData = json.decode(response.body);
-      Service _service = Service.fromJson(jsonData);
+      _service = Service.fromJson(jsonData);
       _counter = _service.counter;
       setState(() {
         _isLoading = false;
@@ -49,13 +50,95 @@ class _HandleServiceState extends State<HandleService> {
     }
   }
 
+  void _incrementCounter(String status) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      var prefs = await SharedPreferences.getInstance();
+      final response = await ServiceService()
+          .incrementCounter(prefs.getString('token'), _service.id, status);
+      assert(response.statusCode == 200);
+      setState(() {
+        _counter++;
+        _isLoading = false;
+      });
+    } catch (error) {
+      final snackBar = SnackBar(
+        content: Text("INCREMENT_COUNTER_FAIL"),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _resetCounter(int id) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text("RESET_COUNTER"),
+          content: new Text("Etes vous sur de reseter le compteur du E-SAFF ?"),
+          actions: <Widget>[
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "NO")),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "YES")),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  var prefs = await SharedPreferences.getInstance();
+                  final response = await ServiceService()
+                      .resetCounter(prefs.getString('token'), id);
+                  assert(response.statusCode == 200);
+                  final snackBar = SnackBar(
+                    content: Text("RESET_SUCCESS"),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  initializeServiceData();
+                  setState(() {
+                    _isLoading = false;
+                  });
+                } catch (error) {
+                  final snackBar = SnackBar(
+                    content: Text("RESET_FAIL"),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  setState(() {
+                    _isLoading = false;
+                  });
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        // actions: [IconButton(onPressed: () {}, icon: Icon(Icons.qr_code))],
+        leading: IconButton(
+          icon: Icon(Icons.repeat),
+          onPressed: () {
+            _resetCounter(_service.id);
+          },
+        ),
         title: Text(getTranslate(context, "HOME")),
       ),
       body: Center(
@@ -88,13 +171,15 @@ class _HandleServiceState extends State<HandleService> {
                             // ignore: deprecated_member_use
                             child: RaisedButton.icon(
                               elevation: 5.0,
-                              icon: Icon(Icons.done),
+                              icon: Icon(Icons.dangerous),
                               shape: new RoundedRectangleBorder(
                                   borderRadius:
                                       new BorderRadius.circular(30.0)),
-                              color: Colors.green[900],
-                              label: Text(getTranslate(context, "DONE")),
-                              onPressed: () {},
+                              color: Colors.red[900],
+                              label: Text(getTranslate(context, "UNDONE")),
+                              onPressed: () {
+                                _incrementCounter("UNDONE");
+                              },
                             ),
                           ),
                           ButtonTheme(
@@ -102,17 +187,32 @@ class _HandleServiceState extends State<HandleService> {
                             // ignore: deprecated_member_use
                             child: RaisedButton.icon(
                               elevation: 5.0,
-                              icon: Icon(Icons.dangerous),
+                              icon: Icon(Icons.done),
                               shape: new RoundedRectangleBorder(
                                   borderRadius:
                                       new BorderRadius.circular(30.0)),
-                              color: Colors.red[900],
-                              label: Text(getTranslate(context, "UNDONE")),
-                              onPressed: () {},
+                              color: Colors.green[900],
+                              label: Text(getTranslate(context, "DONE")),
+                              onPressed: () {
+                                _incrementCounter("DONE");
+                              },
                             ),
                           ),
                         ],
-                      )
+                      ),
+                      ButtonTheme(
+                        minWidth: 150,
+                        // ignore: deprecated_member_use
+                        child: RaisedButton.icon(
+                          elevation: 5.0,
+                          icon: Icon(Icons.navigate_before),
+                          shape: new RoundedRectangleBorder(
+                              borderRadius: new BorderRadius.circular(30.0)),
+                          color: Colors.grey,
+                          label: Text("Décrémenter"),
+                          onPressed: () {},
+                        ),
+                      ),
                     ],
                   ),
       ),

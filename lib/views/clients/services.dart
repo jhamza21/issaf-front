@@ -172,7 +172,7 @@ class _ServiceListState extends State<ServiceList> {
               title:
                   Text(widget.provider.title, style: TextStyle(fontSize: 17)),
               leading: IconButton(
-                icon: Icon(Icons.arrow_back),
+                icon: Icon(Icons.navigate_before),
                 onPressed: () => widget.callback(0),
               ),
             ),

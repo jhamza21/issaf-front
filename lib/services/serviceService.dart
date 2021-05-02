@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
@@ -41,7 +42,6 @@ class ServiceService {
       String title,
       String description,
       String avgTimePerClient,
-      String counter,
       String workStartTime,
       String workEndTime,
       List<String> openDays,
@@ -56,14 +56,14 @@ class ServiceService {
     var request = new http.MultipartRequest("POST", Uri.parse(url));
     if (image != null)
       request.files.add(await http.MultipartFile.fromPath('img', image.path));
-    if (id != null) request.fields['user_id'] = userId.toString();
+    request.fields['user_id'] = userId.toString();
 
     if (title != null) request.fields['title'] = title;
     if (description != null) request.fields['description'] = description;
 
     if (avgTimePerClient != null)
       request.fields['avg_time_per_client'] = avgTimePerClient;
-    if (counter != null) request.fields['counter'] = counter;
+    if (id == null) request.fields['counter'] = "1";
     if (workStartTime != null)
       request.fields['work_start_time'] = workStartTime;
     if (workEndTime != null) request.fields['work_end_time'] = workEndTime;
@@ -84,5 +84,32 @@ class ServiceService {
             breaks[i].toString();
     }
     return await request.send();
+  }
+
+//RESET SERVICE COUNTER
+  Future<http.Response> resetCounter(String token, int id) async {
+    var url = URL_BACKEND + "services/" + id.toString() + "?api_token=" + token;
+    return await http.put(url,
+        headers: {
+          "content-type": "application/json",
+          "Accept": "application/json"
+        },
+        body: json.encode({"counter": 1}));
+  }
+
+//INCREMENT COUNTER
+  Future<http.Response> incrementCounter(
+      String token, int id, String status) async {
+    var url = URL_BACKEND +
+        "incrementService/" +
+        id.toString() +
+        "?api_token=" +
+        token;
+    return await http.put(url,
+        headers: {
+          "content-type": "application/json",
+          "Accept": "application/json"
+        },
+        body: json.encode({"ticket_status": status}));
   }
 }
