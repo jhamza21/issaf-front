@@ -15,7 +15,7 @@ class TicketsInProgress extends StatefulWidget {
 }
 
 class _TicketsInProgressState extends State<TicketsInProgress> {
-  bool _isLoading = true;
+  bool _isLoading = true, _isHandlingTicket = false;
   String _error;
   List<Ticket> _tickets;
   Ticket _selectedTicket;
@@ -80,30 +80,30 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
             new FlatButton(
               child: new Text(getTranslate(context, "YES")),
               onPressed: () async {
-                Navigator.of(context).pop();
                 try {
                   setState(() {
-                    _isLoading = true;
+                    _isHandlingTicket = true;
                   });
+                  Navigator.of(context).pop();
                   var prefs = await SharedPreferences.getInstance();
                   final response = await TicketService()
                       .deleteTicket(prefs.getString('token'), id);
                   assert(response.statusCode == 204);
-                  _fetchTickets();
+                  _tickets.removeWhere((element) => element.id == id);
                   final snackBar = SnackBar(
                     content: Text(getTranslate(context, "SUCCESS_DELETE")),
                   );
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   setState(() {
-                    _isLoading = false;
+                    _isHandlingTicket = false;
                   });
                 } catch (error) {
                   final snackBar = SnackBar(
-                    content: Text(getTranslate(context, "FAIL_DELETE")),
+                    content: Text(getTranslate(context, "ERROR_SERVER")),
                   );
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   setState(() {
-                    _isLoading = false;
+                    _isHandlingTicket = false;
                   });
                 }
               },
@@ -186,16 +186,18 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton.icon(
-                    onPressed: () {
-                      _deleteTicket(ticket.id);
-                    },
+                    onPressed: _isHandlingTicket
+                        ? null
+                        : () => _deleteTicket(ticket.id),
                     icon: Icon(Icons.remove_circle),
                     label: Text(getTranslate(context, "CANCEL"))),
                 TextButton.icon(
-                    onPressed: () {
-                      _selectedTicket = ticket;
-                      changePage(1);
-                    },
+                    onPressed: _isHandlingTicket
+                        ? null
+                        : () {
+                            _selectedTicket = ticket;
+                            changePage(1);
+                          },
                     icon: Icon(Icons.restore_rounded),
                     label: Text(getTranslate(context, "RESCHEDULE"))),
               ],

@@ -432,9 +432,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
                   ? getTranslate(context, 'LOGIN').toUpperCase()
                   : getTranslate(context, 'SIGN_UP').toUpperCase(),
               style: new TextStyle(fontSize: 20.0, color: Colors.orange[100])),
-          onPressed: () {
-            validateAndSubmit();
-          },
+          onPressed: _isLoading ? null : () => validateAndSubmit(),
         ),
       ),
     );

@@ -15,7 +15,7 @@ class Notifications extends StatefulWidget {
 
 class _NotificationsState extends State<Notifications> {
   List<Request> _requests = [];
-  bool _isLoading = true;
+  bool _isLoading = true, _isHandlingNotif = false;
 
   @override
   void initState() {
@@ -64,21 +64,30 @@ class _NotificationsState extends State<Notifications> {
               child: new Text(getTranslate(context, "YES")),
               onPressed: () async {
                 try {
+                  setState(() {
+                    _isHandlingNotif = true;
+                  });
+                  Navigator.of(context).pop();
                   var prefs = await SharedPreferences.getInstance();
                   var res = await RequestService()
                       .deleteRequest(prefs.getString('token'), id);
                   assert(res.statusCode == 204);
+                  _requests.removeWhere((element) => element.id == id);
+                  widget.callback(_requests.length);
                   final snackBar = SnackBar(
                     content: Text(getTranslate(context, "SUCCESS_DELETE")),
                   );
-                  await _fetchRequests();
-                  widget.callback(_requests.length);
-                  Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  setState(() {
+                    _isHandlingNotif = false;
+                  });
                 } catch (e) {
+                  setState(() {
+                    _isHandlingNotif = false;
+                  });
                   Navigator.of(context).pop();
                   final snackBar = SnackBar(
-                    content: Text(getTranslate(context, "FAIL_DELETE")),
+                    content: Text(getTranslate(context, "ERROR_SERVER")),
                   );
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 }
@@ -125,9 +134,9 @@ class _NotificationsState extends State<Notifications> {
               Icons.delete_sweep,
               color: Colors.red,
             ),
-            onPressed: () {
-              _deleteNotification(request.id, _confirmation);
-            },
+            onPressed: _isHandlingNotif
+                ? null
+                : () => _deleteNotification(request.id, _confirmation),
           ),
           trailing: Icon(
             Icons.circle,
@@ -151,7 +160,8 @@ class _NotificationsState extends State<Notifications> {
           elevation: 0,
           actions: [
             IconButton(
-                onPressed: () => _fetchRequests(), icon: Icon(Icons.refresh))
+                onPressed: _isLoading ? null : () => _fetchRequests(),
+                icon: Icon(Icons.refresh))
           ],
           title: Text(getTranslate(context, "REQUESTS")),
         ),

@@ -138,52 +138,55 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
 
   Widget showSaveService() {
     return TextButton.icon(
-        onPressed: () async {
-          if (!_isLoading && validateAndSave())
-            try {
-              setState(() {
-                _error = null;
-                _isLoading = true;
-              });
-              var prefs = await SharedPreferences.getInstance();
-              var res = await ServiceService().addUpdateService(
-                  prefs.getString('token'),
-                  widget.idService != null ? widget.idService : null,
-                  _selectedUser.id,
-                  _title,
-                  _description,
-                  _avgTimePerClient.toInt().toString(),
-                  _workStartTime,
-                  _workEndTime,
-                  _openDays,
-                  _hoolidays,
-                  _breaks,
-                  _selectedImage);
-              if (res.statusCode == 201 || res.statusCode == 200) {
-                final snackBar = SnackBar(
-                  content: Text(getTranslate(
-                      context,
-                      res.statusCode == 201
-                          ? "SUCCESS_ADD"
-                          : "SUCCESS_UPDATE")),
-                );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                widget.fetchServices();
-                widget.callback(0);
-              } else {
-                final jsonData = json.decode(await res.stream.bytesToString());
-                setState(() {
-                  _isLoading = false;
-                  _error = getTranslate(context, jsonData["error"]);
-                });
-              }
-            } catch (e) {
-              setState(() {
-                _isLoading = false;
-                _error = getTranslate(context, "ERROR_SERVER");
-              });
-            }
-        },
+        onPressed: _isLoading
+            ? null
+            : () async {
+                if (!_isLoading && validateAndSave())
+                  try {
+                    setState(() {
+                      _error = null;
+                      _isLoading = true;
+                    });
+                    var prefs = await SharedPreferences.getInstance();
+                    var res = await ServiceService().addUpdateService(
+                        prefs.getString('token'),
+                        widget.idService != null ? widget.idService : null,
+                        _selectedUser.id,
+                        _title,
+                        _description,
+                        _avgTimePerClient.toInt().toString(),
+                        _workStartTime,
+                        _workEndTime,
+                        _openDays,
+                        _hoolidays,
+                        _breaks,
+                        _selectedImage);
+                    if (res.statusCode == 201 || res.statusCode == 200) {
+                      final snackBar = SnackBar(
+                        content: Text(getTranslate(
+                            context,
+                            res.statusCode == 201
+                                ? "SUCCESS_ADD"
+                                : "SUCCESS_UPDATE")),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      widget.fetchServices();
+                      widget.callback(0);
+                    } else {
+                      final jsonData =
+                          json.decode(await res.stream.bytesToString());
+                      setState(() {
+                        _isLoading = false;
+                        _error = getTranslate(context, jsonData["error"]);
+                      });
+                    }
+                  } catch (e) {
+                    setState(() {
+                      _isLoading = false;
+                      _error = getTranslate(context, "ERROR_SERVER");
+                    });
+                  }
+              },
         icon: _isLoading ? circularProgressIndicator : Icon(Icons.save),
         label: Text(getTranslate(context, "SAVE_CHANGES")));
   }

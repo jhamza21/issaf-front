@@ -153,57 +153,59 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
   Widget showSaveProvider() {
     return checkProviderChanged(widget.provider)
         ? TextButton.icon(
-            onPressed: () async {
-              if (!_isLoading && validateAndSave())
-                try {
-                  setState(() {
-                    _error = null;
-                    _isLoading = true;
-                  });
-                  var prefs = await SharedPreferences.getInstance();
-                  var res = await ProviderService().addUpdateProvider(
-                      prefs.getString('token'),
-                      widget.provider != null ? widget.provider.id : null,
-                      _type,
-                      _title,
-                      _description,
-                      _email,
-                      _mobile,
-                      _siteWeb,
-                      _region,
-                      _selectedImage);
-                  if (res.statusCode == 201 || res.statusCode == 200) {
-                    ModelProvider.Provider _resProvider =
-                        ModelProvider.Provider.fromJson(
-                            json.decode(await res.stream.bytesToString()));
-                    _selectedImage = null;
-                    widget.callback(_resProvider);
-                    setState(() {
-                      _isLoading = false;
-                    });
-                    final snackBar = SnackBar(
-                      content: Text(getTranslate(
-                          context,
-                          res.statusCode == 200
-                              ? "SUCCESS_UPDATE"
-                              : "SUCCESS_ADD")),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  } else {
-                    final jsonData =
-                        json.decode(await res.stream.bytesToString());
-                    setState(() {
-                      _isLoading = false;
-                      _error = getTranslate(context, jsonData["error"]);
-                    });
-                  }
-                } catch (e) {
-                  setState(() {
-                    _isLoading = false;
-                    _error = getTranslate(context, "ERROR_SERVER");
-                  });
-                }
-            },
+            onPressed: _isLoading
+                ? null
+                : () async {
+                    if (!_isLoading && validateAndSave())
+                      try {
+                        setState(() {
+                          _error = null;
+                          _isLoading = true;
+                        });
+                        var prefs = await SharedPreferences.getInstance();
+                        var res = await ProviderService().addUpdateProvider(
+                            prefs.getString('token'),
+                            widget.provider != null ? widget.provider.id : null,
+                            _type,
+                            _title,
+                            _description,
+                            _email,
+                            _mobile,
+                            _siteWeb,
+                            _region,
+                            _selectedImage);
+                        if (res.statusCode == 201 || res.statusCode == 200) {
+                          ModelProvider.Provider _resProvider =
+                              ModelProvider.Provider.fromJson(json
+                                  .decode(await res.stream.bytesToString()));
+                          _selectedImage = null;
+                          widget.callback(_resProvider);
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          final snackBar = SnackBar(
+                            content: Text(getTranslate(
+                                context,
+                                res.statusCode == 200
+                                    ? "SUCCESS_UPDATE"
+                                    : "SUCCESS_ADD")),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        } else {
+                          final jsonData =
+                              json.decode(await res.stream.bytesToString());
+                          setState(() {
+                            _isLoading = false;
+                            _error = getTranslate(context, jsonData["error"]);
+                          });
+                        }
+                      } catch (e) {
+                        setState(() {
+                          _isLoading = false;
+                          _error = getTranslate(context, "ERROR_SERVER");
+                        });
+                      }
+                  },
             icon: _isLoading ? circularProgressIndicator : Icon(Icons.save),
             label: Text(getTranslate(context, "SAVE_CHANGES")))
         : SizedBox.shrink();

@@ -181,9 +181,7 @@ class _BookTicketState extends State<BookTicket> {
           color: Colors.orange[600],
           label: Text(getTranslate(context, "BOOK_TICKET"),
               style: new TextStyle(fontSize: 15.0, color: Colors.black)),
-          onPressed: () {
-            _getTicket();
-          },
+          onPressed: _isLoading ? null : () => _getTicket(),
         ),
       ),
     );

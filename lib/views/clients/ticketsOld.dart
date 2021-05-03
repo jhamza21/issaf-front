@@ -12,7 +12,7 @@ class TicketsOld extends StatefulWidget {
 }
 
 class _TicketsOldState extends State<TicketsOld> {
-  bool _isLoading = true;
+  bool _isLoading = true, _isHandlingTicket = false;
   String _error;
   List<Ticket> _tickets;
 
@@ -65,30 +65,30 @@ class _TicketsOldState extends State<TicketsOld> {
             new FlatButton(
               child: new Text(getTranslate(context, "YES")),
               onPressed: () async {
-                Navigator.of(context).pop();
                 try {
                   setState(() {
-                    _isLoading = true;
+                    _isHandlingTicket = true;
                   });
+                  Navigator.of(context).pop();
                   var prefs = await SharedPreferences.getInstance();
                   final response = await TicketService()
                       .deleteTicket(prefs.getString('token'), id);
                   assert(response.statusCode == 204);
-                  _fetchTickets();
+                  _tickets.removeWhere((element) => element.id == id);
                   final snackBar = SnackBar(
                     content: Text(getTranslate(context, "SUCCESS_DELETE")),
                   );
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   setState(() {
-                    _isLoading = false;
+                    _isHandlingTicket = false;
                   });
                 } catch (error) {
                   final snackBar = SnackBar(
-                    content: Text(getTranslate(context, "FAIL_DELETE")),
+                    content: Text(getTranslate(context, "ERROR_SERVER")),
                   );
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   setState(() {
-                    _isLoading = false;
+                    _isHandlingTicket = false;
                   });
                 }
               },
@@ -116,13 +116,13 @@ class _TicketsOldState extends State<TicketsOld> {
             style: TextStyle(fontSize: 13),
           ),
           leading: IconButton(
-              icon: Icon(
-                Icons.delete_rounded,
-                color: Colors.red,
-              ),
-              onPressed: () {
-                _deleteTicket(ticket.id);
-              }),
+            icon: Icon(
+              Icons.delete_rounded,
+              color: Colors.red,
+            ),
+            onPressed:
+                _isHandlingTicket ? null : () => _deleteTicket(ticket.id),
+          ),
           trailing: Icon(
             Icons.circle,
             size: 15,

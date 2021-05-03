@@ -15,7 +15,7 @@ class Notifications extends StatefulWidget {
 
 class _NotificationsState extends State<Notifications> {
   List<Request> _requests = [];
-  bool _isLoading = true;
+  bool _isLoading = true, _isHandlingRequest = false;
 
   @override
   void initState() {
@@ -65,19 +65,28 @@ class _NotificationsState extends State<Notifications> {
               child: new Text(getTranslate(context, "YES")),
               onPressed: () async {
                 try {
+                  setState(() {
+                    _isHandlingRequest = true;
+                  });
+                  Navigator.of(context).pop();
                   var prefs = await SharedPreferences.getInstance();
                   var res = await RequestService()
                       .refuseRequest(prefs.getString('token'), id);
                   assert(res.statusCode == 200);
+                  _requests.removeWhere((element) => element.id == id);
+                  widget.callback(_requests.length);
                   final snackBar = SnackBar(
                     content:
                         Text(getTranslate(context, "SUCCESS_REFUSE_REQUEST")),
                   );
-                  Navigator.of(context).pop();
-                  await _fetchRequests();
-                  widget.callback(_requests.length);
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  setState(() {
+                    _isHandlingRequest = false;
+                  });
                 } catch (e) {
+                  setState(() {
+                    _isHandlingRequest = false;
+                  });
                   Navigator.of(context).pop();
                   final snackBar = SnackBar(
                     content: Text(getTranslate(context, "ERROR_SERVER")),
@@ -112,19 +121,29 @@ class _NotificationsState extends State<Notifications> {
               child: new Text(getTranslate(context, "YES")),
               onPressed: () async {
                 try {
+                  setState(() {
+                    _isHandlingRequest = true;
+                  });
+                  Navigator.of(context).pop();
                   var prefs = await SharedPreferences.getInstance();
                   var res = await RequestService()
                       .acceptRequest(prefs.getString('token'), id);
                   assert(res.statusCode == 200);
+
+                  _requests.removeWhere((element) => element.id == id);
+                  widget.callback(_requests.length);
                   final snackBar = SnackBar(
                     content:
                         Text(getTranslate(context, "SUCCESS_ACCEPT_REQUEST")),
                   );
-                  Navigator.of(context).pop();
-                  await _fetchRequests();
-                  widget.callback(_requests.length);
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  setState(() {
+                    _isHandlingRequest = false;
+                  });
                 } catch (e) {
+                  setState(() {
+                    _isHandlingRequest = false;
+                  });
                   Navigator.of(context).pop();
                   final snackBar = SnackBar(
                     content: Text(getTranslate(context, "ERROR_SERVER")),
@@ -165,18 +184,18 @@ class _NotificationsState extends State<Notifications> {
                     Icons.remove_circle,
                     color: Colors.red[600],
                   ),
-                  onPressed: () {
-                    _refuseRequest(request.id);
-                  },
+                  onPressed: _isHandlingRequest
+                      ? null
+                      : () => _refuseRequest(request.id),
                 ),
                 IconButton(
                   icon: Icon(
                     Icons.check_circle,
                     color: Colors.green[800],
                   ),
-                  onPressed: () {
-                    _acceptRequest(request.id);
-                  },
+                  onPressed: _isHandlingRequest
+                      ? null
+                      : () => _acceptRequest(request.id),
                 ),
               ],
             ),
@@ -192,7 +211,8 @@ class _NotificationsState extends State<Notifications> {
           title: Text(getTranslate(context, "REQUESTS")),
           actions: [
             IconButton(
-                onPressed: () => _fetchRequests(), icon: Icon(Icons.refresh))
+                onPressed: _isLoading ? null : () => _fetchRequests(),
+                icon: Icon(Icons.refresh))
           ],
           elevation: 0,
         ),
