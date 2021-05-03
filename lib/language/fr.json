@@ -187,5 +187,10 @@
     "TICKET_NOTICE": "NB : Le temps indiqué sur le ticket est approximatif, vous serez notifier avant deux tickets de votre tour ! ",
     "RESCHEDULE":"Replanifier",
     "TICKET_DONE":"Votre rendez vous c'est bien passé",
-    "TICKET_UNDONE":"Vous n'êtes pas venu(e) !"
+    "TICKET_UNDONE":"Vous n'êtes pas venu(e) !",
+    "RESET_COUNTER":"Réinitialisation du compteur ?",
+    "RESET_COUNTER_CONFIRMATION":"Etes vous sûr de réinitialiser le compteur ?",
+    "DECREMENT_COUNTER":"Décrémentation du compteur ?",
+    "DECREMENT_COUNTER_CONFIRMATION":"Etes vous sûr de décrémenter le compteur ?",
+    "DECREMENT":"Décrémenter"
 }

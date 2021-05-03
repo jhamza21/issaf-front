@@ -87,14 +87,14 @@ class ServiceService {
   }
 
 //RESET SERVICE COUNTER
-  Future<http.Response> resetCounter(String token, int id) async {
+  Future<http.Response> updateCounter(String token, int id, int number) async {
     var url = URL_BACKEND + "services/" + id.toString() + "?api_token=" + token;
     return await http.put(url,
         headers: {
           "content-type": "application/json",
           "Accept": "application/json"
         },
-        body: json.encode({"counter": 1}));
+        body: json.encode({"counter": number}));
   }
 
 //INCREMENT COUNTER

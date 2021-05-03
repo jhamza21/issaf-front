@@ -13,6 +13,7 @@ class HandleService extends StatefulWidget {
 
 class _HandleServiceState extends State<HandleService> {
   bool _isLoading = true;
+  bool _isCounterLoading = false;
   String _error;
   Service _service;
   int _counter = 0;
@@ -53,7 +54,7 @@ class _HandleServiceState extends State<HandleService> {
   void _incrementCounter(String status) async {
     try {
       setState(() {
-        _isLoading = true;
+        _isCounterLoading = true;
       });
       var prefs = await SharedPreferences.getInstance();
       final response = await ServiceService()
@@ -61,15 +62,15 @@ class _HandleServiceState extends State<HandleService> {
       assert(response.statusCode == 200);
       setState(() {
         _counter++;
-        _isLoading = false;
+        _isCounterLoading = false;
       });
     } catch (error) {
       final snackBar = SnackBar(
-        content: Text("INCREMENT_COUNTER_FAIL"),
+        content: Text(getTranslate(context, "ERROR_SERVER")),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       setState(() {
-        _isLoading = false;
+        _isCounterLoading = false;
       });
     }
   }
@@ -79,8 +80,9 @@ class _HandleServiceState extends State<HandleService> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: new Text("RESET_COUNTER"),
-          content: new Text("Etes vous sur de reseter le compteur du E-SAFF ?"),
+          title: new Text(getTranslate(context, "RESET_COUNTER")),
+          content:
+              new Text(getTranslate(context, "RESET_COUNTER_CONFIRMATION")),
           actions: <Widget>[
             // ignore: deprecated_member_use
             new FlatButton(
@@ -96,27 +98,75 @@ class _HandleServiceState extends State<HandleService> {
                 Navigator.of(context).pop();
                 try {
                   setState(() {
-                    _isLoading = true;
+                    _isCounterLoading = true;
                   });
                   var prefs = await SharedPreferences.getInstance();
                   final response = await ServiceService()
-                      .resetCounter(prefs.getString('token'), id);
+                      .updateCounter(prefs.getString('token'), id, 1);
                   assert(response.statusCode == 200);
-                  final snackBar = SnackBar(
-                    content: Text("RESET_SUCCESS"),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  initializeServiceData();
                   setState(() {
-                    _isLoading = false;
+                    _counter = 1;
+                    _isCounterLoading = false;
                   });
                 } catch (error) {
                   final snackBar = SnackBar(
-                    content: Text("RESET_FAIL"),
+                    content: Text(getTranslate(context, "ERROR_SERVER")),
                   );
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   setState(() {
-                    _isLoading = false;
+                    _isCounterLoading = false;
+                  });
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _decrementCounter(int id) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text(getTranslate(context, "DECREMENT_COUNTER")),
+          content:
+              new Text(getTranslate(context, "DECREMENT_COUNTER_CONFIRMATION")),
+          actions: <Widget>[
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "NO")),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "YES")),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  setState(() {
+                    _isCounterLoading = true;
+                  });
+                  var prefs = await SharedPreferences.getInstance();
+                  final response = await ServiceService().updateCounter(
+                      prefs.getString('token'),
+                      id,
+                      _counter == 1 ? 1 : _counter - 1);
+                  assert(response.statusCode == 200);
+                  setState(() {
+                    _counter--;
+                    _isCounterLoading = false;
+                  });
+                } catch (error) {
+                  final snackBar = SnackBar(
+                    content: Text(getTranslate(context, "ERROR_SERVER")),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  setState(() {
+                    _isCounterLoading = false;
                   });
                 }
               },
@@ -135,9 +185,9 @@ class _HandleServiceState extends State<HandleService> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.repeat),
-          onPressed: () {
-            _resetCounter(_service.id);
-          },
+          onPressed: _isCounterLoading || _isLoading
+              ? null
+              : () => _resetCounter(_service.id),
         ),
         title: Text(getTranslate(context, "HOME")),
       ),
@@ -155,11 +205,13 @@ class _HandleServiceState extends State<HandleService> {
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                      Text(
-                        _counter.toString(),
-                        style: TextStyle(
-                            fontSize: 80, fontWeight: FontWeight.bold),
-                      ),
+                      _isCounterLoading
+                          ? circularProgressIndicator
+                          : Text(
+                              _counter.toString(),
+                              style: TextStyle(
+                                  fontSize: 80, fontWeight: FontWeight.bold),
+                            ),
                       SizedBox(
                         height: 40,
                       ),
@@ -177,9 +229,9 @@ class _HandleServiceState extends State<HandleService> {
                                       new BorderRadius.circular(30.0)),
                               color: Colors.red[900],
                               label: Text(getTranslate(context, "UNDONE")),
-                              onPressed: () {
-                                _incrementCounter("UNDONE");
-                              },
+                              onPressed: _isCounterLoading
+                                  ? null
+                                  : () => _incrementCounter("UNDONE"),
                             ),
                           ),
                           ButtonTheme(
@@ -193,9 +245,9 @@ class _HandleServiceState extends State<HandleService> {
                                       new BorderRadius.circular(30.0)),
                               color: Colors.green[900],
                               label: Text(getTranslate(context, "DONE")),
-                              onPressed: () {
-                                _incrementCounter("DONE");
-                              },
+                              onPressed: _isCounterLoading
+                                  ? null
+                                  : () => _incrementCounter("DONE"),
                             ),
                           ),
                         ],
@@ -209,8 +261,10 @@ class _HandleServiceState extends State<HandleService> {
                           shape: new RoundedRectangleBorder(
                               borderRadius: new BorderRadius.circular(30.0)),
                           color: Colors.grey,
-                          label: Text("Décrémenter"),
-                          onPressed: () {},
+                          label: Text(getTranslate(context, "DECREMENT")),
+                          onPressed: _isCounterLoading
+                              ? null
+                              : () => _decrementCounter(_service.id),
                         ),
                       ),
                     ],
