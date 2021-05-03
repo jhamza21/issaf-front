@@ -33,6 +33,9 @@ class _ServiceListState extends State<ServiceList> {
 
   void _fetchServices() async {
     try {
+      setState(() {
+        _isLoading = true;
+      });
       var prefs = await SharedPreferences.getInstance();
       final response = await ServiceService()
           .fetchServices(prefs.getString('token'), widget.provider.id);
@@ -80,6 +83,15 @@ class _ServiceListState extends State<ServiceList> {
               service.image != null ? "serviceImg/" + service.image : null,
               Column(
                 children: [
+                  Text(
+                    getTranslate(context, "CLIENT_NUMBER") +
+                        " " +
+                        service.counter.toString(),
+                    style: TextStyle(
+                        backgroundColor: Colors.orange,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold),
+                  ),
                   Row(
                     children: [
                       Icon(Icons.timer_outlined),
@@ -175,6 +187,12 @@ class _ServiceListState extends State<ServiceList> {
                 icon: Icon(Icons.navigate_before),
                 onPressed: () => widget.callback(0),
               ),
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.refresh),
+                  onPressed: _isLoading ? null : () => _fetchServices(),
+                ),
+              ],
             ),
             body: _isLoading
                 ? Center(child: circularProgressIndicator)
