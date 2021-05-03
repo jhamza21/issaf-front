@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:issaf/language/appLanguage.dart';
@@ -7,11 +8,12 @@ import 'package:provider/provider.dart';
 import 'package:issaf/language/appLocalizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-void main() async {
+Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Redux.init();
   AppLanguage appLanguage = AppLanguage();
   await appLanguage.fetchLocale();
+  await Firebase.initializeApp();
   runApp(MyApp(
     appLanguage: appLanguage,
   ));

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:commons/commons.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -81,9 +82,11 @@ class _LoginSignUpState extends State<LoginSignUp> {
           setState(() {
             _isLoading = true;
           });
+          String _messagingToken = await FirebaseMessaging.instance.getToken();
           var prefs = await SharedPreferences.getInstance();
-          final response = await UserService()
-              .signUp(_username, _password, _name, _email, _mobile, _region);
+          final response = await UserService().signUp(_username, _password,
+              _name, _email, _mobile, _region, _messagingToken);
+          print(response.body);
           final jsonData = json.decode(response.body);
           if (response.statusCode == 201) {
             await prefs.setString('token', jsonData["data"]["api_token"]);

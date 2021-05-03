@@ -29,7 +29,7 @@ class _RootPageState extends State<RootPage> {
   Future<void> _checkLoggedInUser() async {
     try {
       var prefs = await SharedPreferences.getInstance();
-
+      print(prefs.getString('token'));
       final response = await UserService().checkToken(prefs.getString('token'));
       final jsonData = json.decode(response.body);
       assert(jsonData["id"] != null);

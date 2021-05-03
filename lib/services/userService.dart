@@ -53,7 +53,7 @@ class UserService {
 
 //sign up
   Future<http.Response> signUp(String username, String password, String name,
-      String email, String mobile, String region) async {
+      String email, String mobile, String region, String messaginToken) async {
     var url = URL_BACKEND + "register";
     return await http.post(url,
         headers: {
@@ -67,7 +67,8 @@ class UserService {
           "name": name,
           "email": email,
           "mobile": mobile,
-          "region": region
+          "region": region,
+          "messaging_token": messaginToken
         }));
   }
 
