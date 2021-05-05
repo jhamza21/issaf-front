@@ -2,25 +2,6 @@ import 'package:http/http.dart' as http;
 import 'package:issaf/constants.dart';
 
 class RequestService {
-  //fetch available tickets by Date
-  Future<http.Response> fetchAvailableTicketsByDat(
-      String token, String date, String serviceId) async {
-    var url = URL_BACKEND +
-        "requests/" +
-        date +
-        "/" +
-        serviceId +
-        "?api_token=" +
-        token;
-    return await http.get(url);
-  }
-
-  //fetch request by service id
-  Future<http.Response> fetchRequestByServiceId(String token, int id) async {
-    var url = URL_BACKEND + "requests/" + id.toString() + "?api_token=" + token;
-    return await http.get(url);
-  }
-
 //fetch received requests
   Future<http.Response> fetchReceivedRequests(String token) async {
     var url = URL_BACKEND + "requests/received?api_token=" + token;

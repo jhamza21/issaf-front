@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/errorHandler.dart';
@@ -39,86 +40,94 @@ class _LoginSignUpState extends State<LoginSignUp> {
     return false;
   }
 
-  // Perform login or signup
-  void validateAndSubmit() async {
-    if (validateAndSave()) {
-      if (_isLoginForm) {
-        //LOGIN
-        try {
-          setState(() {
-            _isLoading = true;
-          });
-          var prefs = await SharedPreferences.getInstance();
-          final response = await UserService().signIn(_username, _password);
-          final jsonData = json.decode(response.body);
-          if (response.statusCode == 200) {
-            await prefs.setString('token', jsonData["data"]["api_token"]);
-            Redux.store.dispatch(
-              SetUserStateAction(
-                UserState(
-                    isLoggedIn: true,
-                    user: User.fromJson(jsonData["data"]),
-                    role: prefs.getString("role") != null
-                        ? prefs.getString("role")
-                        : "CLIENT"),
-              ),
-            );
-          } else {
-            var error = jsonData["errors"] as Map<String, dynamic>;
-            setState(() {
-              _isLoading = false;
-              _error = errorHandler(error.values.first[0], context);
-            });
-          }
-        } catch (error) {
-          setState(() {
-            _isLoading = false;
-            _error = errorHandler("ERROR_SERVER", context);
-          });
-        }
+  //sign in user
+  void signIn() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      var prefs = await SharedPreferences.getInstance();
+      final response = await UserService().signIn(_username, _password);
+      final jsonData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        await prefs.setString('token', jsonData["data"]["api_token"]);
+        Redux.store.dispatch(
+          SetUserStateAction(
+            UserState(
+                isLoggedIn: true,
+                user: User.fromJson(jsonData["data"]),
+                role: prefs.getString("role") != null
+                    ? prefs.getString("role")
+                    : "CLIENT"),
+          ),
+        );
       } else {
-        //SIGN UP CLIENT
-        try {
-          setState(() {
-            _isLoading = true;
-          });
-          String _messagingToken = await FirebaseMessaging.instance.getToken();
-          var prefs = await SharedPreferences.getInstance();
-          final response = await UserService().signUp(_username, _password,
-              _name, _email, _mobile, _region, _messagingToken);
-          print(response.body);
-          final jsonData = json.decode(response.body);
-          if (response.statusCode == 201) {
-            await prefs.setString('token', jsonData["data"]["api_token"]);
-            Redux.store.dispatch(
-              SetUserStateAction(
-                UserState(
-                    isLoggedIn: true,
-                    user: User.fromJson(jsonData["data"]),
-                    role: "CLIENT"),
-              ),
-            );
-          } else {
-            var error = jsonData["errors"] as Map<String, dynamic>;
-            setState(() {
-              _isLoading = false;
-              _error = errorHandler(error.values.first[0], context);
-            });
-          }
-        } catch (error) {
-          setState(() {
-            _isLoading = false;
-            _error = errorHandler("ERROR_SERVER", context);
-          });
-        }
+        var error = jsonData["errors"] as Map<String, dynamic>;
+        setState(() {
+          _isLoading = false;
+          _error = errorHandler(error.values.first[0], context);
+        });
       }
+    } catch (error) {
+      setState(() {
+        _isLoading = false;
+        _error = errorHandler("ERROR_SERVER", context);
+      });
     }
   }
 
+//sign up user
+  void signUp() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      String _messagingToken = await FirebaseMessaging.instance.getToken();
+      var prefs = await SharedPreferences.getInstance();
+      final response = await UserService().signUp(_username, _password, _name,
+          _email, _mobile, _region, _messagingToken);
+      final jsonData = json.decode(response.body);
+      if (response.statusCode == 201) {
+        await prefs.setString('token', jsonData["data"]["api_token"]);
+        Redux.store.dispatch(
+          SetUserStateAction(
+            UserState(
+                isLoggedIn: true,
+                user: User.fromJson(jsonData["data"]),
+                role: "CLIENT"),
+          ),
+        );
+      } else {
+        var error = jsonData["errors"] as Map<String, dynamic>;
+        setState(() {
+          _isLoading = false;
+          _error = errorHandler(error.values.first[0], context);
+        });
+      }
+    } catch (error) {
+      setState(() {
+        _isLoading = false;
+        _error = errorHandler("ERROR_SERVER", context);
+      });
+    }
+  }
+
+  // login or signup if form is valid
+  void validateAndSubmit() async {
+    if (validateAndSave()) {
+      if (_isLoginForm)
+        signIn();
+      else
+        signUp();
+    }
+  }
+
+//reset all form fields
   void resetForm() {
     _formKey.currentState.reset();
   }
 
+//toggle between signIn and signUp form
   void toggleFormMode() {
     resetForm();
     setState(() {
@@ -126,7 +135,8 @@ class _LoginSignUpState extends State<LoginSignUp> {
     });
   }
 
-  Widget buildSignInWithText() {
+//build sign in with google button
+  Widget buildSocialBtn() {
     return Column(
       children: <Widget>[
         SizedBox(height: 20.0),
@@ -144,34 +154,66 @@ class _LoginSignUpState extends State<LoginSignUp> {
           ),
         ),
         SizedBox(height: 20.0),
+        GestureDetector(
+          onTap: () => signInWithGoogle(),
+          child: Container(
+            height: 60.0,
+            width: 60.0,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  offset: Offset(0, 2),
+                  blurRadius: 6.0,
+                ),
+              ],
+              image: DecorationImage(
+                image: AssetImage(
+                  'assets/images/google.jpg',
+                ),
+              ),
+            ),
+          ),
+        )
       ],
     );
   }
 
-  Widget buildSocialBtn() {
-    return GestureDetector(
-      onTap: () {},
-      child: Container(
-        height: 60.0,
-        width: 60.0,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black26,
-              offset: Offset(0, 2),
-              blurRadius: 6.0,
-            ),
-          ],
-          image: DecorationImage(
-            image: AssetImage(
-              'assets/images/google.jpg',
-            ),
-          ),
+  void signInWithGoogle() async {
+    try {
+      final _googleSignIn = GoogleSignIn();
+      final user = await _googleSignIn.signIn();
+      var res = await UserService().getUserByEmail(user.email);
+      if (res.statusCode == 404) {
+        toggleFormMode();
+        setState(() {
+          _name = user.displayName;
+          _email = user.email;
+        });
+        return;
+      }
+      assert(res.statusCode == 200);
+      var prefs = await SharedPreferences.getInstance();
+      final jsonData = json.decode(res.body);
+      await prefs.setString('token', jsonData["api_token"]);
+      Redux.store.dispatch(
+        SetUserStateAction(
+          UserState(
+              isLoggedIn: true,
+              user: User.fromJson(jsonData),
+              role: prefs.getString("role") != null
+                  ? prefs.getString("role")
+                  : "CLIENT"),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      final snackBar = SnackBar(
+        content: Text(getTranslate(context, "ERROR_SERVER")),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
   }
 
   Widget buildSwitchFormBtn() {
@@ -228,7 +270,6 @@ class _LoginSignUpState extends State<LoginSignUp> {
                       ? buildNotice(getTranslate(context, "REQUIRED_FIELD"))
                       : SizedBox(),
                   buildSignInBtn(),
-                  _isLoginForm ? buildSignInWithText() : SizedBox.shrink(),
                   _isLoginForm ? buildSocialBtn() : SizedBox.shrink(),
                   SizedBox(height: 20.0),
                   buildSwitchFormBtn(),
@@ -315,6 +356,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: TextFormField(
+        initialValue: _email,
         keyboardType: TextInputType.emailAddress,
         decoration: inputTextDecorationRounded(
             Icon(Icons.email), getTranslate(context, 'EMAIL') + "*", null),
@@ -380,6 +422,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 15.0, 12.0, 0.0),
       child: new TextFormField(
+        initialValue: _name,
         keyboardType: TextInputType.text,
         decoration: inputTextDecorationRounded(
             Icon(Icons.supervised_user_circle),
@@ -448,7 +491,9 @@ class _LoginSignUpState extends State<LoginSignUp> {
         child: Text(
           _error,
           style: TextStyle(
-              fontSize: 15.0, color: Colors.red, fontWeight: FontWeight.w400),
+              fontSize: 14.0,
+              color: Colors.red[600],
+              fontWeight: FontWeight.w400),
         ),
       );
     else

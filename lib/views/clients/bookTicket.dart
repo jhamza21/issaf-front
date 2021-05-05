@@ -92,7 +92,6 @@ class _BookTicketState extends State<BookTicket> {
         });
       }
     } catch (e) {
-      print(e);
       setState(() {
         _isLoading = false;
         _error = getTranslate(context, "ERROR_SERVER");

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:commons/commons.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:issaf/language/appLanguage.dart';
 import 'package:issaf/language/language.dart';
@@ -24,7 +25,7 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  bool _isLoading = false, _showPasswordInput = false;
+  bool _isLoading = false, _showPasswordInput = false, _isLogout = false;
   String _name, _mobile, _password, _email, _username, _region, _error;
   final _formKey = new GlobalKey<FormState>();
   int _currentIndex = 0;
@@ -332,22 +333,40 @@ class _ProfileState extends State<Profile> {
     );
   }
 
+  void disconnect() async {
+    try {
+      setState(() {
+        _isLogout = true;
+      });
+      final _googleSignIn = GoogleSignIn();
+      if (await _googleSignIn.isSignedIn()) await _googleSignIn.disconnect();
+      var prefs = await SharedPreferences.getInstance();
+      var res = await UserService().logout(prefs.getString("token"));
+      assert(res.statusCode == 200);
+      await prefs.setString('token', null);
+      Redux.store.dispatch(
+        SetUserStateAction(
+          UserState(
+            isLoggedIn: false,
+            user: null,
+          ),
+        ),
+      );
+    } catch (e) {
+      setState(() {
+        _isLogout = false;
+      });
+      final snackBar = SnackBar(
+        content: Text(getTranslate(context, "ERROR_SERVER")),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+  }
+
   Widget showLogout() {
     return TextButton.icon(
-        onPressed: () async {
-          //disconnect
-          var prefs = await SharedPreferences.getInstance();
-          await prefs.setString('token', null);
-          Redux.store.dispatch(
-            SetUserStateAction(
-              UserState(
-                isLoggedIn: false,
-                user: null,
-              ),
-            ),
-          );
-        },
-        icon: Icon(Icons.exit_to_app),
+        onPressed: _isLogout ? null : () => disconnect(),
+        icon: _isLogout ? circularProgressIndicator : Icon(Icons.exit_to_app),
         label: Text(getTranslate(context, "LOGOUT")));
   }
 

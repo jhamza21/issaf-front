@@ -27,16 +27,8 @@ class UserService {
   }
 
 //get user by username
-  Future<http.Response> getUserByUsername(String token, String username) async {
-    var url =
-        URL_BACKEND + "getUserByUsername/" + username + "?api_token=" + token;
-    return await http.get(url);
-  }
-
-//get user by id
-  Future<http.Response> getUserById(String token, int id) async {
-    var url =
-        URL_BACKEND + "getUserById/" + id.toString() + "?api_token=" + token;
+  Future<http.Response> getUserByEmail(String email) async {
+    var url = URL_BACKEND + "getUserByEmail/" + email;
     return await http.get(url);
   }
 
