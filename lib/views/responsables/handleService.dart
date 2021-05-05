@@ -185,7 +185,7 @@ class _HandleServiceState extends State<HandleService> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.repeat),
-          onPressed: _isCounterLoading || _isLoading
+          onPressed: _isCounterLoading || _isLoading || _service == null
               ? null
               : () => _resetCounter(_service.id),
         ),

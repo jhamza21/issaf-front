@@ -223,6 +223,14 @@ class _BookTicketState extends State<BookTicket> {
             icon: Icon(Icons.navigate_before),
             onPressed: () => widget.callback(0),
           ),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.refresh),
+              onPressed: _isLoading || _isFetchingTimes
+                  ? null
+                  : () => _fetchAvailableTimes(),
+            ),
+          ],
         ),
         body: Column(
           children: [
