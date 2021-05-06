@@ -192,5 +192,6 @@
     "RESET_COUNTER_CONFIRMATION":"Etes vous sûr de réinitialiser le compteur ?",
     "DECREMENT_COUNTER":"Décrémentation du compteur ?",
     "DECREMENT_COUNTER_CONFIRMATION":"Etes vous sûr de décrémenter le compteur ?",
-    "DECREMENT":"Décrémenter"
+    "DECREMENT":"Décrémenter",
+    "FILE_SIZE_TOO_BIG":"Taille de l'image ne doit as dépasser 2MB"
 }

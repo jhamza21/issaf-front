@@ -246,7 +246,16 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
   Future getImageFromGallery() async {
     var img = await ImagePicker().getImage(source: ImageSource.gallery);
     setState(() {
-      if (img != null) _selectedImage = File(img.path);
+      if (img != null) {
+        if (File(img.path).lengthSync() >= 2097152) {
+          final snackBar = SnackBar(
+            content: Text(getTranslate(context, "FILE_SIZE_TOO_BIG")),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          return;
+        }
+        _selectedImage = File(img.path);
+      }
     });
   }
 

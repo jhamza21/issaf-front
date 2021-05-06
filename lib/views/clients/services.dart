@@ -52,6 +52,10 @@ class _ServiceListState extends State<ServiceList> {
       setState(() {
         _isLoading = false;
       });
+      final snackBar = SnackBar(
+        content: Text(getTranslate(context, "ERROR_SERVER")),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
 

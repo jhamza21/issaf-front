@@ -16,8 +16,7 @@ class TicketsInProgress extends StatefulWidget {
 
 class _TicketsInProgressState extends State<TicketsInProgress> {
   bool _isLoading = true, _isHandlingTicket = false;
-  String _error;
-  List<Ticket> _tickets;
+  List<Ticket> _tickets = [];
   Ticket _selectedTicket;
   int _currentIndex = 0;
 
@@ -55,8 +54,11 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _error = getTranslate(context, "ERROR_SERVER");
       });
+      final snackBar = SnackBar(
+        content: Text(getTranslate(context, "ERROR_SERVER")),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
 
@@ -90,6 +92,9 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
                       .deleteTicket(prefs.getString('token'), id);
                   assert(response.statusCode == 204);
                   _tickets.removeWhere((element) => element.id == id);
+                  setState(() {
+                    _tickets = _tickets;
+                  });
                   final snackBar = SnackBar(
                     content: Text(getTranslate(context, "SUCCESS_DELETE")),
                   );
@@ -214,23 +219,16 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
         ? BookTicket(_selectedTicket.service, changePage, _fetchTickets)
         : _isLoading
             ? Center(child: circularProgressIndicator)
-            : _error != null
+            : _tickets.length == 0
                 ? Center(
-                    child: Text(
-                      _error,
-                      style: TextStyle(fontSize: 14.0, color: Colors.red),
-                    ),
+                    child: Text(getTranslate(context, "NO_RESULT_FOUND")),
                   )
-                : _tickets.length == 0
-                    ? Center(
-                        child: Text(getTranslate(context, "NO_RESULT_FOUND")),
-                      )
-                    : ListView.builder(
-                        padding: EdgeInsets.all(8),
-                        itemCount: _tickets.length,
-                        itemBuilder: (context, index) {
-                          return ticketCardInProgress(_tickets[index]);
-                        },
-                      );
+                : ListView.builder(
+                    padding: EdgeInsets.all(8),
+                    itemCount: _tickets.length,
+                    itemBuilder: (context, index) {
+                      return ticketCardInProgress(_tickets[index]);
+                    },
+                  );
   }
 }

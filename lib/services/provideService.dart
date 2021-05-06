@@ -7,7 +7,9 @@ class ProviderService {
 //fetch all providers
   Future<http.Response> fetchProviders(String token) async {
     var url = URL_BACKEND + "providers?api_token=" + token;
-    return await http.get(url);
+    return await http.get(
+      url,
+    );
   }
 
   //fetch connected user provider

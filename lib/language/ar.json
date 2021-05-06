@@ -192,6 +192,8 @@
     "RESET_COUNTER_CONFIRMATION":"هل أنت متأكد من إعادة ضبط العداد؟",
     "DECREMENT_COUNTER":"إنقاص العداد؟",
     "DECREMENT_COUNTER_CONFIRMATION":"هل أنت متأكد من أنك تخفض العداد؟",
-    "DECREMENT":"إنقاص"
+    "DECREMENT":"إنقاص",
+    "FILE_SIZE_TOO_BIG":"يجب ألا يتجاوز حجم الصورة 2 ميغا بايت"
+
 }
 

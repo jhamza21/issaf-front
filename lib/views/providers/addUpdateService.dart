@@ -71,6 +71,10 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
           _isFetchingData = false;
         });
       } catch (e) {
+        final snackBar = SnackBar(
+          content: Text(getTranslate(context, "ERROR_SERVER")),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
         widget.callback(0);
       }
   }
@@ -226,7 +230,16 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
   Future getImageFromGallery() async {
     var img = await ImagePicker().getImage(source: ImageSource.gallery);
     setState(() {
-      if (img != null) _selectedImage = File(img.path);
+      if (img != null) {
+        if (File(img.path).lengthSync() >= 2097152) {
+          final snackBar = SnackBar(
+            content: Text(getTranslate(context, "FILE_SIZE_TOO_BIG")),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          return;
+        }
+        _selectedImage = File(img.path);
+      }
     });
   }
 

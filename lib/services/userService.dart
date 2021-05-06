@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
   //get all users
+
   Future<List<User>> getUserSuggestions(String text) async {
     try {
       var prefs = await SharedPreferences.getInstance();
