@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
@@ -67,14 +68,60 @@ class _ServiceListState extends State<ServiceList> {
   Widget _getOpenDays(Service service) {
     // ignore: deprecated_member_use
     List<Widget> list = new List<Widget>();
-    list.add(Icon(Icons.calendar_today));
-    list.add(Text(" : "));
+    list.add(Text(
+      "- Jours de travail : ",
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ));
     for (var i = 0; i < service.openDays.length; i++) {
       list.add(
           new Text(getTranslate(context, service.openDays[i].toUpperCase())));
       list.add(Text(", "));
     }
-    return new Row(children: list);
+    return new Align(
+        alignment: Alignment.topLeft,
+        child: Wrap(
+          children: list,
+        ));
+  }
+
+  Widget _getHoolidays(Service service) {
+    // ignore: deprecated_member_use
+    List<Widget> list = new List<Widget>();
+    list.add(Text(
+      "- Jours fériés : ",
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ));
+    for (var i = 0; i < service.hoolidays.length; i++) {
+      list.add(new Text(getTranslate(context, service.hoolidays[i])));
+      list.add(Text("/"));
+    }
+    if (service.hoolidays.length == 0) list.add(Text("Pas de jours fériés"));
+
+    return new Align(
+        alignment: Alignment.topLeft,
+        child: Wrap(
+          children: list,
+        ));
+  }
+
+  Widget _getBreakTimes(Service service) {
+    // ignore: deprecated_member_use
+    List<Widget> list = new List<Widget>();
+    list.add(Text(
+      "- Temps de pause : ",
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ));
+    for (var i = 0; i < service.breakTimes.length; i++) {
+      list.add(new Text(getTranslate(context, service.breakTimes[i])));
+      list.add(Text("/"));
+    }
+    if (service.breakTimes.length == 0) list.add(Text("Pas de pauses"));
+
+    return new Align(
+        alignment: Alignment.topLeft,
+        child: Wrap(
+          children: list,
+        ));
   }
 
   void _showServiceInfo(Service service) {
@@ -87,32 +134,43 @@ class _ServiceListState extends State<ServiceList> {
               service.image != null ? "serviceImg/" + service.image : null,
               Column(
                 children: [
+                  Divider(),
                   Text(
-                    getTranslate(context, "CLIENT_NUMBER") +
+                    "On serre maintenant le client n : " +
                         " " +
                         service.counter.toString(),
-                    style: TextStyle(
-                        backgroundColor: Colors.orange,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
-                  Row(
-                    children: [
-                      Icon(Icons.timer_outlined),
-                      Expanded(
-                          child: Text(
-                              " : " + service.workStartTime.substring(0, 5)))
-                    ],
+                  Divider(),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Wrap(
+                      alignment: WrapAlignment.start,
+                      children: [
+                        Text(
+                          "- Temps de travail de : ",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(service.workStartTime.substring(0, 5) +
+                            " à " +
+                            service.workEndTime.substring(0, 5))
+                      ],
+                    ),
                   ),
-                  Row(
-                    children: [
-                      Icon(Icons.timer_off),
-                      Expanded(
-                          child:
-                              Text(" : " + service.workEndTime.substring(0, 5)))
-                    ],
-                  ),
-                  _getOpenDays(service)
+                  _getOpenDays(service),
+                  Align(
+                      alignment: Alignment.topLeft,
+                      child: Wrap(
+                        children: [
+                          Text(
+                            "- Temps moyen par client (mn): ",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(service.timePerClient.toString())
+                        ],
+                      )),
+                  _getBreakTimes(service),
+                  _getHoolidays(service),
                 ],
               ));
         });

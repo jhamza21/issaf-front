@@ -6,6 +6,7 @@ class User {
   String email;
   String password;
   String region;
+  String status;
   User(
       {this.id,
       this.username,
@@ -13,6 +14,7 @@ class User {
       this.email,
       this.password,
       this.region,
+      this.status,
       this.mobile});
 
   User.fromJson(Map<String, dynamic> json)
@@ -22,6 +24,7 @@ class User {
         mobile = json['mobile'] ?? '',
         email = json['email'] ?? '',
         region = json['region'] ?? '',
+        status = json['status'] ?? null,
         password = json['password'] ?? '';
 
   static List<User> listFromJson(List<dynamic> json) {

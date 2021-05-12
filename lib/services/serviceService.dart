@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:issaf/constants.dart';
+import 'package:issaf/models/user.dart';
 
 class ServiceService {
 //fetch all services
@@ -15,6 +16,12 @@ class ServiceService {
     return await http.get(url);
   }
 
+  //fetch admin services
+  Future<http.Response> fetchAdminServices(String token) async {
+    var url = URL_BACKEND + "getServicesByAdmin/?api_token=" + token;
+    return await http.get(url);
+  }
+
   //get service by id
   Future<http.Response> getServiceById(String token, int id) async {
     var url =
@@ -22,9 +29,19 @@ class ServiceService {
     return await http.get(url);
   }
 
+  //get service tickets
+  Future<http.Response> getServiceTickets(String token, int id) async {
+    var url = URL_BACKEND +
+        "getServiceTickets/" +
+        id.toString() +
+        "?api_token=" +
+        token;
+    return await http.get(url);
+  }
+
   //get service by admin
-  Future<http.Response> getServiceByAdmin(String token) async {
-    var url = URL_BACKEND + "getServiceByAdmin/?api_token=" + token;
+  Future<http.Response> getServiceByRespo(String token) async {
+    var url = URL_BACKEND + "getServiceByRespo/?api_token=" + token;
     return await http.get(url);
   }
 
@@ -38,7 +55,7 @@ class ServiceService {
   Future<http.StreamedResponse> addUpdateService(
       String token,
       int id,
-      int userId,
+      List<User> users,
       String title,
       String description,
       String avgTimePerClient,
@@ -56,7 +73,10 @@ class ServiceService {
     var request = new http.MultipartRequest("POST", Uri.parse(url));
     if (image != null)
       request.files.add(await http.MultipartFile.fromPath('img', image.path));
-    request.fields['user_id'] = userId.toString();
+
+    //users
+    for (int i = 0; i < users.length; i++)
+      request.fields['users[' + i.toString() + ']'] = users[i].id.toString();
 
     if (title != null) request.fields['title'] = title;
     if (description != null) request.fields['description'] = description;
@@ -99,7 +119,7 @@ class ServiceService {
 
 //INCREMENT COUNTER
   Future<http.Response> incrementCounter(
-      String token, int id, String status) async {
+      String token, int id, String status, int duration) async {
     var url = URL_BACKEND +
         "incrementService/" +
         id.toString() +
@@ -110,6 +130,6 @@ class ServiceService {
           "content-type": "application/json",
           "Accept": "application/json"
         },
-        body: json.encode({"ticket_status": status}));
+        body: json.encode({"ticket_status": status, "duration": duration}));
   }
 }

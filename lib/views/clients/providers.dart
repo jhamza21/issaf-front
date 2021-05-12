@@ -122,30 +122,36 @@ class _ProvidersListState extends State<ProvidersList> {
               Column(
                 children: [
                   provider.email != ''
-                      ? Row(
-                          children: [
-                            Icon(Icons.email),
-                            Expanded(child: Text(" : " + provider.email))
-                          ],
-                        )
+                      ? Align(
+                          alignment: Alignment.topLeft,
+                          child: Wrap(
+                            children: [
+                              Icon(Icons.email),
+                              Text(" : " + provider.email)
+                            ],
+                          ))
                       : SizedBox.shrink(),
                   provider.mobile != ''
-                      ? Row(
-                          children: [
-                            Icon(Icons.phone),
-                            Text(" : " +
-                                provider.mobile.split("/")[1] +
-                                provider.mobile.split("/")[2])
-                          ],
-                        )
+                      ? Align(
+                          alignment: Alignment.topLeft,
+                          child: Wrap(
+                            children: [
+                              Icon(Icons.phone),
+                              Text(" : " +
+                                  provider.mobile.split("/")[1] +
+                                  provider.mobile.split("/")[2])
+                            ],
+                          ))
                       : SizedBox.shrink(),
                   provider.url != ''
-                      ? Row(
-                          children: [
-                            Icon(Icons.web),
-                            Expanded(child: Text(" : " + provider.url))
-                          ],
-                        )
+                      ? Align(
+                          alignment: Alignment.topLeft,
+                          child: Wrap(
+                            children: [
+                              Icon(Icons.web),
+                              Text(" : " + provider.url)
+                            ],
+                          ))
                       : SizedBox.shrink(),
                 ],
               ));

@@ -4,12 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/ticket.dart';
 import 'package:issaf/services/ticketService.dart';
-import 'package:issaf/views/clients/bookTicket.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TicketsInProgress extends StatefulWidget {
-  final void Function(bool) switchAppBar;
-  TicketsInProgress(this.switchAppBar);
   @override
   _TicketsInProgressState createState() => _TicketsInProgressState();
 }
@@ -17,18 +14,6 @@ class TicketsInProgress extends StatefulWidget {
 class _TicketsInProgressState extends State<TicketsInProgress> {
   bool _isLoading = true, _isHandlingTicket = false;
   List<Ticket> _tickets = [];
-  Ticket _selectedTicket;
-  int _currentIndex = 0;
-
-  changePage(int i) {
-    if (i == 0)
-      widget.switchAppBar(true);
-    else
-      widget.switchAppBar(false);
-    setState(() {
-      _currentIndex = i;
-    });
-  }
 
   @override
   void initState() {
@@ -43,7 +28,7 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
       });
       var prefs = await SharedPreferences.getInstance();
       final response =
-          await TicketService().fetchTickets(prefs.getString('token'));
+          await TicketService().fetchTicketsRespo(prefs.getString('token'));
       assert(response.statusCode == 200);
       final jsonData = json.decode(response.body);
       _tickets = Ticket.listFromJson(jsonData);
@@ -156,7 +141,10 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
                     ),
                     Column(
                       children: [
-                        Text(getTranslate(context, "TICKET_MSG")),
+                        Text(
+                          ticket.name,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         Row(
                           children: [
                             Text(
@@ -197,15 +185,6 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
                         : () => _deleteTicket(ticket.id),
                     icon: Icon(Icons.remove_circle),
                     label: Text(getTranslate(context, "CANCEL"))),
-                TextButton.icon(
-                    onPressed: _isHandlingTicket
-                        ? null
-                        : () {
-                            _selectedTicket = ticket;
-                            changePage(1);
-                          },
-                    icon: Icon(Icons.restore_rounded),
-                    label: Text(getTranslate(context, "RESCHEDULE"))),
               ],
             ),
           )
@@ -216,20 +195,18 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
 
   @override
   Widget build(BuildContext context) {
-    return _currentIndex == 1
-        ? BookTicket(_selectedTicket.service, changePage, _fetchTickets)
-        : _isLoading
-            ? Center(child: circularProgressIndicator)
-            : _tickets.length == 0
-                ? Center(
-                    child: Text(getTranslate(context, "NO_RESULT_FOUND")),
-                  )
-                : ListView.builder(
-                    padding: EdgeInsets.all(8),
-                    itemCount: _tickets.length,
-                    itemBuilder: (context, index) {
-                      return ticketCardInProgress(_tickets[index]);
-                    },
-                  );
+    return _isLoading
+        ? Center(child: circularProgressIndicator)
+        : _tickets.length == 0
+            ? Center(
+                child: Text(getTranslate(context, "NO_RESULT_FOUND")),
+              )
+            : ListView.builder(
+                padding: EdgeInsets.all(8),
+                itemCount: _tickets.length,
+                itemBuilder: (context, index) {
+                  return ticketCardInProgress(_tickets[index]);
+                },
+              );
   }
 }

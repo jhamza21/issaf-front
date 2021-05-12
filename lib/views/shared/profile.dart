@@ -342,7 +342,6 @@ class _ProfileState extends State<Profile> {
       if (await _googleSignIn.isSignedIn()) await _googleSignIn.disconnect();
       var prefs = await SharedPreferences.getInstance();
       var res = await UserService().logout(prefs.getString("token"));
-      print(res.body);
       assert(res.statusCode == 200);
       await prefs.setString('token', null);
       Redux.store.dispatch(

@@ -8,6 +8,9 @@ import 'package:issaf/services/serviceService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HandleService extends StatefulWidget {
+  final int serviceId;
+  final void Function(int) callback;
+  HandleService(this.serviceId, this.callback);
   @override
   _HandleServiceState createState() => _HandleServiceState();
 }
@@ -16,8 +19,8 @@ class _HandleServiceState extends State<HandleService> {
   bool _isLoading = true;
   bool _isCounterLoading = false;
   String _error;
-  Service _service;
   int _counter = 0;
+  Service _service;
   Timer _timer;
   int seconds = 0, minutes = 0, hours = 0;
   bool _isStarted = false;
@@ -62,15 +65,8 @@ class _HandleServiceState extends State<HandleService> {
   void initializeServiceData() async {
     try {
       var prefs = await SharedPreferences.getInstance();
-      var response =
-          await ServiceService().getServiceByRespo(prefs.getString('token'));
-      if (response.statusCode == 404) {
-        _error = getTranslate(context, "REGISTER_TO_SERVER");
-        setState(() {
-          _isLoading = false;
-        });
-        return;
-      }
+      var response = await ServiceService()
+          .getServiceById(prefs.getString('token'), widget.serviceId);
       assert(response.statusCode == 200);
       var jsonData = json.decode(response.body);
       _service = Service.fromJson(jsonData);
@@ -84,56 +80,6 @@ class _HandleServiceState extends State<HandleService> {
         _isLoading = false;
       });
     }
-  }
-
-  void _resetCounter(int id) async {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: new Text(getTranslate(context, "RESET_COUNTER")),
-          content:
-              new Text(getTranslate(context, "RESET_COUNTER_CONFIRMATION")),
-          actions: <Widget>[
-            // ignore: deprecated_member_use
-            new FlatButton(
-              child: new Text(getTranslate(context, "NO")),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            // ignore: deprecated_member_use
-            new FlatButton(
-              child: new Text(getTranslate(context, "YES")),
-              onPressed: () async {
-                try {
-                  Navigator.of(context).pop();
-                  setState(() {
-                    _isCounterLoading = true;
-                  });
-                  var prefs = await SharedPreferences.getInstance();
-                  final response = await ServiceService()
-                      .updateCounter(prefs.getString('token'), id, 1);
-                  assert(response.statusCode == 200);
-                  setState(() {
-                    _counter = 1;
-                    _isCounterLoading = false;
-                  });
-                } catch (error) {
-                  final snackBar = SnackBar(
-                    content: Text(getTranslate(context, "ERROR_SERVER")),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  setState(() {
-                    _isCounterLoading = false;
-                  });
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void _incrementCounter(String status) async {
@@ -167,6 +113,56 @@ class _HandleServiceState extends State<HandleService> {
     }
   }
 
+  void _resetCounter(int id) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text(getTranslate(context, "RESET_COUNTER")),
+          content:
+              new Text(getTranslate(context, "RESET_COUNTER_CONFIRMATION")),
+          actions: <Widget>[
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "NO")),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "YES")),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  setState(() {
+                    _isCounterLoading = true;
+                  });
+                  var prefs = await SharedPreferences.getInstance();
+                  final response = await ServiceService()
+                      .updateCounter(prefs.getString('token'), id, 1);
+                  assert(response.statusCode == 200);
+                  setState(() {
+                    _counter = 1;
+                    _isCounterLoading = false;
+                  });
+                } catch (error) {
+                  final snackBar = SnackBar(
+                    content: Text(getTranslate(context, "ERROR_SERVER")),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  setState(() {
+                    _isCounterLoading = false;
+                  });
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   // void _decrementCounter(int id) async {
   //   showDialog(
   //     context: context,
@@ -187,17 +183,17 @@ class _HandleServiceState extends State<HandleService> {
   //           new FlatButton(
   //             child: new Text(getTranslate(context, "YES")),
   //             onPressed: () async {
+  //               Navigator.of(context).pop();
   //               try {
-  //                 if (_counter == 1) return;
-  //                 Navigator.of(context).pop();
   //                 setState(() {
   //                   _isCounterLoading = true;
   //                 });
   //                 var prefs = await SharedPreferences.getInstance();
   //                 final response = await ServiceService().updateCounter(
-  //                     prefs.getString('token'), id, _counter - 1);
+  //                     prefs.getString('token'),
+  //                     id,
+  //                     _counter == 1 ? 1 : _counter - 1);
   //                 assert(response.statusCode == 200);
-  //                 resetTimer();
   //                 setState(() {
   //                   _counter--;
   //                   _isCounterLoading = false;
@@ -291,6 +287,10 @@ class _HandleServiceState extends State<HandleService> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.navigate_before),
+          onPressed: () => widget.callback(0),
+        ),
         actions: [
           PopupMenuButton(
             enabled: _isCounterLoading || _isLoading || _service == null

@@ -2,16 +2,14 @@ import 'dart:convert';
 import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
-import 'package:issaf/models/provider.dart';
 import 'package:issaf/models/service.dart';
 import 'package:issaf/services/serviceService.dart';
 import 'package:issaf/views/providers/addUpdateService.dart';
+import 'package:issaf/views/providers/handleService.dart';
+import 'package:issaf/views/providers/indicateurs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ServiceList extends StatefulWidget {
-  final Provider provider;
-  ServiceList(this.provider);
-
   @override
   _ServiceListState createState() => _ServiceListState();
 }
@@ -20,6 +18,7 @@ class ServiceList extends StatefulWidget {
 class _ServiceListState extends State<ServiceList> {
   int _selectedService;
   List<Service> _services = [];
+  bool _isRegistredToProvider = false;
   bool _isLoading = true;
   int _currentIndex = 0;
   var _tapPosition;
@@ -38,11 +37,14 @@ class _ServiceListState extends State<ServiceList> {
   void _fetchServices() async {
     try {
       var prefs = await SharedPreferences.getInstance();
-      final response = await ServiceService()
-          .fetchServices(prefs.getString('token'), widget.provider.id);
-      assert(response.statusCode == 200);
-      final jsonData = json.decode(response.body)["services"];
-      _services = Service.listFromJson(jsonData);
+      final response =
+          await ServiceService().fetchAdminServices(prefs.getString('token'));
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        _services = Service.listFromJson(jsonData);
+        _isRegistredToProvider = true;
+      }
+
       setState(() {
         _isLoading = false;
       });
@@ -129,11 +131,13 @@ class _ServiceListState extends State<ServiceList> {
             // ignore: deprecated_member_use
             child: FlatButton.icon(
               icon: Icon(
-                Icons.delete,
+                Icons.settings,
               ),
-              label: Text(getTranslate(context, "DELETE")),
+              label: Text("Gérer"),
               onPressed: () {
-                _deleteService(service);
+                Navigator.of(context).pop();
+                _selectedService = service.id;
+                changePage(2);
               },
             ),
           ),
@@ -141,13 +145,25 @@ class _ServiceListState extends State<ServiceList> {
             // ignore: deprecated_member_use
             child: FlatButton.icon(
               icon: Icon(
-                Icons.info,
+                Icons.bar_chart,
               ),
-              label: Text(getTranslate(context, "DETAILS")),
+              label: Text("Statistiques"),
               onPressed: () {
                 Navigator.of(context).pop();
                 _selectedService = service.id;
-                changePage(1);
+                changePage(3);
+              },
+            ),
+          ),
+          PopupMenuItem(
+            // ignore: deprecated_member_use
+            child: FlatButton.icon(
+              icon: Icon(
+                Icons.delete,
+              ),
+              label: Text(getTranslate(context, "DELETE")),
+              onPressed: () {
+                _deleteService(service);
               },
             ),
           ),
@@ -182,11 +198,8 @@ class _ServiceListState extends State<ServiceList> {
           trailing: Icon(
             Icons.circle,
             size: 15,
-            color: service.status == "ACCEPTED"
-                ? Colors.green[800]
-                : service.status == "REFUSED"
-                    ? Colors.red[800]
-                    : Colors.grey,
+            color:
+                service.status == "ACCEPTED" ? Colors.green[800] : Colors.grey,
           ),
         ),
       ),
@@ -210,18 +223,12 @@ class _ServiceListState extends State<ServiceList> {
               actions: [
                 IconButton(
                   icon: Icon(Icons.add),
-                  onPressed: () {
-                    if (widget.provider == null) {
-                      final snackBar = SnackBar(
-                        content: Text(
-                            getTranslate(context, "EVENT_REQUIRE_PROVIDER")),
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                    } else {
-                      _selectedService = null;
-                      changePage(1);
-                    }
-                  },
+                  onPressed: !_isRegistredToProvider
+                      ? null
+                      : () {
+                          _selectedService = null;
+                          changePage(1);
+                        },
                 )
               ],
             ),
@@ -238,6 +245,10 @@ class _ServiceListState extends State<ServiceList> {
                           return serviceCard(_services[index]);
                         },
                       ))
-        : AddUpdateService(_selectedService, changePage, _fetchServices);
+        : _currentIndex == 1
+            ? AddUpdateService(_selectedService, changePage, _fetchServices)
+            : _currentIndex == 2
+                ? HandleService(_selectedService, changePage)
+                : Indicators(_selectedService, changePage);
   }
 }

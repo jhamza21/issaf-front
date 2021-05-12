@@ -12,15 +12,12 @@ import 'package:flutter/services.dart';
 import 'package:issaf/constants.dart';
 
 class AddUpdateProvider extends StatefulWidget {
-  final ModelProvider.Provider provider;
-  final void Function(ModelProvider.Provider) callback;
-  AddUpdateProvider(this.provider, this.callback);
   @override
   _AddUpdateProviderState createState() => _AddUpdateProviderState();
 }
 
 class _AddUpdateProviderState extends State<AddUpdateProvider> {
-  bool _isLoading = false;
+  bool _isLoading = true;
   String _type,
       _title,
       _description,
@@ -30,6 +27,7 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
       _region,
       _error;
   File _selectedImage;
+  ModelProvider.Provider _provider;
   final _formKey = new GlobalKey<FormState>();
 
   @override
@@ -39,14 +37,37 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
   }
 
   void initializeProviderData() async {
-    if (widget.provider != null) {
-      _type = widget.provider.type;
-      _title = widget.provider.title;
-      _description = widget.provider.description;
-      _mobile = widget.provider.mobile;
-      _email = widget.provider.email;
-      _siteWeb = widget.provider.url;
-      _region = widget.provider.region;
+    try {
+      var prefs = await SharedPreferences.getInstance();
+      final response =
+          await ProviderService().fetchProviderUser(prefs.getString('token'));
+
+      assert(response.statusCode == 200);
+      final jsonData = json.decode(response.body);
+
+      _provider = jsonData["id"] == null
+          ? null
+          : ModelProvider.Provider.fromJson(jsonData);
+      if (_provider != null) {
+        _type = _provider.type;
+        _title = _provider.title;
+        _description = _provider.description;
+        _mobile = _provider.mobile;
+        _email = _provider.email;
+        _siteWeb = _provider.url;
+        _region = _provider.region;
+      }
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
+      final snackBar = SnackBar(
+        content: Text(getTranslate(context, "ERROR_SERVER")),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
 
@@ -138,7 +159,7 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
   }
 
   bool validateImage() {
-    if (widget.provider == null && _selectedImage == null) return false;
+    if (_provider == null && _selectedImage == null) return false;
 
     return true;
   }
@@ -151,7 +172,7 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
   }
 
   Widget showSaveProvider() {
-    return checkProviderChanged(widget.provider)
+    return checkProviderChanged(_provider)
         ? TextButton.icon(
             onPressed: _isLoading
                 ? null
@@ -165,7 +186,7 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
                         var prefs = await SharedPreferences.getInstance();
                         var res = await ProviderService().addUpdateProvider(
                             prefs.getString('token'),
-                            widget.provider != null ? widget.provider.id : null,
+                            _provider != null ? _provider.id : null,
                             _type,
                             _title,
                             _description,
@@ -178,8 +199,8 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
                           ModelProvider.Provider _resProvider =
                               ModelProvider.Provider.fromJson(json
                                   .decode(await res.stream.bytesToString()));
+                          _provider = _resProvider;
                           _selectedImage = null;
-                          widget.callback(_resProvider);
                           setState(() {
                             _isLoading = false;
                           });
@@ -267,16 +288,16 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
         children: <Widget>[
           CircleAvatar(
               child: _selectedImage != null ||
-                      (widget.provider != null && widget.provider.image != null)
+                      (_provider != null && _provider.image != null)
                   ? SizedBox.shrink()
                   : Text(getTranslate(context, "INSERT_IMAGE")),
               backgroundColor: Colors.orange[200],
               radius: 80,
               backgroundImage: _selectedImage != null
                   ? FileImage(_selectedImage)
-                  : widget.provider != null && widget.provider.image != null
+                  : _provider != null && _provider.image != null
                       ? NetworkImage(
-                          URL_BACKEND + "providerImg/" + widget.provider.image)
+                          URL_BACKEND + "providerImg/" + _provider.image)
                       : null),
           Column(
             children: [
@@ -378,30 +399,34 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
       child: Scaffold(
         appBar: AppBar(
           elevation: 0,
-          title: Text(widget.provider == null
-              ? getTranslate(context, 'ADD_PROVIDER')
-              : widget.provider.title),
+          title: Text(_isLoading
+              ? "..."
+              : _provider == null
+                  ? getTranslate(context, 'ADD_PROVIDER')
+                  : _provider.title),
           centerTitle: true,
         ),
-        body: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                showImageInput(),
-                showTypeInput(),
-                showTitleInput(),
-                showDescriptionInput(),
-                showEmailInput(),
-                showMobileInput(),
-                showSiteWebInput(),
-                showRegionInput(),
-                showError(),
-                showSaveProvider(),
-              ],
-            ),
-          ),
-        ),
+        body: _isLoading
+            ? Center(child: circularProgressIndicator)
+            : Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      showImageInput(),
+                      showTypeInput(),
+                      showTitleInput(),
+                      showDescriptionInput(),
+                      showEmailInput(),
+                      showMobileInput(),
+                      showSiteWebInput(),
+                      showRegionInput(),
+                      showError(),
+                      showSaveProvider(),
+                    ],
+                  ),
+                ),
+              ),
       ),
     );
   }

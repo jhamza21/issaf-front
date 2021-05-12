@@ -25,7 +25,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
   final _formKey = new GlobalKey<FormState>();
   final TextEditingController _typeAheadController = TextEditingController();
   bool _isLoading = false, _isFetchingData = false;
-  User _selectedUser;
+  List<User> _selectedUsers = [];
   String _title,
       _description,
       _workStartTime = "08:00",
@@ -64,9 +64,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
         _openDays = _service.openDays;
         _hoolidays = _service.hoolidays;
         _breaks = _service.breakTimes;
-        _selectedUser = _service.user;
-        _typeAheadController.text =
-            _selectedUser != null ? _selectedUser.username : null;
+        _selectedUsers = _service.users;
         setState(() {
           _isFetchingData = false;
         });
@@ -155,7 +153,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                     var res = await ServiceService().addUpdateService(
                         prefs.getString('token'),
                         widget.idService != null ? widget.idService : null,
-                        _selectedUser.id,
+                        _selectedUsers,
                         _title,
                         _description,
                         _avgTimePerClient.toInt().toString(),
@@ -403,59 +401,116 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
     );
   }
 
-  GestureDetector _getSuffixIcon() {
-    if (widget.idService == null)
-      return null;
-    else
-      return GestureDetector(
-        child: Icon(
-          Icons.circle,
-          size: 15,
-          color: _service.status == "ACCEPTED"
-              ? Colors.green[800]
-              : _service.status == "REFUSED"
-                  ? Colors.red[800]
-                  : Colors.grey,
-        ),
-      );
+  GestureDetector _getSuffixIcon(User user) {
+    return GestureDetector(
+      child: Icon(
+        Icons.circle,
+        size: 15,
+        color: user.status == null
+            ? Colors.grey
+            : user.status == "ACCEPTED"
+                ? Colors.green[800]
+                : Colors.red[800],
+      ),
+    );
+  }
+
+  bool contains(User user, List<User> users) {
+    for (User u in users) {
+      if (user.id == u.id) return true;
+    }
+    return false;
   }
 
   Widget showUsernameInput() {
     return Padding(
-        padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
-        child: new TypeAheadFormField(
-            validator: (value) => _selectedUser == null
-                ? getTranslate(context, 'INVALID_USERNAME_LENGTH')
-                : null,
-            textFieldConfiguration: TextFieldConfiguration(
-              controller: _typeAheadController,
-              decoration: inputTextDecorationRectangle(
-                  null,
-                  getTranslate(context, 'USERNAME_RECEIVER') + "*",
-                  null,
-                  _getSuffixIcon()),
-            ),
-            suggestionsCallback: UserService().getUserSuggestions,
-            hideSuggestionsOnKeyboardHide: false,
-            debounceDuration: Duration(milliseconds: 500),
-            noItemsFoundBuilder: (context) => Container(
-                  height: 100,
-                  child: Center(
-                    child: Text(getTranslate(context, "NO_RESULT_FOUND")),
+      padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0.0),
+      child: Column(
+        children: [
+          new TypeAheadFormField(
+              textFieldConfiguration: TextFieldConfiguration(
+                controller: _typeAheadController,
+                decoration: inputTextDecorationRectangle(null,
+                    getTranslate(context, 'USERNAME_RECEIVER'), null, null),
+              ),
+              suggestionsCallback: UserService().getUserSuggestions,
+              hideSuggestionsOnKeyboardHide: false,
+              debounceDuration: Duration(milliseconds: 500),
+              noItemsFoundBuilder: (context) => Container(
+                    height: 100,
+                    child: Center(
+                      child: Text(getTranslate(context, "NO_RESULT_FOUND")),
+                    ),
                   ),
-                ),
-            itemBuilder: (context, User user) {
-              return ListTile(
-                title: Text(user.name),
-                subtitle: Text(user.username),
-              );
-            },
-            onSuggestionSelected: (User user) {
-              _typeAheadController.text = user.username;
-              setState(() {
-                _selectedUser = user;
-              });
-            }));
+              itemBuilder: (context, User user) {
+                return ListTile(
+                  title: Row(
+                    children: [
+                      Text(user.name),
+                      Text(
+                        " (" + user.username + ")",
+                        style: TextStyle(fontSize: 13, color: Colors.orange),
+                      ),
+                    ],
+                  ),
+                  subtitle: Text(user.email),
+                );
+              },
+              onSuggestionSelected: (User user) {
+                _typeAheadController.text = "";
+                if (!contains(user, _selectedUsers))
+                  setState(() {
+                    _selectedUsers.add(user);
+                  });
+              }),
+          Container(
+            height: 120,
+            child: _selectedUsers.length == 0
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 50),
+                    child: Text(
+                      "Pas d'opérateurs séléctionnés",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  )
+                : Scrollbar(
+                    thickness: 10,
+                    child: ListView.builder(
+                        itemCount: _selectedUsers.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return new ListTile(
+                            title: Row(
+                              children: [
+                                Text(_selectedUsers[index].name),
+                                Text(
+                                  " (" + _selectedUsers[index].username + ")",
+                                  style: TextStyle(
+                                      fontSize: 13, color: Colors.orange),
+                                ),
+                              ],
+                            ),
+                            subtitle: Text(_selectedUsers[index].email),
+                            leading: IconButton(
+                              icon: Icon(
+                                Icons.delete,
+                                color: Colors.black,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _selectedUsers.removeWhere((element) =>
+                                      element.id == _selectedUsers[index].id);
+                                });
+                              },
+                            ),
+                            trailing: _getSuffixIcon(_selectedUsers[index]),
+                          );
+                        }),
+                  ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget showTimePerClientInput() {
@@ -467,8 +522,6 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
         onChanged: (value) => setState(() {
           _avgTimePerClient = value;
         }),
-        decoration: InputDecoration(
-            labelText: getTranslate(context, "TIME_PER_CLIENT")),
       ),
       padding: const EdgeInsets.all(16),
     );
@@ -700,13 +753,15 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                   child: Column(
                     children: <Widget>[
                       showImageInput(),
-                      showUsernameInput(),
                       showTitleInput(),
                       showDescriptionInput(),
-                      showTimePerClientInput(),
+                      showTitle(getTranslate(context, "OPERATORS")),
+                      showUsernameInput(),
                       showTitle(getTranslate(context, "WORK_TIME")),
                       showWorkTimeInput(context),
                       showDayPicker(),
+                      showTitle(getTranslate(context, "TIME_PER_CLIENT")),
+                      showTimePerClientInput(),
                       showTitle(getTranslate(context, "HOOLIDAYS")),
                       _showHoolidaysInput(context),
                       showTitle(getTranslate(context, "BREAK_TIMES")),

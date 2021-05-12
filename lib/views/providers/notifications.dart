@@ -7,8 +7,6 @@ import 'package:issaf/services/requestService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Notifications extends StatefulWidget {
-  final void Function(int) callback;
-  Notifications(this.callback);
   @override
   _NotificationsState createState() => _NotificationsState();
 }
@@ -34,6 +32,8 @@ class _NotificationsState extends State<Notifications> {
       assert(response.statusCode == 200);
       final jsonData = json.decode(response.body);
       _requests = Request.listFromJson(jsonData);
+      _requests = _requests.reversed.toList();
+
       setState(() {
         _isLoading = false;
       });
@@ -68,16 +68,15 @@ class _NotificationsState extends State<Notifications> {
               child: new Text(getTranslate(context, "YES")),
               onPressed: () async {
                 try {
+                  Navigator.of(context).pop();
                   setState(() {
                     _isHandlingNotif = true;
                   });
-                  Navigator.of(context).pop();
                   var prefs = await SharedPreferences.getInstance();
                   var res = await RequestService()
                       .deleteRequest(prefs.getString('token'), id);
                   assert(res.statusCode == 204);
                   _requests.removeWhere((element) => element.id == id);
-                  widget.callback(_requests.length);
                   final snackBar = SnackBar(
                     content: Text(getTranslate(context, "SUCCESS_DELETE")),
                   );
@@ -109,6 +108,8 @@ class _NotificationsState extends State<Notifications> {
     _confirmation += request.receiver.name;
     _confirmation += "?";
     _subtitle = request.receiver.name;
+    _subtitle += " (" + request.receiver.username + ")";
+
     _subtitle += getTranslate(
         context,
         request.status == null

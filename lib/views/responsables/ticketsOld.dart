@@ -28,7 +28,7 @@ class _TicketsOldState extends State<TicketsOld> {
       });
       var prefs = await SharedPreferences.getInstance();
       final response =
-          await TicketService().fetchTickets(prefs.getString('token'));
+          await TicketService().fetchTicketsRespo(prefs.getString('token'));
       assert(response.statusCode == 200);
       final jsonData = json.decode(response.body);
       _tickets = Ticket.listFromJson(jsonData);

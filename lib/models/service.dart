@@ -13,7 +13,7 @@ class Service {
   List<String> breakTimes;
 
   int providerId;
-  int userId;
+  List<User> users;
   String status;
 
   User user;
@@ -31,7 +31,7 @@ class Service {
       this.hoolidays,
       this.breakTimes,
       this.providerId,
-      this.userId,
+      this.users,
       this.status,
       this.image});
 
@@ -50,7 +50,7 @@ class Service {
             ? json['break_times'].cast<String>()
             : [],
         providerId = json['provider_id'] ?? null,
-        userId = json['user_id'] ?? null,
+        users = User.listFromJson(json['users']) ?? null,
         status = json['status'] ?? '',
         user = json["user"] != null ? User.fromJson(json["user"]) : null,
         image = json['image'] ?? null;

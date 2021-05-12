@@ -70,7 +70,7 @@
     "REGISTER_AS":"سجل باسم",
     "SEARCH_BY_COUNTRY":"البحث عن طريق اسم الدولة",
     "SERVICE":"خدمة",
-    "USERNAME_RECEIVER":"اسم مستخدم المدير",
+    "USERNAME_RECEIVER":"اسم المستخدم / الاسم / البريد الإلكتروني",
     "TIME_PER_CLIENT":"متوسط ​​الوقت لكل عميل (دقيقة)",
     "TIME_PER_CLIENT_NOTICE":"ملاحظة: سيتم تعديل هذه القيمة تلقائيًا",
     "WORK_TIME":"وقت العمل",
@@ -184,16 +184,22 @@
     "CONNECT_AS":"تسجيل الدخول ك",
     "NOTIFICATIONS":"إشعارات",
     "FILTER_WITH":"تصفية حسب :",
-    "TICKET_NOTICE": "ملاحظة: الوقت المشار إليه على التذكرة تقريبي ، سيتم إخطارك بتذكرتين قبل جولتك!",
+    "TICKET_NOTICE": ".ملاحظة: الوقت المشار إليه على التذكرة تقريبي!",
     "RESCHEDULE":"إعادة الجدولة",
     "TICKET_DONE":"لقاء مر جيدا",
     "TICKET_UNDONE":"لم تأت!",
-    "RESET_COUNTER":"إعادة ضبط العداد؟",
+    "RESET_COUNTER":"إعادة ضبط العداد",
     "RESET_COUNTER_CONFIRMATION":"هل أنت متأكد من إعادة ضبط العداد؟",
-    "DECREMENT_COUNTER":"إنقاص العداد؟",
+    "DECREMENT_COUNTER":"إنقاص العداد",
     "DECREMENT_COUNTER_CONFIRMATION":"هل أنت متأكد من أنك تخفض العداد؟",
     "DECREMENT":"إنقاص",
-    "FILE_SIZE_TOO_BIG":"يجب ألا يتجاوز حجم الصورة 2 ميغا بايت"
+    "FILE_SIZE_TOO_BIG":"يجب ألا يتجاوز حجم الصورة 2 ميغا بايت",
+    "OPERATORS":"العاملين",
+    "BOOK_TICKET_R":"احجز تذكرة",
+    "INFO_SERVICE":"معلومات الصاف"
+
+
+
 
 }
 

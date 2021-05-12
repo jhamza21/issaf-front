@@ -3,12 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/request.dart';
+import 'package:issaf/models/service.dart';
 import 'package:issaf/services/requestService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Notifications extends StatefulWidget {
-  final void Function(int) callback;
-  Notifications(this.callback);
   @override
   _NotificationsState createState() => _NotificationsState();
 }
@@ -35,6 +34,7 @@ class _NotificationsState extends State<Notifications> {
       final jsonData = json.decode(response.body);
       _requests = Request.listFromJson(jsonData);
       _requests.removeWhere((element) => element.status != null);
+      _requests = _requests.reversed.toList();
       setState(() {
         _isLoading = false;
       });
@@ -69,16 +69,15 @@ class _NotificationsState extends State<Notifications> {
               child: new Text(getTranslate(context, "YES")),
               onPressed: () async {
                 try {
+                  Navigator.of(context).pop();
                   setState(() {
                     _isHandlingRequest = true;
                   });
-                  Navigator.of(context).pop();
                   var prefs = await SharedPreferences.getInstance();
                   var res = await RequestService()
                       .refuseRequest(prefs.getString('token'), id);
                   assert(res.statusCode == 200);
                   _requests.removeWhere((element) => element.id == id);
-                  widget.callback(_requests.length);
                   final snackBar = SnackBar(
                     content:
                         Text(getTranslate(context, "SUCCESS_REFUSE_REQUEST")),
@@ -125,17 +124,15 @@ class _NotificationsState extends State<Notifications> {
               child: new Text(getTranslate(context, "YES")),
               onPressed: () async {
                 try {
+                  Navigator.of(context).pop();
                   setState(() {
                     _isHandlingRequest = true;
                   });
-                  Navigator.of(context).pop();
                   var prefs = await SharedPreferences.getInstance();
                   var res = await RequestService()
                       .acceptRequest(prefs.getString('token'), id);
                   assert(res.statusCode == 200);
-
                   _requests.removeWhere((element) => element.id == id);
-                  widget.callback(_requests.length);
                   final snackBar = SnackBar(
                     content:
                         Text(getTranslate(context, "SUCCESS_ACCEPT_REQUEST")),
@@ -162,45 +159,169 @@ class _NotificationsState extends State<Notifications> {
     );
   }
 
+  Widget _getOpenDays(Service service) {
+    // ignore: deprecated_member_use
+    List<Widget> list = new List<Widget>();
+    list.add(Text(
+      "- Jours de travail : ",
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ));
+    for (var i = 0; i < service.openDays.length; i++) {
+      list.add(
+          new Text(getTranslate(context, service.openDays[i].toUpperCase())));
+      list.add(Text(", "));
+    }
+    return new Align(
+        alignment: Alignment.topLeft,
+        child: Wrap(
+          children: list,
+        ));
+  }
+
+  Widget _getHoolidays(Service service) {
+    // ignore: deprecated_member_use
+    List<Widget> list = new List<Widget>();
+    list.add(Text(
+      "- Jours fériés : ",
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ));
+    for (var i = 0; i < service.hoolidays.length; i++) {
+      list.add(new Text(getTranslate(context, service.hoolidays[i])));
+      list.add(Text("/"));
+    }
+    if (service.hoolidays.length == 0) list.add(Text("Pas de jours fériés"));
+
+    return new Align(
+        alignment: Alignment.topLeft,
+        child: Wrap(
+          children: list,
+        ));
+  }
+
+  Widget _getBreakTimes(Service service) {
+    // ignore: deprecated_member_use
+    List<Widget> list = new List<Widget>();
+    list.add(Text(
+      "- Temps de pause : ",
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ));
+    for (var i = 0; i < service.breakTimes.length; i++) {
+      list.add(new Text(getTranslate(context, service.breakTimes[i])));
+      list.add(Text("/"));
+    }
+    if (service.breakTimes.length == 0) list.add(Text("Pas de pauses"));
+
+    return new Align(
+        alignment: Alignment.topLeft,
+        child: Wrap(
+          children: list,
+        ));
+  }
+
+  void _showServiceInfo(Service service) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return customDialog(
+              service.title,
+              service.description,
+              service.image != null ? "serviceImg/" + service.image : null,
+              Column(
+                children: [
+                  Divider(),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Wrap(
+                      alignment: WrapAlignment.start,
+                      children: [
+                        Text(
+                          "- Temps de travail de : ",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(service.workStartTime.substring(0, 5) +
+                            " à " +
+                            service.workEndTime.substring(0, 5))
+                      ],
+                    ),
+                  ),
+                  _getOpenDays(service),
+                  Align(
+                      alignment: Alignment.topLeft,
+                      child: Wrap(
+                        children: [
+                          Text(
+                            "- Temps moyen par client (mn): ",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(service.timePerClient.toString())
+                        ],
+                      )),
+                  _getBreakTimes(service),
+                  _getHoolidays(service),
+                ],
+              ));
+        });
+  }
+
   Card requestCard(Request request) {
     return Card(
       color: Colors.orange[50],
       child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: ListTile(
+            leading: IconButton(
+              icon: Icon(Icons.info),
+              onPressed: () => _showServiceInfo(request.service),
+            ),
             title: Text(
               request.dateTime.substring(0, 11) +
                   getTranslate(context, "A") +
                   request.dateTime.substring(11, 16),
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
             ),
-            subtitle: Text(
-              request.sender.name +
-                  getTranslate(context, "INVITED_YOU") +
-                  request.service.title,
-              style: TextStyle(fontSize: 13),
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
+            subtitle: Column(
               children: [
-                IconButton(
-                  icon: Icon(
-                    Icons.remove_circle,
-                    color: Colors.red[600],
-                  ),
-                  onPressed: _isHandlingRequest
-                      ? null
-                      : () => _refuseRequest(request.id),
+                Text(
+                  request.sender.name +
+                      " (" +
+                      request.sender.username +
+                      ") " +
+                      getTranslate(context, "INVITED_YOU") +
+                      request.service.title,
+                  style: TextStyle(fontSize: 13),
                 ),
-                IconButton(
-                  icon: Icon(
-                    Icons.check_circle,
-                    color: Colors.green[800],
-                  ),
-                  onPressed: _isHandlingRequest
-                      ? null
-                      : () => _acceptRequest(request.id),
-                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton.icon(
+                      onPressed: _isHandlingRequest
+                          ? null
+                          : () => _acceptRequest(request.id),
+                      label: Text(
+                        getTranslate(context, "ACCEPT"),
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      icon: Icon(
+                        Icons.check_circle,
+                        size: 17,
+                        color: Colors.green[800],
+                      ),
+                    ),
+                    TextButton.icon(
+                        icon: Icon(
+                          Icons.remove_circle,
+                          size: 17,
+                          color: Colors.red[600],
+                        ),
+                        onPressed: _isHandlingRequest
+                            ? null
+                            : () => _refuseRequest(request.id),
+                        label: Text(
+                          getTranslate(context, "REFUSE"),
+                          style: TextStyle(color: Colors.black),
+                        ))
+                  ],
+                )
               ],
             ),
           )),

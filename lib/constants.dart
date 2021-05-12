@@ -1,8 +1,8 @@
 import 'package:issaf/language/appLocalizations.dart';
 import 'package:flutter/material.dart';
 
-//const URL_BACKEND = "http://10.0.2.2:8000/api/";
-const URL_BACKEND = "https://issaf.herokuapp.com/api/";
+const URL_BACKEND = "http://10.0.2.2:8000/api/";
+//const URL_BACKEND = "https://issaf.herokuapp.com/api/";
 //TEXT INPUT DECORATION
 inputTextDecorationRounded(
     Icon prefixIcon, String hintText, GestureDetector suffixIcon) {
@@ -85,18 +85,27 @@ Widget customDialog(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text(
-                title,
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-              ),
+              new Align(
+                  alignment: Alignment.topCenter,
+                  child: Wrap(children: [
+                    Text(
+                      title,
+                      style:
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                    ),
+                  ])),
               SizedBox(
                 height: 8,
               ),
-              Text(
-                description,
-                style: TextStyle(fontSize: 14),
-                textAlign: TextAlign.center,
-              ),
+              new Align(
+                  alignment: Alignment.topCenter,
+                  child: Wrap(children: [
+                    Text(
+                      description,
+                      style: TextStyle(fontSize: 14),
+                      textAlign: TextAlign.center,
+                    )
+                  ])),
               SizedBox(
                 height: 10,
               ),
