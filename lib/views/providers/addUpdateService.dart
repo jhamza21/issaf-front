@@ -469,7 +469,7 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                 ? Padding(
                     padding: const EdgeInsets.only(top: 50),
                     child: Text(
-                      "Pas d'opérateurs séléctionnés",
+                      getTranslate(context, "NO_OPERATORS_SELECTED"),
                       style: TextStyle(color: Colors.grey),
                     ),
                   )

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:issaf/constants.dart';
 import 'package:issaf/views/providers/line_chart.dart';
 import 'package:issaf/views/providers/pie_chart.dart';
 
@@ -32,7 +33,7 @@ class _IndicatorsState extends State<Indicators>
               Tab(icon: Icon(FontAwesomeIcons.chartLine)),
             ],
           ),
-          title: Text('Statistiques'),
+          title: Text(getTranslate(context, "STATISTICS")),
         ),
         body: TabBarView(
           children: [

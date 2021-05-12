@@ -218,14 +218,62 @@ class _HandleServiceState extends State<HandleService> {
   Widget _getOpenDays(Service service) {
     // ignore: deprecated_member_use
     List<Widget> list = new List<Widget>();
-    list.add(Icon(Icons.calendar_today));
-    list.add(Text(" : "));
+    list.add(Text(
+      getTranslate(context, "WORK_DAYS"),
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ));
     for (var i = 0; i < service.openDays.length; i++) {
       list.add(
           new Text(getTranslate(context, service.openDays[i].toUpperCase())));
       list.add(Text(", "));
     }
-    return new Row(children: list);
+    return new Align(
+        alignment: Alignment.topLeft,
+        child: Wrap(
+          children: list,
+        ));
+  }
+
+  Widget _getHoolidays(Service service) {
+    // ignore: deprecated_member_use
+    List<Widget> list = new List<Widget>();
+    list.add(Text(
+      getTranslate(context, "HOOLI_DAYS"),
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ));
+    for (var i = 0; i < service.hoolidays.length; i++) {
+      list.add(new Text(getTranslate(context, service.hoolidays[i])));
+      list.add(Text("/"));
+    }
+    if (service.hoolidays.length == 0)
+      list.add(Text(getTranslate(context, "NO_HOOLIDAYS")));
+
+    return new Align(
+        alignment: Alignment.topLeft,
+        child: Wrap(
+          children: list,
+        ));
+  }
+
+  Widget _getBreakTimes(Service service) {
+    // ignore: deprecated_member_use
+    List<Widget> list = new List<Widget>();
+    list.add(Text(
+      getTranslate(context, "BREAKTIMES"),
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ));
+    for (var i = 0; i < service.breakTimes.length; i++) {
+      list.add(new Text(getTranslate(context, service.breakTimes[i])));
+      list.add(Text("/"));
+    }
+    if (service.breakTimes.length == 0)
+      list.add(Text(getTranslate(context, "NO_BREAKTIMES")));
+
+    return new Align(
+        alignment: Alignment.topLeft,
+        child: Wrap(
+          children: list,
+        ));
   }
 
   void _showServiceInfo(Service service) {
@@ -238,32 +286,42 @@ class _HandleServiceState extends State<HandleService> {
               service.image != null ? "serviceImg/" + service.image : null,
               Column(
                 children: [
+                  Divider(),
                   Text(
-                    getTranslate(context, "CLIENT_NUMBER") +
-                        " " +
+                    getTranslate(context, "SERVICE_INFO_COUNTER") +
                         service.counter.toString(),
-                    style: TextStyle(
-                        backgroundColor: Colors.orange,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
-                  Row(
-                    children: [
-                      Icon(Icons.timer_outlined),
-                      Expanded(
-                          child: Text(
-                              " : " + service.workStartTime.substring(0, 5)))
-                    ],
+                  Divider(),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Wrap(
+                      alignment: WrapAlignment.start,
+                      children: [
+                        Text(
+                          getTranslate(context, "WORK_TIME_INFO"),
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(service.workStartTime.substring(0, 5) +
+                            getTranslate(context, "A") +
+                            service.workEndTime.substring(0, 5))
+                      ],
+                    ),
                   ),
-                  Row(
-                    children: [
-                      Icon(Icons.timer_off),
-                      Expanded(
-                          child:
-                              Text(" : " + service.workEndTime.substring(0, 5)))
-                    ],
-                  ),
-                  _getOpenDays(service)
+                  _getOpenDays(service),
+                  Align(
+                      alignment: Alignment.topLeft,
+                      child: Wrap(
+                        children: [
+                          Text(
+                            getTranslate(context, "AVG_TIME_INFO"),
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(service.timePerClient.toString())
+                        ],
+                      )),
+                  _getBreakTimes(service),
+                  _getHoolidays(service),
                 ],
               ));
         });
@@ -384,7 +442,7 @@ class _HandleServiceState extends State<HandleService> {
                                   borderRadius:
                                       new BorderRadius.circular(30.0)),
                               color: Colors.grey,
-                              label: Text("Commencer"),
+                              label: Text(getTranslate(context, "BEGIN")),
                               onPressed: () => {
                                 resetTimer(),
                                 setState(() {

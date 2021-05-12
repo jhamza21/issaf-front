@@ -52,11 +52,14 @@ class _PieChartState extends State<PieChart> {
       int inProgress =
           _tickets.where((c) => c.status == "IN_PROGRESS").toList().length;
       if (present != 0)
-        piedata.add(Tickets("Clients présents", present, Colors.green));
+        piedata.add(Tickets(
+            getTranslate(context, "PRESENT_CLIENTS"), present, Colors.green));
       if (absent != 0)
-        piedata.add(Tickets("Clients absents", absent, Colors.red));
+        piedata.add(Tickets(
+            getTranslate(context, "ABSENT_CLIENTS"), absent, Colors.red));
       if (inProgress != 0)
-        piedata.add(Tickets("Clients en cours", inProgress, Colors.grey));
+        piedata.add(Tickets(getTranslate(context, "IN_PROGRESS_CLIENTS"),
+            inProgress, Colors.grey));
 
       setState(() {
         _isLoading = false;
@@ -83,7 +86,7 @@ class _PieChartState extends State<PieChart> {
               : Column(
                   children: <Widget>[
                     Text(
-                      "Taux de tickets réservés",
+                      getTranslate(context, "CHART_PRESENT_CLIENTS"),
                       style: TextStyle(
                           fontSize: 16.0, fontWeight: FontWeight.bold),
                     ),
@@ -116,7 +119,8 @@ class _PieChartState extends State<PieChart> {
                                         charts.ArcLabelPosition.inside)
                               ])),
                     ),
-                    Text("Total clients : " + _tickets.length.toString())
+                    Text(getTranslate(context, "TOTAL_CLIENTS") +
+                        _tickets.length.toString())
                   ],
                 ),
         ),

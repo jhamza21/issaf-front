@@ -171,7 +171,8 @@ class _BookTicketState extends State<BookTicket> {
                 onChanged: (Time value) {
                   if (value.isAvailable != "T") {
                     final snackBar = SnackBar(
-                      content: Text("Cet ticket n'est plus disponible !"),
+                      content:
+                          Text(getTranslate(context, "UNAVAILABLE_TICKET")),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   } else
@@ -392,15 +393,15 @@ class _BookTicketState extends State<BookTicket> {
                   width: 05,
                 ),
                 Text(
-                  "Me notifier avant : ",
+                  getTranslate(context, "ALERT_BEFORE"),
                 ),
                 _incrementDecrement(),
                 Text(
-                  "   tickets (~" +
+                  getTranslate(context, "ALERT_N") +
                       (int.parse(_controller.text) *
                               widget.service.timePerClient)
                           .toString() +
-                      " mn)",
+                      getTranslate(context, "ALERT_MN"),
                 ),
                 Spacer(),
                 IconButton(
@@ -412,9 +413,10 @@ class _BookTicketState extends State<BookTicket> {
                       if (_ticketNumber - _notifIndex <=
                           widget.service.counter) {
                         final snackBar = SnackBar(
-                          content: Text("On peut pas vous notifier avant " +
-                              _notifIndex.toString() +
-                              " tickets, pas de clients suffisants avant vous!"),
+                          content: Text(
+                              getTranslate(context, "IMPOSS_ALERT_1") +
+                                  _notifIndex.toString() +
+                                  getTranslate(context, "IMPOSS_ALERT_2")),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                         return;
@@ -438,7 +440,7 @@ class _BookTicketState extends State<BookTicket> {
                   ? Padding(
                       padding: const EdgeInsets.only(top: 50),
                       child: Text(
-                        "Pas de notification planifiée",
+                        getTranslate(context, "NO_NOTIFICATIONS"),
                         style: TextStyle(color: Colors.grey),
                       ),
                     )
@@ -460,13 +462,13 @@ class _BookTicketState extends State<BookTicket> {
                                       Icons.delete,
                                       size: 20,
                                     )),
-                                Text("Avant "),
+                                Text(getTranslate(context, "ALERT_BEFORE")),
                                 Text(_notifications[index].toString()),
-                                Text(" tickets (~" +
+                                Text(getTranslate(context, "ALERT_N") +
                                     (_notifications[index] *
                                             widget.service.timePerClient)
                                         .toString() +
-                                    " mn)")
+                                    getTranslate(context, "ALERT_MN"))
                               ],
                             );
                           }),

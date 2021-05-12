@@ -163,7 +163,7 @@ class _NotificationsState extends State<Notifications> {
     // ignore: deprecated_member_use
     List<Widget> list = new List<Widget>();
     list.add(Text(
-      "- Jours de travail : ",
+      getTranslate(context, "WORK_DAYS"),
       style: TextStyle(fontWeight: FontWeight.bold),
     ));
     for (var i = 0; i < service.openDays.length; i++) {
@@ -182,14 +182,15 @@ class _NotificationsState extends State<Notifications> {
     // ignore: deprecated_member_use
     List<Widget> list = new List<Widget>();
     list.add(Text(
-      "- Jours fériés : ",
+      getTranslate(context, "HOOLI_DAYS"),
       style: TextStyle(fontWeight: FontWeight.bold),
     ));
     for (var i = 0; i < service.hoolidays.length; i++) {
       list.add(new Text(getTranslate(context, service.hoolidays[i])));
       list.add(Text("/"));
     }
-    if (service.hoolidays.length == 0) list.add(Text("Pas de jours fériés"));
+    if (service.hoolidays.length == 0)
+      list.add(Text(getTranslate(context, "NO_HOOLIDAYS")));
 
     return new Align(
         alignment: Alignment.topLeft,
@@ -202,14 +203,15 @@ class _NotificationsState extends State<Notifications> {
     // ignore: deprecated_member_use
     List<Widget> list = new List<Widget>();
     list.add(Text(
-      "- Temps de pause : ",
+      getTranslate(context, "BREAKTIMES"),
       style: TextStyle(fontWeight: FontWeight.bold),
     ));
     for (var i = 0; i < service.breakTimes.length; i++) {
       list.add(new Text(getTranslate(context, service.breakTimes[i])));
       list.add(Text("/"));
     }
-    if (service.breakTimes.length == 0) list.add(Text("Pas de pauses"));
+    if (service.breakTimes.length == 0)
+      list.add(Text(getTranslate(context, "NO_BREAKTIMES")));
 
     return new Align(
         alignment: Alignment.topLeft,
@@ -229,17 +231,23 @@ class _NotificationsState extends State<Notifications> {
               Column(
                 children: [
                   Divider(),
+                  Text(
+                    getTranslate(context, "SERVICE_INFO_COUNTER") +
+                        service.counter.toString(),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  Divider(),
                   Align(
                     alignment: Alignment.topLeft,
                     child: Wrap(
                       alignment: WrapAlignment.start,
                       children: [
                         Text(
-                          "- Temps de travail de : ",
+                          getTranslate(context, "WORK_TIME_INFO"),
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text(service.workStartTime.substring(0, 5) +
-                            " à " +
+                            getTranslate(context, "A") +
                             service.workEndTime.substring(0, 5))
                       ],
                     ),
@@ -250,7 +258,7 @@ class _NotificationsState extends State<Notifications> {
                       child: Wrap(
                         children: [
                           Text(
-                            "- Temps moyen par client (mn): ",
+                            getTranslate(context, "AVG_TIME_INFO"),
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           Text(service.timePerClient.toString())

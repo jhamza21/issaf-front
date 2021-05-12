@@ -149,7 +149,8 @@ class _BookTicketState extends State<BookTicket> {
                 onChanged: (Time value) {
                   if (value.isAvailable != "T") {
                     final snackBar = SnackBar(
-                      content: Text("Cet ticket n'est plus disponible !"),
+                      content:
+                          Text(getTranslate(context, "UNAVAILABLE_TICKET")),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   } else
@@ -236,7 +237,7 @@ class _BookTicketState extends State<BookTicket> {
         appBar: AppBar(
           centerTitle: true,
           elevation: 0.0,
-          title: Text("Réserver un ticket"),
+          title: Text(getTranslate(context, "RESERVE_TICKET")),
           leading: IconButton(
             icon: Icon(Icons.navigate_before),
             onPressed: () => widget.callback(0),
@@ -258,7 +259,7 @@ class _BookTicketState extends State<BookTicket> {
                 height: 20,
               ),
               Text(
-                "Réserver un ticket pour :",
+                getTranslate(context, "RESERVE_TICKET_MSG"),
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(

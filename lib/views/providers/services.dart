@@ -133,7 +133,7 @@ class _ServiceListState extends State<ServiceList> {
               icon: Icon(
                 Icons.settings,
               ),
-              label: Text("Gérer"),
+              label: Text(getTranslate(context, "HANDLE")),
               onPressed: () {
                 Navigator.of(context).pop();
                 _selectedService = service.id;
@@ -147,7 +147,7 @@ class _ServiceListState extends State<ServiceList> {
               icon: Icon(
                 Icons.bar_chart,
               ),
-              label: Text("Statistiques"),
+              label: Text(getTranslate(context, "STATISTICS")),
               onPressed: () {
                 Navigator.of(context).pop();
                 _selectedService = service.id;
