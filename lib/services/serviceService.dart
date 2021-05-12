@@ -83,7 +83,7 @@ class ServiceService {
 
     if (avgTimePerClient != null)
       request.fields['avg_time_per_client'] = avgTimePerClient;
-    if (id == null) request.fields['counter'] = "0";
+    if (id == null) request.fields['counter'] = "1";
     if (workStartTime != null)
       request.fields['work_start_time'] = workStartTime;
     if (workEndTime != null) request.fields['work_end_time'] = workEndTime;
