@@ -10,9 +10,8 @@ import 'package:issaf/services/ticketService.dart';
 class BookTicket extends StatefulWidget {
   final Service service;
   final void Function(int) callback;
-
-  final void Function() fetchTickets;
-  BookTicket(this.service, this.callback, this.fetchTickets);
+  final int idTicket;
+  BookTicket(this.service, this.callback, this.idTicket);
   @override
   _BookTicketState createState() => _BookTicketState();
 }
@@ -24,7 +23,6 @@ class _BookTicketState extends State<BookTicket> {
   bool _isLoading = false, _isFetchingTimes;
   List<int> _notifications = [];
   List<Time> _times = [];
-  List<Time> _timesOnlyAvailable = [];
   TextEditingController _controller = TextEditingController();
 
   @override
@@ -42,28 +40,20 @@ class _BookTicketState extends State<BookTicket> {
       });
       var prefs = await SharedPreferences.getInstance();
       var res = await TicketService().fetchAvailableTicketsByDat(
-          prefs.getString('token'),
-          _selectedDate,
-          widget.service.id.toString());
+          prefs.getString('token'), _selectedDate, widget.service.id);
       assert(res.statusCode == 200);
+      _times = [];
       json
           .decode(res.body)
           .entries
           .forEach((entry) => _times.add(Time(entry.key, entry.value)));
       //get first available time
-      //get first available time
       for (var i = 0; i < _times.length; i++) {
-        if (_times[i].isAvailable == "T") {
+        if (_times[i].isAvailable) {
           _selectedTime = _times[i];
           break;
         }
       }
-      for (var i = 0; i < _times.length; i++) {
-        if (_times[i].isAvailable == "N" || _times[i].isAvailable == "T") {
-          _timesOnlyAvailable.add(_times[i]);
-        }
-      }
-
       setState(() {
         _isFetchingTimes = false;
       });
@@ -84,12 +74,13 @@ class _BookTicketState extends State<BookTicket> {
       });
       var prefs = await SharedPreferences.getInstance();
       var res;
-      if (widget.fetchTickets != null)
+      if (widget.idTicket != null)
         res = await TicketService().reschudleTicket(
             prefs.getString('token'),
+            widget.idTicket,
             _selectedDate,
             _selectedTime.value,
-            _timesOnlyAvailable.indexOf(_selectedTime) + 1,
+            _times.indexOf(_selectedTime) + 1,
             widget.service.id,
             _notifications);
       else
@@ -97,7 +88,7 @@ class _BookTicketState extends State<BookTicket> {
             prefs.getString('token'),
             _selectedDate,
             _selectedTime.value,
-            _timesOnlyAvailable.indexOf(_selectedTime) + 1,
+            _times.indexOf(_selectedTime) + 1,
             widget.service.id,
             _notifications);
       if (res.statusCode == 201 || res.statusCode == 200) {
@@ -105,7 +96,6 @@ class _BookTicketState extends State<BookTicket> {
           content: Text(getTranslate(context, "SUCCESS_ADD")),
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        if (widget.fetchTickets != null) widget.fetchTickets();
         widget.callback(0);
       } else {
         setState(() {
@@ -128,11 +118,13 @@ class _BookTicketState extends State<BookTicket> {
       firstDate: DateTime.now(),
       lastDate: DateTime(2030),
     );
-    if (d != null)
+    if (d != null) {
       setState(() {
         _selectedDate = new DateFormat("yyyy-MM-dd").format(d);
-        _fetchAvailableTimes();
       });
+      _fetchAvailableTimes();
+      _notifications = [];
+    }
   }
 
   Widget _showDatePicker() {
@@ -169,16 +161,18 @@ class _BookTicketState extends State<BookTicket> {
                 dropdownColor: Colors.orange[50],
                 value: _selectedTime,
                 onChanged: (Time value) {
-                  if (value.isAvailable != "T") {
+                  if (!value.isAvailable) {
                     final snackBar = SnackBar(
                       content:
                           Text(getTranslate(context, "UNAVAILABLE_TICKET")),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  } else
+                  } else {
+                    _notifications = [];
                     setState(() {
                       _selectedTime = value;
                     });
+                  }
                 },
                 underline: SizedBox(),
                 items: _times
@@ -187,10 +181,15 @@ class _BookTicketState extends State<BookTicket> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text("~ " + _time.value),
+                              Text(
+                                (_times.indexOf(_time) + 1).toString(),
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(" (~ " + _time.value + ")",
+                                  style: TextStyle(fontSize: 12)),
                               Icon(Icons.circle,
                                   size: 15,
-                                  color: _time.isAvailable == "T"
+                                  color: _time.isAvailable
                                       ? Colors.green
                                       : Colors.red)
                             ],
@@ -406,12 +405,15 @@ class _BookTicketState extends State<BookTicket> {
                 Spacer(),
                 IconButton(
                     onPressed: () {
+                      String _today =
+                          new DateFormat("yyyy-MM-dd").format(DateTime.now());
                       int _notifIndex = int.parse(_controller.text);
-                      int _ticketNumber = _times.indexOf(_selectedTime) +
-                          1 +
-                          widget.service.counter;
-                      if (_ticketNumber - _notifIndex <=
-                          widget.service.counter) {
+                      int _ticketNumber = _times.indexOf(_selectedTime) + 1;
+                      if ((_today != _selectedDate &&
+                              _notifIndex <= _ticketNumber) ||
+                          (_today == _selectedDate &&
+                              (_ticketNumber - _notifIndex) >=
+                                  widget.service.counter)) {
                         final snackBar = SnackBar(
                           content: Text(
                               getTranslate(context, "IMPOSS_ALERT_1") +
@@ -483,7 +485,7 @@ class _BookTicketState extends State<BookTicket> {
 
 class Time {
   final String value;
-  final String isAvailable;
+  final bool isAvailable;
 
   Time(this.value, this.isAvailable);
 }

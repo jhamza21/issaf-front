@@ -15,8 +15,7 @@ import 'package:issaf/views/shared/selectDays.dart';
 class AddUpdateService extends StatefulWidget {
   final int idService;
   final void Function(int) callback;
-  final void Function() fetchServices;
-  AddUpdateService(this.idService, this.callback, this.fetchServices);
+  AddUpdateService(this.idService, this.callback);
   @override
   _AddUpdateServiceState createState() => _AddUpdateServiceState();
 }
@@ -172,7 +171,6 @@ class _AddUpdateServiceState extends State<AddUpdateService> {
                                 : "SUCCESS_UPDATE")),
                       );
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      widget.fetchServices();
                       widget.callback(0);
                     } else {
                       final jsonData =

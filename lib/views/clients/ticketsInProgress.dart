@@ -21,9 +21,10 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
   int _currentIndex = 0;
 
   changePage(int i) {
-    if (i == 0)
+    if (i == 0) {
       widget.switchAppBar(true);
-    else
+      _fetchTickets();
+    } else
       widget.switchAppBar(false);
     setState(() {
       _currentIndex = i;
@@ -217,7 +218,7 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
   @override
   Widget build(BuildContext context) {
     return _currentIndex == 1
-        ? BookTicket(_selectedTicket.service, changePage, _fetchTickets)
+        ? BookTicket(_selectedTicket.service, changePage, _selectedTicket.id)
         : _isLoading
             ? Center(child: circularProgressIndicator)
             : _tickets.length == 0

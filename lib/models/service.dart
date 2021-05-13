@@ -1,3 +1,4 @@
+import 'package:issaf/models/ticket.dart';
 import 'package:issaf/models/user.dart';
 
 class Service {
@@ -5,15 +6,15 @@ class Service {
   String title;
   String description;
   int timePerClient;
-  int counter;
   String workStartTime;
   String workEndTime;
   List<String> openDays;
   List<String> hoolidays;
   List<String> breakTimes;
-
+  int counter;
   int providerId;
   List<User> users;
+  List<Ticket> tickets;
   String status;
 
   User user;
@@ -24,12 +25,12 @@ class Service {
       this.title,
       this.description,
       this.timePerClient,
-      this.counter,
       this.workStartTime,
       this.workEndTime,
       this.openDays,
       this.hoolidays,
       this.breakTimes,
+      this.counter,
       this.providerId,
       this.users,
       this.status,
@@ -40,7 +41,6 @@ class Service {
         title = json['title'] ?? '',
         description = json['description'] ?? '',
         timePerClient = json['avg_time_per_client'] ?? null,
-        counter = json['counter'] ?? 0,
         workStartTime = json['work_start_time'] ?? '',
         workEndTime = json['work_end_time'] ?? '',
         openDays = json['open_days'].cast<String>() ?? [],
@@ -49,10 +49,13 @@ class Service {
         breakTimes = json['break_times'] != null
             ? json['break_times'].cast<String>()
             : [],
+        counter = json['counter'] ?? null,
         providerId = json['provider_id'] ?? null,
         users = User.listFromJson(json['users']) ?? null,
         status = json['status'] ?? '',
         user = json["user"] != null ? User.fromJson(json["user"]) : null,
+        tickets =
+            json["tickets"] != null ? Ticket.listFromJson(json["tickets"]) : [],
         image = json['image'] ?? null;
   static List<Service> listFromJson(List<dynamic> json) {
     return json == null

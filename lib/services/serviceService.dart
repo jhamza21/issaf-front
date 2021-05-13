@@ -83,7 +83,6 @@ class ServiceService {
 
     if (avgTimePerClient != null)
       request.fields['avg_time_per_client'] = avgTimePerClient;
-    if (id == null) request.fields['counter'] = "1";
     if (workStartTime != null)
       request.fields['work_start_time'] = workStartTime;
     if (workEndTime != null) request.fields['work_end_time'] = workEndTime;
@@ -106,7 +105,7 @@ class ServiceService {
     return await request.send();
   }
 
-//RESET SERVICE COUNTER
+  //RESET SERVICE COUNTER
   Future<http.Response> updateCounter(String token, int id, int number) async {
     var url = URL_BACKEND + "services/" + id.toString() + "?api_token=" + token;
     return await http.put(url,
@@ -115,21 +114,5 @@ class ServiceService {
           "Accept": "application/json"
         },
         body: json.encode({"counter": number}));
-  }
-
-//INCREMENT COUNTER
-  Future<http.Response> incrementCounter(
-      String token, int id, String status, int duration) async {
-    var url = URL_BACKEND +
-        "incrementService/" +
-        id.toString() +
-        "?api_token=" +
-        token;
-    return await http.put(url,
-        headers: {
-          "content-type": "application/json",
-          "Accept": "application/json"
-        },
-        body: json.encode({"ticket_status": status, "duration": duration}));
   }
 }

@@ -1,4 +1,5 @@
 import 'package:issaf/models/service.dart';
+import 'package:issaf/models/user.dart';
 
 class Ticket {
   int id;
@@ -7,6 +8,7 @@ class Ticket {
   String time;
   String status;
   Service service;
+  User user;
   String name;
   int duration;
   Ticket(
@@ -15,6 +17,7 @@ class Ticket {
       this.date,
       this.time,
       this.service,
+      this.user,
       this.status,
       this.name,
       this.duration});
@@ -28,6 +31,7 @@ class Ticket {
             json['service'] != null ? Service.fromJson(json['service']) : null,
         status = json['status'] ?? '',
         name = json['name'] ?? '',
+        user = json["user"] != null ? User.fromJson(json["user"]) : null,
         duration = json['duration'] ?? '';
 
   static List<Ticket> listFromJson(List<dynamic> json) {

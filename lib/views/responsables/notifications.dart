@@ -231,12 +231,6 @@ class _NotificationsState extends State<Notifications> {
               Column(
                 children: [
                   Divider(),
-                  Text(
-                    getTranslate(context, "SERVICE_INFO_COUNTER") +
-                        service.counter.toString(),
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                  ),
-                  Divider(),
                   Align(
                     alignment: Alignment.topLeft,
                     child: Wrap(

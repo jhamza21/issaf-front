@@ -1,25 +1,33 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/service.dart';
+import 'package:issaf/models/ticket.dart';
 import 'package:issaf/services/serviceService.dart';
+import 'package:issaf/services/ticketService.dart';
+import 'package:issaf/views/responsables/tickets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HandleService extends StatefulWidget {
+  final int serviceId;
+  final void Function(int) callback;
+  HandleService(this.serviceId, this.callback);
   @override
   _HandleServiceState createState() => _HandleServiceState();
 }
 
 class _HandleServiceState extends State<HandleService> {
   bool _isLoading = true;
-  bool _isCounterLoading = false;
+  bool _isHandlingTicket = false;
   String _error;
   Service _service;
-  int _counter = 0;
+  Time _selectedTime;
+  List<Time> _times = [];
   Timer _timer;
-  int seconds = 0, minutes = 0, hours = 0;
+  int seconds = 0, minutes = 0, hours = 0, _currentIndex = 0;
   bool _isStarted = false;
 
   @override
@@ -33,6 +41,66 @@ class _HandleServiceState extends State<HandleService> {
   void dispose() {
     super.dispose();
     _timer.cancel();
+  }
+
+  void initializeServiceData() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      var prefs = await SharedPreferences.getInstance();
+      var response;
+      if (widget.serviceId != null)
+        response = await ServiceService()
+            .getServiceById(prefs.getString('token'), widget.serviceId);
+      else
+        response =
+            await ServiceService().getServiceByRespo(prefs.getString('token'));
+      if (response.statusCode == 404) {
+        _error = getTranslate(context, "REGISTER_TO_SERVER");
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+      assert(response.statusCode == 200);
+      _service = Service.fromJson(json.decode(response.body));
+      String _todayDate = new DateFormat("yyyy-MM-dd").format(DateTime.now());
+      var res = await TicketService().fetchAvailableTicketsByDat(
+          prefs.getString('token'), _todayDate, _service.id);
+      assert(res.statusCode == 200);
+      json
+          .decode(res.body)
+          .entries
+          .forEach((entry) => _times.add(Time(entry.key, entry.value)));
+      for (int i = 0; i < _times.length; i++) {
+        Ticket _ticket = _service.tickets.firstWhere(
+            (element) =>
+                element.status == "DONE" &&
+                element.time.substring(0, 5) == _times[i].value,
+            orElse: () => null);
+        _times[i].isDone =
+            _service.counter > i + 1 || _ticket != null ? true : false;
+      }
+      _selectedTime = _times.length >= _service.counter - 1
+          ? _times[_service.counter - 1]
+          : null;
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      print(e);
+      _error = getTranslate(context, "ERROR_SERVER");
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void changePage(int i) {
+    setState(() {
+      _currentIndex = i;
+    });
   }
 
   void resetTimer() {
@@ -59,33 +127,6 @@ class _HandleServiceState extends State<HandleService> {
     );
   }
 
-  void initializeServiceData() async {
-    try {
-      var prefs = await SharedPreferences.getInstance();
-      var response =
-          await ServiceService().getServiceByRespo(prefs.getString('token'));
-      if (response.statusCode == 404) {
-        _error = getTranslate(context, "REGISTER_TO_SERVER");
-        setState(() {
-          _isLoading = false;
-        });
-        return;
-      }
-      assert(response.statusCode == 200);
-      var jsonData = json.decode(response.body);
-      _service = Service.fromJson(jsonData);
-      _counter = _service.counter;
-      setState(() {
-        _isLoading = false;
-      });
-    } catch (e) {
-      _error = getTranslate(context, "ERROR_SERVER");
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
   void _resetCounter(int id) async {
     showDialog(
       context: context,
@@ -109,15 +150,15 @@ class _HandleServiceState extends State<HandleService> {
                 try {
                   Navigator.of(context).pop();
                   setState(() {
-                    _isCounterLoading = true;
+                    _isHandlingTicket = true;
                   });
                   var prefs = await SharedPreferences.getInstance();
                   final response = await ServiceService()
                       .updateCounter(prefs.getString('token'), id, 1);
                   assert(response.statusCode == 200);
+                  initializeServiceData();
                   setState(() {
-                    _counter = 1;
-                    _isCounterLoading = false;
+                    _isHandlingTicket = false;
                   });
                 } catch (error) {
                   final snackBar = SnackBar(
@@ -125,7 +166,7 @@ class _HandleServiceState extends State<HandleService> {
                   );
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   setState(() {
-                    _isCounterLoading = false;
+                    _isHandlingTicket = false;
                   });
                 }
               },
@@ -136,10 +177,10 @@ class _HandleServiceState extends State<HandleService> {
     );
   }
 
-  void _incrementCounter(String status) async {
+  void _validateTicket(String status) async {
     try {
       setState(() {
-        _isCounterLoading = true;
+        _isHandlingTicket = true;
       });
       var prefs = await SharedPreferences.getInstance();
       int _dur = 0;
@@ -148,13 +189,26 @@ class _HandleServiceState extends State<HandleService> {
         _dur += minutes;
         _dur += hours * 60;
       }
-      final response = await ServiceService().incrementCounter(
-          prefs.getString('token'), _service.id, status, _dur);
+      Ticket _ticket = _service.tickets.firstWhere(
+          (element) => element.time.substring(0, 5) == _selectedTime.value,
+          orElse: () => null);
+
+      final response = await TicketService().validateTicket(
+          prefs.getString('token'),
+          _service.id,
+          _ticket != null ? _ticket.id : -1,
+          status,
+          _dur);
       assert(response.statusCode == 200);
-      _counter = json.decode(response.body)["counter"];
+      var jsonData = json.decode(response.body);
+      _service = Service.fromJson(jsonData);
+      _times[_times.indexOf(_selectedTime)].isDone = true;
+      _selectedTime = _times.length >= _service.counter - 1
+          ? _times[_service.counter - 1]
+          : null;
       _isStarted = false;
       setState(() {
-        _isCounterLoading = false;
+        _isHandlingTicket = false;
       });
     } catch (error) {
       final snackBar = SnackBar(
@@ -162,7 +216,7 @@ class _HandleServiceState extends State<HandleService> {
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       setState(() {
-        _isCounterLoading = false;
+        _isHandlingTicket = false;
       });
     }
   }
@@ -191,7 +245,7 @@ class _HandleServiceState extends State<HandleService> {
   //                 if (_counter == 1) return;
   //                 Navigator.of(context).pop();
   //                 setState(() {
-  //                   _isCounterLoading = true;
+  //                   _isHandlingTicket = true;
   //                 });
   //                 var prefs = await SharedPreferences.getInstance();
   //                 final response = await ServiceService().updateCounter(
@@ -200,7 +254,7 @@ class _HandleServiceState extends State<HandleService> {
   //                 resetTimer();
   //                 setState(() {
   //                   _counter--;
-  //                   _isCounterLoading = false;
+  //                   _isHandlingTicket = false;
   //                 });
   //               } catch (error) {
   //                 final snackBar = SnackBar(
@@ -208,7 +262,7 @@ class _HandleServiceState extends State<HandleService> {
   //                 );
   //                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
   //                 setState(() {
-  //                   _isCounterLoading = false;
+  //                   _isHandlingTicket = false;
   //                 });
   //               }
   //             },
@@ -291,12 +345,6 @@ class _HandleServiceState extends State<HandleService> {
               Column(
                 children: [
                   Divider(),
-                  Text(
-                    getTranslate(context, "SERVICE_INFO_COUNTER") +
-                        service.counter.toString(),
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                  ),
-                  Divider(),
                   Align(
                     alignment: Alignment.topLeft,
                     child: Wrap(
@@ -345,115 +393,199 @@ class _HandleServiceState extends State<HandleService> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        elevation: 0,
-        actions: [
-          PopupMenuButton(
-            enabled: _isCounterLoading || _isLoading || _service == null
-                ? false
-                : true,
-            onSelected: (value) {
-              if (value == "RESET_COUNTER")
-                _resetCounter(_service.id);
-              // else if (value == "DECREMENT_COUNTER")
-              //   _decrementCounter(_service.id);
-              else if (value == "INFO_SERVICE") _showServiceInfo(_service);
-            },
-            itemBuilder: (BuildContext context) {
-              return {"RESET_COUNTER", "INFO_SERVICE"}.map((String choice) {
-                return PopupMenuItem(
-                  value: choice,
-                  child: Text(getTranslate(context, choice)),
-                );
-              }).toList();
-            },
-          ),
-        ],
-        title: Text(_isLoading || _service == null ? "..." : _service.title),
-      ),
-      body: Center(
-        child: _isLoading
-            ? circularProgressIndicator
-            : _error != null
-                ? Text(_error)
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        getTranslate(context, "CLIENT_NUMBER"),
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        _counter.toString(),
-                        style: TextStyle(
-                            fontSize: 80, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(
-                        height: 40,
-                      ),
-                      _isStarted
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                ButtonTheme(
-                                  minWidth: 150,
-                                  // ignore: deprecated_member_use
-                                  child: RaisedButton.icon(
-                                    elevation: 5.0,
-                                    icon: Icon(Icons.dangerous),
-                                    shape: new RoundedRectangleBorder(
-                                        borderRadius:
-                                            new BorderRadius.circular(30.0)),
-                                    color: Colors.red,
-                                    label:
-                                        Text(getTranslate(context, "UNDONE")),
-                                    onPressed: _isCounterLoading
-                                        ? null
-                                        : () => _incrementCounter("UNDONE"),
-                                  ),
-                                ),
-                                ButtonTheme(
-                                  minWidth: 150,
-                                  // ignore: deprecated_member_use
-                                  child: RaisedButton.icon(
-                                    elevation: 5.0,
-                                    icon: Icon(Icons.done),
-                                    shape: new RoundedRectangleBorder(
-                                        borderRadius:
-                                            new BorderRadius.circular(30.0)),
-                                    color: Colors.green,
-                                    label: Text(getTranslate(context, "DONE")),
-                                    onPressed: _isCounterLoading
-                                        ? null
-                                        : () => _incrementCounter("DONE"),
-                                  ),
-                                ),
-                              ],
-                            )
-                          // ignore: deprecated_member_use
-                          : RaisedButton.icon(
-                              elevation: 5.0,
-                              icon: Icon(Icons.play_arrow),
-                              shape: new RoundedRectangleBorder(
-                                  borderRadius:
-                                      new BorderRadius.circular(30.0)),
-                              color: Colors.grey,
-                              label: Text(getTranslate(context, "BEGIN")),
-                              onPressed: () => {
-                                resetTimer(),
-                                setState(() {
-                                  _isStarted = true;
-                                })
-                              },
+    return _currentIndex == 1
+        ? Tickets(changePage, _service.id)
+        : Scaffold(
+            appBar: AppBar(
+              centerTitle: true,
+              elevation: 0,
+              leading: widget.callback != null
+                  ? IconButton(
+                      icon: Icon(Icons.navigate_before),
+                      onPressed: () => widget.callback(0),
+                    )
+                  : null,
+              actions: [
+                PopupMenuButton(
+                  enabled: _isHandlingTicket || _isLoading || _service == null
+                      ? false
+                      : true,
+                  onSelected: (value) {
+                    if (value == "HANDLE_TICKETS") changePage(1);
+                    if (value == "RESET_COUNTER") _resetCounter(_service.id);
+                    if (value == "INFO_SERVICE") _showServiceInfo(_service);
+                  },
+                  itemBuilder: (BuildContext context) {
+                    return {"HANDLE_TICKETS", "RESET_COUNTER", "INFO_SERVICE"}
+                        .map((String choice) {
+                      return PopupMenuItem(
+                        value: choice,
+                        child: Text(getTranslate(context, choice)),
+                      );
+                    }).toList();
+                  },
+                ),
+              ],
+              title:
+                  Text(_isLoading || _service == null ? "..." : _service.title),
+            ),
+            body: Center(
+              child: _isLoading
+                  ? circularProgressIndicator
+                  : _error != null
+                      ? Text(_error)
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              getTranslate(context, "TICKET_NUMBER"),
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
                             ),
-                      _isStarted ? _getTimer() : SizedBox.shrink(),
-                    ],
-                  ),
-      ),
-    );
+                            SizedBox(
+                              height: 40,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.orange[100],
+                                  borderRadius: BorderRadius.circular(30)),
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    50.0, 10.0, 50.0, 10.0),
+                                child: DropdownButton<Time>(
+                                  underline: SizedBox(),
+                                  value: _selectedTime,
+                                  elevation: 5,
+                                  style: TextStyle(color: Colors.black),
+                                  items: _times.map<DropdownMenuItem<Time>>(
+                                      (Time value) {
+                                    return DropdownMenuItem<Time>(
+                                      value: value,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            (_times.indexOf(value) + 1)
+                                                    .toString() +
+                                                " - ",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 20),
+                                          ),
+                                          Text(" (~" + value.value + ")"),
+                                          Icon(Icons.circle,
+                                              size: 15,
+                                              color: value.isDone
+                                                  ? Colors.green
+                                                  : Colors.grey)
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                  hint: Text(
+                                    getTranslate(context, "NO_TICKETS"),
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                  onChanged: _isStarted
+                                      ? null
+                                      : (Time value) {
+                                          if (value.isDone) {
+                                            final snackBar = SnackBar(
+                                              content: Text(getTranslate(
+                                                  context,
+                                                  "TICKET_ALREADY_DONE")),
+                                            );
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(snackBar);
+                                          } else
+                                            setState(() {
+                                              _selectedTime = value;
+                                            });
+                                        },
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 40,
+                            ),
+                            _isStarted
+                                ? Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      ButtonTheme(
+                                        minWidth: 150,
+                                        // ignore: deprecated_member_use
+                                        child: RaisedButton.icon(
+                                          elevation: 5.0,
+                                          icon: Icon(Icons.dangerous),
+                                          shape: new RoundedRectangleBorder(
+                                              borderRadius:
+                                                  new BorderRadius.circular(
+                                                      30.0)),
+                                          color: Colors.red,
+                                          label: Text(
+                                              getTranslate(context, "UNDONE")),
+                                          onPressed: _isHandlingTicket
+                                              ? null
+                                              : () => _validateTicket("UNDONE"),
+                                        ),
+                                      ),
+                                      ButtonTheme(
+                                        minWidth: 150,
+                                        // ignore: deprecated_member_use
+                                        child: RaisedButton.icon(
+                                          elevation: 5.0,
+                                          icon: Icon(Icons.done),
+                                          shape: new RoundedRectangleBorder(
+                                              borderRadius:
+                                                  new BorderRadius.circular(
+                                                      30.0)),
+                                          color: Colors.green,
+                                          label: Text(
+                                              getTranslate(context, "DONE")),
+                                          onPressed: _isHandlingTicket
+                                              ? null
+                                              : () => _validateTicket("DONE"),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                // ignore: deprecated_member_use
+                                : RaisedButton.icon(
+                                    elevation: 5.0,
+                                    icon: Icon(Icons.play_arrow),
+                                    shape: new RoundedRectangleBorder(
+                                        borderRadius:
+                                            new BorderRadius.circular(30.0)),
+                                    color: Colors.grey,
+                                    label: Text(getTranslate(context, "BEGIN")),
+                                    onPressed: _isHandlingTicket ||
+                                            _service.tickets.length == 0
+                                        ? null
+                                        : () => {
+                                              resetTimer(),
+                                              setState(() {
+                                                _isStarted = true;
+                                              })
+                                            },
+                                  ),
+                            _isStarted ? _getTimer() : SizedBox.shrink(),
+                          ],
+                        ),
+            ),
+          );
   }
+}
+
+class Time {
+  String value;
+  bool isDone;
+
+  Time(this.value, this.isDone);
 }

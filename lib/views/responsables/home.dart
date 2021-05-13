@@ -1,7 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:issaf/redux/users/state.dart';
-import 'package:issaf/views/responsables/tickets.dart';
 import 'package:issaf/views/responsables/handleService.dart';
 import 'package:issaf/views/responsables/notifications.dart';
 import 'package:issaf/views/shared/profile.dart';
@@ -25,8 +24,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> _children = [
-      HandleService(),
-      Tickets(),
+      HandleService(null, null),
       Notifications(),
       Profile(widget.userState)
     ];
@@ -42,11 +40,6 @@ class _HomeState extends State<Home> {
             items: <Widget>[
               Icon(
                 Icons.settings,
-                size: 20,
-                color: Colors.black,
-              ),
-              Icon(
-                Icons.bookmark,
                 size: 20,
                 color: Colors.black,
               ),

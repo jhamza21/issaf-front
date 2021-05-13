@@ -5,8 +5,8 @@ import 'package:issaf/constants.dart';
 import 'package:issaf/models/service.dart';
 import 'package:issaf/services/serviceService.dart';
 import 'package:issaf/views/providers/addUpdateService.dart';
-import 'package:issaf/views/providers/handleService.dart';
 import 'package:issaf/views/providers/indicateurs.dart';
+import 'package:issaf/views/responsables/handleService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ServiceList extends StatefulWidget {
@@ -207,6 +207,7 @@ class _ServiceListState extends State<ServiceList> {
   }
 
   void changePage(int index) {
+    if (index == 0) _fetchServices();
     setState(() {
       _currentIndex = index;
     });
@@ -246,7 +247,7 @@ class _ServiceListState extends State<ServiceList> {
                         },
                       ))
         : _currentIndex == 1
-            ? AddUpdateService(_selectedService, changePage, _fetchServices)
+            ? AddUpdateService(_selectedService, changePage)
             : _currentIndex == 2
                 ? HandleService(_selectedService, changePage)
                 : Indicators(_selectedService, changePage);

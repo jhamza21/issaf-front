@@ -7,8 +7,8 @@ import 'package:issaf/services/ticketService.dart';
 
 class BookTicket extends StatefulWidget {
   final void Function(int) callback;
-  final void Function() fetchTickets;
-  BookTicket(this.callback, this.fetchTickets);
+  final int serviceId;
+  BookTicket(this.callback, this.serviceId);
   @override
   _BookTicketState createState() => _BookTicketState();
 }
@@ -21,7 +21,6 @@ class _BookTicketState extends State<BookTicket> {
   Time _selectedTime;
   bool _isLoading = false, _isFetchingTimes;
   List<Time> _times = [];
-  List<Time> _timesOnlyAvailable = [];
   TextEditingController _controller = TextEditingController();
 
   @override
@@ -49,7 +48,7 @@ class _BookTicketState extends State<BookTicket> {
       });
       var prefs = await SharedPreferences.getInstance();
       var res = await TicketService().fetchAvailableTicketsByDat(
-          prefs.getString('token'), _selectedDate, "-1");
+          prefs.getString('token'), _selectedDate, widget.serviceId);
       assert(res.statusCode == 200);
       json
           .decode(res.body)
@@ -57,14 +56,9 @@ class _BookTicketState extends State<BookTicket> {
           .forEach((entry) => _times.add(Time(entry.key, entry.value)));
       //get first available time
       for (var i = 0; i < _times.length; i++) {
-        if (_times[i].isAvailable == "T") {
+        if (_times[i].isAvailable) {
           _selectedTime = _times[i];
           break;
-        }
-      }
-      for (var i = 0; i < _times.length; i++) {
-        if (_times[i].isAvailable == "N" || _times[i].isAvailable == "T") {
-          _timesOnlyAvailable.add(_times[i]);
         }
       }
 
@@ -105,18 +99,18 @@ class _BookTicketState extends State<BookTicket> {
           _error = null;
         });
         var prefs = await SharedPreferences.getInstance();
-        var res = await TicketService().addTicketRespo(
+        var res = await TicketService().addTicketToService(
             prefs.getString('token'),
+            widget.serviceId,
             _selectedDate,
             _selectedTime.value,
-            _timesOnlyAvailable.indexOf(_selectedTime) + 1,
+            _times.indexOf(_selectedTime) + 1,
             _name);
         if (res.statusCode == 201) {
           final snackBar = SnackBar(
             content: Text(getTranslate(context, "SUCCESS_ADD")),
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
-          if (widget.fetchTickets != null) widget.fetchTickets();
           widget.callback(0);
         } else {
           setState(() {
@@ -147,7 +141,7 @@ class _BookTicketState extends State<BookTicket> {
                 dropdownColor: Colors.orange[50],
                 value: _selectedTime,
                 onChanged: (Time value) {
-                  if (value.isAvailable != "T") {
+                  if (!value.isAvailable) {
                     final snackBar = SnackBar(
                       content:
                           Text(getTranslate(context, "UNAVAILABLE_TICKET")),
@@ -165,10 +159,15 @@ class _BookTicketState extends State<BookTicket> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text("~ " + _time.value),
+                              Text(
+                                (_times.indexOf(_time) + 1).toString(),
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(" (~ " + _time.value + ")",
+                                  style: TextStyle(fontSize: 12)),
                               Icon(Icons.circle,
                                   size: 15,
-                                  color: _time.isAvailable == "T"
+                                  color: _time.isAvailable
                                       ? Colors.green
                                       : Colors.red)
                             ],
@@ -289,7 +288,7 @@ class _BookTicketState extends State<BookTicket> {
 
 class Time {
   final String value;
-  final String isAvailable;
+  final bool isAvailable;
 
   Time(this.value, this.isAvailable);
 }

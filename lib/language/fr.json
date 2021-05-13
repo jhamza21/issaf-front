@@ -131,7 +131,7 @@
     "INVALID_DAYS":"Sélectionnez les jours de travail",
     "REGISTER_TO_SERVER":"Vous n'appartenez pas à aucun service !",
     "HOME":"Accueil",
-    "CLIENT_NUMBER":"Client nᵒ",
+    "CLIENT_NUMBER":"Ticket nᵒ",
     "DONE":"Présent",
     "UNDONE":"Absent",
     "BOOK_TICKET":"Prendre ce ticket",
@@ -221,5 +221,8 @@
     "ALERT_MN":" mn)",
     "IMPOSS_ALERT_1":"On peut pas vous notifier avant ",
     "IMPOSS_ALERT_2":" tickets, pas assez de clients avant vous!",
-    "NO_NOTIFICATIONS":"Pas de notifications planifiées"
+    "NO_NOTIFICATIONS":"Pas de notifications planifiées",
+    "HANDLE_TICKETS":"Gérer les tickets",
+    "NO_TICKETS":"Aucun ticket trouvé",
+    "TICKET_ALREADY_DONE":"Ticket déjà traité"
 }

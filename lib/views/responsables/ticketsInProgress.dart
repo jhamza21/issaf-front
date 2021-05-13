@@ -7,6 +7,8 @@ import 'package:issaf/services/ticketService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TicketsInProgress extends StatefulWidget {
+  final int serviceId;
+  TicketsInProgress(this.serviceId);
   @override
   _TicketsInProgressState createState() => _TicketsInProgressState();
 }
@@ -27,8 +29,8 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
         _isLoading = true;
       });
       var prefs = await SharedPreferences.getInstance();
-      final response =
-          await TicketService().fetchTicketsRespo(prefs.getString('token'));
+      final response = await TicketService()
+          .fetchTicketsByServiceId(prefs.getString('token'), widget.serviceId);
       assert(response.statusCode == 200);
       final jsonData = json.decode(response.body);
       _tickets = Ticket.listFromJson(jsonData);
