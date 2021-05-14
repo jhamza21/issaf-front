@@ -257,7 +257,7 @@ class _BookTicketState extends State<BookTicket> {
 
   Widget _incrementDecrement() {
     return Container(
-      width: 60.0,
+      width: 90.0,
       foregroundDecoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5.0),
         border: Border.all(
@@ -289,12 +289,13 @@ class _BookTicketState extends State<BookTicket> {
             ),
           ),
           Container(
-            height: 38.0,
+            width: 45.0,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Container(
+                  width: 45.0,
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
@@ -305,7 +306,7 @@ class _BookTicketState extends State<BookTicket> {
                   child: InkWell(
                     child: Icon(
                       Icons.arrow_drop_up,
-                      size: 18.0,
+                      size: 22.0,
                     ),
                     onTap: () {
                       int currentValue = int.parse(_controller.text);
@@ -317,19 +318,23 @@ class _BookTicketState extends State<BookTicket> {
                     },
                   ),
                 ),
-                InkWell(
-                  child: Icon(
-                    Icons.arrow_drop_down,
-                    size: 18.0,
+                Container(
+                  width: 45.0,
+                  child: InkWell(
+                    child: Icon(
+                      Icons.arrow_drop_down,
+                      size: 22.0,
+                    ),
+                    onTap: () {
+                      int currentValue = int.parse(_controller.text);
+                      setState(() {
+                        currentValue--;
+                        _controller.text =
+                            (currentValue >= 1 ? currentValue : 1)
+                                .toString(); // decrementing value
+                      });
+                    },
                   ),
-                  onTap: () {
-                    int currentValue = int.parse(_controller.text);
-                    setState(() {
-                      currentValue--;
-                      _controller.text = (currentValue >= 1 ? currentValue : 1)
-                          .toString(); // decrementing value
-                    });
-                  },
                 ),
               ],
             ),
@@ -395,11 +400,12 @@ class _BookTicketState extends State<BookTicket> {
                   width: 05,
                 ),
                 Text(
-                  getTranslate(context, "ALERT_BEFORE"),
+                  getTranslate(context, "ALERT_BEFORE") + " ",
                 ),
                 _incrementDecrement(),
                 Text(
-                  getTranslate(context, "ALERT_N") +
+                  "  " +
+                      getTranslate(context, "ALERT_N") +
                       (int.parse(_controller.text) *
                               widget.service.timePerClient)
                           .toString() +
