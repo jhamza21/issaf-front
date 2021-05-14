@@ -430,6 +430,15 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
                       .deleteProvider(prefs.getString('token'), id);
                   assert(response.statusCode == 204);
                   _provider = null;
+                  _type = null;
+                  _title = null;
+                  _description = null;
+                  _mobile = null;
+                  _email = null;
+                  _siteWeb = null;
+                  _region = null;
+                  _selectedImage = null;
+                  _error = null;
                   final snackBar = SnackBar(
                     content: Text(getTranslate(context, "SUCCESS_DELETE")),
                   );
