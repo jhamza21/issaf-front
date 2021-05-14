@@ -52,7 +52,7 @@ class _NotificationsState extends State<Notifications> {
   void _refuseRequest(int id) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: new Text(getTranslate(context, "REFUSE")),
           content: new Text(getTranslate(context, "REFUSE_CONFIRMATION")),
@@ -61,7 +61,7 @@ class _NotificationsState extends State<Notifications> {
             new FlatButton(
               child: new Text(getTranslate(context, "NO")),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
               },
             ),
             // ignore: deprecated_member_use
@@ -69,7 +69,7 @@ class _NotificationsState extends State<Notifications> {
               child: new Text(getTranslate(context, "YES")),
               onPressed: () async {
                 try {
-                  Navigator.of(context).pop();
+                  Navigator.of(dialogContext).pop();
                   setState(() {
                     _isHandlingRequest = true;
                   });
@@ -107,7 +107,7 @@ class _NotificationsState extends State<Notifications> {
   void _acceptRequest(int id) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: new Text(getTranslate(context, "ACCEPT")),
           content: new Text(getTranslate(context, "ACCEPT_CONFIRMATION")),
@@ -116,7 +116,7 @@ class _NotificationsState extends State<Notifications> {
             new FlatButton(
               child: new Text(getTranslate(context, "NO")),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
               },
             ),
             // ignore: deprecated_member_use
@@ -124,7 +124,7 @@ class _NotificationsState extends State<Notifications> {
               child: new Text(getTranslate(context, "YES")),
               onPressed: () async {
                 try {
-                  Navigator.of(context).pop();
+                  Navigator.of(dialogContext).pop();
                   setState(() {
                     _isHandlingRequest = true;
                   });
@@ -290,9 +290,9 @@ class _NotificationsState extends State<Notifications> {
             subtitle: Column(
               children: [
                 Text(
-                  request.receiver.name +
+                  request.sender.name +
                       " (" +
-                      request.receiver.username +
+                      request.sender.username +
                       ") " +
                       getTranslate(context, "INVITED_YOU") +
                       request.service.title,

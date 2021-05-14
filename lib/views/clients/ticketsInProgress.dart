@@ -67,7 +67,7 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
   void _deleteTicket(int id) async {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: new Text(getTranslate(context, "DELETE") + "?"),
           content:
@@ -77,7 +77,7 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
             new FlatButton(
               child: new Text(getTranslate(context, "NO")),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
               },
             ),
             // ignore: deprecated_member_use
@@ -85,7 +85,7 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
               child: new Text(getTranslate(context, "YES")),
               onPressed: () async {
                 try {
-                  Navigator.of(context).pop();
+                  Navigator.of(dialogContext).pop();
                   setState(() {
                     _isHandlingTicket = true;
                   });

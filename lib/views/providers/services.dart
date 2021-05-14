@@ -57,7 +57,7 @@ class _ServiceListState extends State<ServiceList> {
     Navigator.of(context).pop();
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: new Text(getTranslate(context, "DELETE") + "?"),
           content: new Text(getTranslate(context, "DELETE_CONFIRMATION") +
@@ -68,7 +68,7 @@ class _ServiceListState extends State<ServiceList> {
             new FlatButton(
               child: new Text(getTranslate(context, "NO")),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
               },
             ),
             // ignore: deprecated_member_use
@@ -76,11 +76,11 @@ class _ServiceListState extends State<ServiceList> {
               child: new Text(getTranslate(context, "YES")),
               onPressed: () async {
                 try {
+                  Navigator.of(dialogContext).pop();
                   var prefs = await SharedPreferences.getInstance();
                   var res = await ServiceService()
                       .deleteService(prefs.getString('token'), service.id);
                   assert(res.statusCode == 204);
-                  Navigator.of(context).pop();
                   _fetchServices();
                   final snackBar = SnackBar(
                     content: Text(getTranslate(context, "SUCCESS_DELETE")),

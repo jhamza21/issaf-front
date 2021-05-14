@@ -64,6 +64,7 @@ class _HandleServiceState extends State<HandleService> {
         return;
       }
       assert(response.statusCode == 200);
+      _times = [];
       _service = Service.fromJson(json.decode(response.body));
       String _todayDate = new DateFormat("yyyy-MM-dd").format(DateTime.now());
       var res = await TicketService().fetchAvailableTicketsByDat(
@@ -130,7 +131,7 @@ class _HandleServiceState extends State<HandleService> {
   void _resetCounter(int id) async {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: new Text(getTranslate(context, "RESET_COUNTER")),
           content:
@@ -140,7 +141,7 @@ class _HandleServiceState extends State<HandleService> {
             new FlatButton(
               child: new Text(getTranslate(context, "NO")),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
               },
             ),
             // ignore: deprecated_member_use
@@ -148,7 +149,7 @@ class _HandleServiceState extends State<HandleService> {
               child: new Text(getTranslate(context, "YES")),
               onPressed: () async {
                 try {
-                  Navigator.of(context).pop();
+                  Navigator.of(dialogContext).pop();
                   setState(() {
                     _isHandlingTicket = true;
                   });

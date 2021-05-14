@@ -18,14 +18,13 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print("ppppp");
+      FlutterRingtonePlayer.playNotification();
       RemoteNotification notification = message.notification;
       showNotification(notification.title, notification.body);
     });
   }
 
   void showNotification(String title, String body) {
-    FlutterRingtonePlayer.playNotification();
     showDialog(
       context: context,
       builder: (_) {
