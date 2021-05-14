@@ -201,10 +201,10 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
                 TextButton.icon(
                     onPressed: _isHandlingTicket
                         ? null
-                        : () {
-                            _selectedTicket = ticket;
-                            changePage(1);
-                          },
+                        : () => {
+                              _selectedTicket = ticket,
+                              changePage(1),
+                            },
                     icon: Icon(Icons.restore_rounded),
                     label: Text(getTranslate(context, "RESCHEDULE"))),
               ],

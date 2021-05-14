@@ -69,10 +69,10 @@ class _HandleServiceState extends State<HandleService> {
       var res = await TicketService().fetchAvailableTicketsByDat(
           prefs.getString('token'), _todayDate, _service.id);
       assert(res.statusCode == 200);
-      json
-          .decode(res.body)
-          .entries
-          .forEach((entry) => _times.add(Time(entry.key, entry.value)));
+      var jsonData = json.decode(res.body);
+      if (jsonData.length != 0)
+        jsonData.entries
+            .forEach((entry) => _times.add(Time(entry.key, entry.value)));
       for (int i = 0; i < _times.length; i++) {
         Ticket _ticket = _service.tickets.firstWhere(
             (element) =>
@@ -192,7 +192,6 @@ class _HandleServiceState extends State<HandleService> {
       Ticket _ticket = _service.tickets.firstWhere(
           (element) => element.time.substring(0, 5) == _selectedTime.value,
           orElse: () => null);
-
       final response = await TicketService().validateTicket(
           prefs.getString('token'),
           _service.id,
@@ -300,7 +299,7 @@ class _HandleServiceState extends State<HandleService> {
       style: TextStyle(fontWeight: FontWeight.bold),
     ));
     for (var i = 0; i < service.hoolidays.length; i++) {
-      list.add(new Text(getTranslate(context, service.hoolidays[i])));
+      list.add(new Text(service.hoolidays[i]));
       list.add(Text("/"));
     }
     if (service.hoolidays.length == 0)
@@ -321,7 +320,7 @@ class _HandleServiceState extends State<HandleService> {
       style: TextStyle(fontWeight: FontWeight.bold),
     ));
     for (var i = 0; i < service.breakTimes.length; i++) {
-      list.add(new Text(getTranslate(context, service.breakTimes[i])));
+      list.add(new Text(service.breakTimes[i]));
       list.add(Text("/"));
     }
     if (service.breakTimes.length == 0)
@@ -344,6 +343,12 @@ class _HandleServiceState extends State<HandleService> {
               service.image != null ? "serviceImg/" + service.image : null,
               Column(
                 children: [
+                  Divider(),
+                  Text(
+                    getTranslate(context, "SERVICE_INFO_COUNTER") +
+                        service.counter.toString(),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
                   Divider(),
                   Align(
                     alignment: Alignment.topLeft,
@@ -420,7 +425,18 @@ class _HandleServiceState extends State<HandleService> {
                         .map((String choice) {
                       return PopupMenuItem(
                         value: choice,
-                        child: Text(getTranslate(context, choice)),
+                        child: Row(
+                          children: [
+                            Icon(
+                                choice == "HANDLE_TICKETS"
+                                    ? Icons.bookmark
+                                    : choice == "RESET_COUNTER"
+                                        ? Icons.repeat
+                                        : Icons.info,
+                                color: Colors.grey),
+                            Text("  " + getTranslate(context, choice)),
+                          ],
+                        ),
                       );
                     }).toList();
                   },
@@ -566,7 +582,7 @@ class _HandleServiceState extends State<HandleService> {
                                     color: Colors.grey,
                                     label: Text(getTranslate(context, "BEGIN")),
                                     onPressed: _isHandlingTicket ||
-                                            _service.tickets.length == 0
+                                            _selectedTime == null
                                         ? null
                                         : () => {
                                               resetTimer(),

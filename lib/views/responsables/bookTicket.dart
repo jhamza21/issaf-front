@@ -50,10 +50,10 @@ class _BookTicketState extends State<BookTicket> {
       var res = await TicketService().fetchAvailableTicketsByDat(
           prefs.getString('token'), _selectedDate, widget.serviceId);
       assert(res.statusCode == 200);
-      json
-          .decode(res.body)
-          .entries
-          .forEach((entry) => _times.add(Time(entry.key, entry.value)));
+      var jsonData = json.decode(res.body);
+      if (jsonData.length != 0)
+        jsonData.entries
+            .forEach((entry) => _times.add(Time(entry.key, entry.value)));
       //get first available time
       for (var i = 0; i < _times.length; i++) {
         if (_times[i].isAvailable) {
@@ -79,8 +79,8 @@ class _BookTicketState extends State<BookTicket> {
       child: new TextFormField(
         initialValue: _name,
         keyboardType: TextInputType.text,
-        decoration: inputTextDecorationRectangle(Icon(Icons.person),
-            getTranslate(context, 'NAME') + "*", null, null),
+        decoration: inputTextDecorationRounded(
+            Icon(Icons.person), getTranslate(context, 'NAME') + "*", null),
         validator: (value) =>
             value.isEmpty || value.length < 6 || value.length > 255
                 ? getTranslate(context, 'INVALID_NAME_LENGTH')
@@ -139,6 +139,7 @@ class _BookTicketState extends State<BookTicket> {
             ? circularProgressIndicator
             : DropdownButton(
                 dropdownColor: Colors.orange[50],
+                hint: Text(getTranslate(context, "NO_TICKETS")),
                 value: _selectedTime,
                 onChanged: (Time value) {
                   if (!value.isAvailable) {
@@ -187,6 +188,8 @@ class _BookTicketState extends State<BookTicket> {
         // ignore: deprecated_member_use
         child: RaisedButton.icon(
           elevation: 8.0,
+          shape: new RoundedRectangleBorder(
+              borderRadius: new BorderRadius.circular(30.0)),
           icon: _isLoading
               ? circularProgressIndicator
               : Icon(Icons.bookmark, color: Colors.black),
@@ -255,7 +258,7 @@ class _BookTicketState extends State<BookTicket> {
           child: Column(
             children: [
               SizedBox(
-                height: 20,
+                height: 100,
               ),
               Text(
                 getTranslate(context, "RESERVE_TICKET_MSG"),

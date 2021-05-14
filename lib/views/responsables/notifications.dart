@@ -207,7 +207,7 @@ class _NotificationsState extends State<Notifications> {
       style: TextStyle(fontWeight: FontWeight.bold),
     ));
     for (var i = 0; i < service.breakTimes.length; i++) {
-      list.add(new Text(getTranslate(context, service.breakTimes[i])));
+      list.add(new Text(service.breakTimes[i]));
       list.add(Text("/"));
     }
     if (service.breakTimes.length == 0)
@@ -230,6 +230,12 @@ class _NotificationsState extends State<Notifications> {
               service.image != null ? "serviceImg/" + service.image : null,
               Column(
                 children: [
+                  Divider(),
+                  Text(
+                    getTranslate(context, "SERVICE_INFO_COUNTER") +
+                        service.counter.toString(),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
                   Divider(),
                   Align(
                     alignment: Alignment.topLeft,
@@ -284,9 +290,9 @@ class _NotificationsState extends State<Notifications> {
             subtitle: Column(
               children: [
                 Text(
-                  request.sender.name +
+                  request.receiver.name +
                       " (" +
-                      request.sender.username +
+                      request.receiver.username +
                       ") " +
                       getTranslate(context, "INVITED_YOU") +
                       request.service.title,

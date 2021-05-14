@@ -202,7 +202,7 @@
     "NO_HOOLIDAYS":"Pas de jours fériés",
     "BREAKTIMES":"- Temps de pause : ",
     "NO_BREAKTIMES":"Pas de pauses",
-    "SERVICE_INFO_COUNTER":"On serre maintenant le client nᵒ : ",
+    "SERVICE_INFO_COUNTER":"On serve maintenant le client nᵒ : ",
     "WORK_TIME_INFO":"- Temps de travail : ",
     "AVG_TIME_INFO":"- Temps moyen par client (mn): ",
     "UNAVAILABLE_TICKET":"Cet ticket n'est plus disponible !",

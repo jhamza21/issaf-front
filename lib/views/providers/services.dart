@@ -21,17 +21,11 @@ class _ServiceListState extends State<ServiceList> {
   bool _isRegistredToProvider = false;
   bool _isLoading = true;
   int _currentIndex = 0;
-  var _tapPosition;
 
   @override
   void initState() {
     super.initState();
     _fetchServices();
-    _tapPosition = Offset(0.0, 0.0);
-  }
-
-  void _storePosition(TapDownDetails details) {
-    _tapPosition = details.globalPosition;
   }
 
   void _fetchServices() async {
@@ -106,103 +100,70 @@ class _ServiceListState extends State<ServiceList> {
     );
   }
 
-  _showPopupMenu(Service service) async {
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject();
-    await showMenu(
-        context: context,
-        position: RelativeRect.fromRect(
-            _tapPosition & Size(40, 40), Offset.zero & overlay.size),
-        items: <PopupMenuEntry>[
-          PopupMenuItem(
-            // ignore: deprecated_member_use
-            child: FlatButton.icon(
-              icon: Icon(
-                Icons.create_rounded,
-              ),
-              label: Text(getTranslate(context, "UPDATE")),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _selectedService = service.id;
-                changePage(1);
-              },
+  _showPopupMenu(Service service) => PopupMenuButton(onSelected: (value) {
+        if (value == "UPDATE") {
+          _selectedService = service.id;
+          changePage(1);
+        }
+        if (value == "HANDLE") {
+          _selectedService = service.id;
+          changePage(2);
+        }
+        if (value == "STATISTICS") {
+          _selectedService = service.id;
+          changePage(3);
+        }
+        if (value == "DELETE") {
+          _deleteService(service);
+        }
+      }, itemBuilder: (BuildContext context) {
+        return {"UPDATE", "HANDLE", "STATISTICS", "DELETE"}
+            .map((String choice) {
+          return PopupMenuItem(
+            value: choice,
+            child: Row(
+              children: [
+                Icon(
+                  choice == "UPDATE"
+                      ? Icons.create_rounded
+                      : choice == "HANDLE"
+                          ? Icons.settings
+                          : choice == "STATISTICS"
+                              ? Icons.bar_chart
+                              : Icons.delete,
+                ),
+                Text("   " + getTranslate(context, choice)),
+              ],
             ),
-          ),
-          PopupMenuItem(
-            // ignore: deprecated_member_use
-            child: FlatButton.icon(
-              icon: Icon(
-                Icons.settings,
-              ),
-              label: Text(getTranslate(context, "HANDLE")),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _selectedService = service.id;
-                changePage(2);
-              },
-            ),
-          ),
-          PopupMenuItem(
-            // ignore: deprecated_member_use
-            child: FlatButton.icon(
-              icon: Icon(
-                Icons.bar_chart,
-              ),
-              label: Text(getTranslate(context, "STATISTICS")),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _selectedService = service.id;
-                changePage(3);
-              },
-            ),
-          ),
-          PopupMenuItem(
-            // ignore: deprecated_member_use
-            child: FlatButton.icon(
-              icon: Icon(
-                Icons.delete,
-              ),
-              label: Text(getTranslate(context, "DELETE")),
-              onPressed: () {
-                _deleteService(service);
-              },
-            ),
-          ),
-        ]);
-  }
+          );
+        }).toList();
+      });
 
   Widget serviceCard(Service service) {
     return GestureDetector(
-      onTapDown: _storePosition,
-      onLongPress: () => _showPopupMenu(service),
       child: Card(
-        color: Colors.orange[50],
-        child: ListTile(
-          dense: true,
-          title: Text(
-            service.title,
-          ),
-          subtitle: Text(service.description),
-          leading: CircleAvatar(
-            backgroundColor: Colors.orange,
-            child: service.image == null
-                ? Text(
-                    service.title[0].toUpperCase(),
-                    style: TextStyle(color: Colors.white),
-                  )
-                : SizedBox.shrink(),
-            radius: 30.0,
-            backgroundImage: service.image != null
-                ? NetworkImage(URL_BACKEND + "serviceImg/" + service.image)
-                : null,
-          ),
-          trailing: Icon(
-            Icons.circle,
-            size: 15,
-            color:
-                service.status == "ACCEPTED" ? Colors.green[800] : Colors.grey,
-          ),
-        ),
-      ),
+          color: Colors.orange[50],
+          child: ListTile(
+            dense: true,
+            title: Text(
+              service.title,
+            ),
+            subtitle: Text(service.description),
+            leading: CircleAvatar(
+              backgroundColor: Colors.orange,
+              child: service.image == null
+                  ? Text(
+                      service.title[0].toUpperCase(),
+                      style: TextStyle(color: Colors.white),
+                    )
+                  : SizedBox.shrink(),
+              radius: 30.0,
+              backgroundImage: service.image != null
+                  ? NetworkImage(URL_BACKEND + "serviceImg/" + service.image)
+                  : null,
+            ),
+            trailing: _showPopupMenu(service),
+          )),
     );
   }
 

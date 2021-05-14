@@ -48,6 +48,7 @@ dependencies:
   google_sign_in: ^5.0.2
   font_awesome_flutter: ^9.0.0
   charts_flutter: ^0.10.0
+  flutter_ringtone_player: ^3.0.0
 
 dev_dependencies:
   flutter_test:

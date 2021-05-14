@@ -43,10 +43,10 @@ class _BookTicketState extends State<BookTicket> {
           prefs.getString('token'), _selectedDate, widget.service.id);
       assert(res.statusCode == 200);
       _times = [];
-      json
-          .decode(res.body)
-          .entries
-          .forEach((entry) => _times.add(Time(entry.key, entry.value)));
+      var jsonData = json.decode(res.body);
+      if (jsonData.length != 0)
+        jsonData.entries
+            .forEach((entry) => _times.add(Time(entry.key, entry.value)));
       //get first available time
       for (var i = 0; i < _times.length; i++) {
         if (_times[i].isAvailable) {
@@ -159,6 +159,7 @@ class _BookTicketState extends State<BookTicket> {
             ? circularProgressIndicator
             : DropdownButton(
                 dropdownColor: Colors.orange[50],
+                hint: Text(getTranslate(context, "NO_TICKETS")),
                 value: _selectedTime,
                 onChanged: (Time value) {
                   if (!value.isAvailable) {
@@ -213,6 +214,8 @@ class _BookTicketState extends State<BookTicket> {
               ? circularProgressIndicator
               : Icon(Icons.bookmark, color: Colors.black),
           color: Colors.orange[600],
+          shape: new RoundedRectangleBorder(
+              borderRadius: new BorderRadius.circular(30.0)),
           label: Text(getTranslate(context, "BOOK_TICKET"),
               style: new TextStyle(fontSize: 15.0, color: Colors.black)),
           onPressed: _isLoading ||
@@ -412,7 +415,7 @@ class _BookTicketState extends State<BookTicket> {
                       if ((_today != _selectedDate &&
                               _notifIndex <= _ticketNumber) ||
                           (_today == _selectedDate &&
-                              (_ticketNumber - _notifIndex) >=
+                              (_ticketNumber - _notifIndex) <=
                                   widget.service.counter)) {
                         final snackBar = SnackBar(
                           content: Text(

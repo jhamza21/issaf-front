@@ -67,14 +67,14 @@ class UserService {
 
 //update user data
   Future<http.Response> updateUser(
-    String token,
-    String username,
-    String password,
-    String name,
-    String email,
-    String mobile,
-    String region,
-  ) async {
+      String token,
+      String username,
+      String password,
+      String name,
+      String email,
+      String mobile,
+      String region,
+      String messagingToken) async {
     var url = URL_BACKEND + "updateAccount?api_token=" + token;
     Map<String, dynamic> data = {};
     if (username != null) data["username"] = username;
@@ -83,6 +83,7 @@ class UserService {
     if (email != null) data["email"] = email;
     if (mobile != null) data["mobile"] = mobile;
     if (region != null) data["region"] = region;
+    if (messagingToken != null) data["messaging_token"] = messagingToken;
 
     return await http.put(url,
         headers: {

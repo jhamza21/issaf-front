@@ -51,6 +51,13 @@ class _LoginSignUpState extends State<LoginSignUp> {
       final jsonData = json.decode(response.body);
       if (response.statusCode == 200) {
         await prefs.setString('token', jsonData["data"]["api_token"]);
+        try {
+          String _messagingToken = await FirebaseMessaging.instance.getToken();
+          await UserService().updateUser(prefs.getString('token'), null, null,
+              null, null, null, null, _messagingToken);
+        } catch (e) {
+          print(e);
+        }
         Redux.store.dispatch(
           SetUserStateAction(
             UserState(

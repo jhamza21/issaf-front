@@ -44,8 +44,6 @@ class _ServiceListState extends State<ServiceList> {
       assert(response.statusCode == 200);
       final jsonData = json.decode(response.body)["services"];
       _services = Service.listFromJson(jsonData);
-      //filter active services
-      _services.removeWhere((element) => element.status != "ACCEPTED");
       setState(() {
         _isLoading = false;
       });
@@ -92,8 +90,11 @@ class _ServiceListState extends State<ServiceList> {
       style: TextStyle(fontWeight: FontWeight.bold),
     ));
     for (var i = 0; i < service.hoolidays.length; i++) {
-      list.add(new Text(getTranslate(context, service.hoolidays[i])));
-      list.add(Text("/"));
+      list.add(new Text(service.hoolidays[i]));
+      list.add(Text(
+        " / ",
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ));
     }
     if (service.hoolidays.length == 0)
       list.add(Text(getTranslate(context, "NO_HOOLIDAYS")));
@@ -113,8 +114,11 @@ class _ServiceListState extends State<ServiceList> {
       style: TextStyle(fontWeight: FontWeight.bold),
     ));
     for (var i = 0; i < service.breakTimes.length; i++) {
-      list.add(new Text(getTranslate(context, service.breakTimes[i])));
-      list.add(Text("/"));
+      list.add(new Text(service.breakTimes[i]));
+      list.add(Text(
+        " / ",
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ));
     }
     if (service.breakTimes.length == 0)
       list.add(Text(getTranslate(context, "NO_BREAKTIMES")));
@@ -136,6 +140,12 @@ class _ServiceListState extends State<ServiceList> {
               service.image != null ? "serviceImg/" + service.image : null,
               Column(
                 children: [
+                  Divider(),
+                  Text(
+                    getTranslate(context, "SERVICE_INFO_COUNTER") +
+                        service.counter.toString(),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
                   Divider(),
                   Align(
                     alignment: Alignment.topLeft,

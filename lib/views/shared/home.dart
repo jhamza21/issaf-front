@@ -1,5 +1,8 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:issaf/constants.dart';
 import 'package:issaf/redux/store.dart';
 import 'package:issaf/views/clients/home.dart' as Clients;
 import 'package:issaf/views/providers/home.dart' as Providers;
@@ -11,6 +14,42 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  @override
+  void initState() {
+    super.initState();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print("ppppp");
+      RemoteNotification notification = message.notification;
+      showNotification(notification.title, notification.body);
+    });
+  }
+
+  void showNotification(String title, String body) {
+    FlutterRingtonePlayer.playNotification();
+    showDialog(
+      context: context,
+      builder: (_) {
+        return new AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(getTranslate(context, "OK")))
+          ],
+          title: Wrap(
+            children: [
+              Icon(Icons.notifications, size: 30),
+              Text("  " + title),
+            ],
+          ),
+          content: Text(body),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return StoreConnector<AppState, AppState>(
