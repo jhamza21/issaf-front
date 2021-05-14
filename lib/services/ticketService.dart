@@ -36,7 +36,7 @@ class TicketService {
 
   //add ticket
   Future<http.Response> addTicket(String token, String date, String time,
-      int number, int serviceId, List<int> notifications) async {
+      int number, int serviceId, String name, List<int> notifications) async {
     var url = URL_BACKEND + "tickets?api_token=" + token;
     return await http.post(url,
         headers: {
@@ -47,31 +47,22 @@ class TicketService {
           "date": date,
           "time": time,
           "number": number,
+          "name": name,
           "service_id": serviceId,
           "notifications": notifications
         }));
   }
 
-  //add ticket respo
-  Future<http.Response> addTicketToService(String token, int serviceId,
-      String date, String time, int number, String name) async {
-    var url = URL_BACKEND +
-        "addTicketToService/" +
-        serviceId.toString() +
-        "?api_token=" +
-        token;
-    return await http.post(url,
-        headers: {
-          "content-type": "application/json",
-          "Accept": "application/json"
-        },
-        body: json.encode(
-            {"date": date, "time": time, "number": number, "name": name}));
-  }
-
-  //add ticket
-  Future<http.Response> reschudleTicket(String token, int ticketId, String date,
-      String time, int number, int serviceId, List<int> notifications) async {
+  //reschudle ticket
+  Future<http.Response> reschudleTicket(
+      String token,
+      int ticketId,
+      String date,
+      String time,
+      int number,
+      int serviceId,
+      String name,
+      List<int> notifications) async {
     var url = URL_BACKEND +
         "reschudle/" +
         ticketId.toString() +
@@ -87,6 +78,7 @@ class TicketService {
           "time": time,
           "number": number,
           "service_id": serviceId,
+          "name": name,
           "notifications": notifications
         }));
   }

@@ -224,5 +224,13 @@
     "NO_NOTIFICATIONS":"Pas de notifications planifiées",
     "HANDLE_TICKETS":"Gérer les tickets",
     "NO_TICKETS":"Aucun ticket trouvé",
-    "TICKET_ALREADY_DONE":"Ticket déjà traité"
-}
+    "TICKET_ALREADY_DONE":"Ticket déjà traité",
+    "DELETE_ACCOUNT":"Supprimer mon compte",
+    "DELETE_PROVIDER":"Supprimer mon service",
+    "DELETE_TICKET":"Annuler ce ticket",
+    "DELETE_TICKET_CONFIRMATION":"Attention, vous perdez votre place! Etes vous sûr d'annuler ce ticket ?",
+    "DELETE_ACCOUNT_CONFIRMATION":"Attention, cette action est irréversible! Etes vous sûr de supprimer votre compte ?",
+    "DELETE_PROVIDER_CONFIRMATION":"Attention, cette action est irréversible! Tous les E-Saffs qui dépendent de ce service seront supprimés! Etes vous sûr de supprimer ce service ?",
+    "DELETE_SERVICE_CONFIRMATION":"Attention, cette action est irréversible! Etes vous sûr de supprimer ce E-SAFF ?",
+    "TICKET_MSG_RESPONSIBLE":"Vous avez réservé un rendez-vous pour"
+} 

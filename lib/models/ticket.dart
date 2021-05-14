@@ -1,3 +1,4 @@
+import 'package:issaf/models/notification.dart';
 import 'package:issaf/models/service.dart';
 import 'package:issaf/models/user.dart';
 
@@ -11,6 +12,7 @@ class Ticket {
   User user;
   String name;
   int duration;
+  List<Notification> notifications;
   Ticket(
       {this.id,
       this.number,
@@ -20,7 +22,8 @@ class Ticket {
       this.user,
       this.status,
       this.name,
-      this.duration});
+      this.duration,
+      this.notifications});
 
   Ticket.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -32,8 +35,10 @@ class Ticket {
         status = json['status'] ?? '',
         name = json['name'] ?? '',
         user = json["user"] != null ? User.fromJson(json["user"]) : null,
-        duration = json['duration'] ?? '';
-
+        duration = json['duration'] ?? '',
+        notifications = json["notifications"] != null
+            ? Notification.listFromJson(json["notifications"])
+            : [];
   static List<Ticket> listFromJson(List<dynamic> json) {
     return json == null
         ? []

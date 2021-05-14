@@ -54,15 +54,21 @@ class _ServiceListState extends State<ServiceList> {
   }
 
   void _deleteService(Service service) {
-    Navigator.of(context).pop();
     showDialog(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: new Text(getTranslate(context, "DELETE") + "?"),
-          content: new Text(getTranslate(context, "DELETE_CONFIRMATION") +
-              service.title +
-              " ?"),
+          title: RichText(
+              text: TextSpan(
+            children: [
+              WidgetSpan(child: Icon(Icons.delete)),
+              TextSpan(
+                  text: "  " + getTranslate(context, "DELETE") + " ?",
+                  style: TextStyle(color: Colors.black, fontSize: 18)),
+            ],
+          )),
+          content:
+              new Text(getTranslate(context, "DELETE_SERVICE_CONFIRMATION")),
           actions: <Widget>[
             // ignore: deprecated_member_use
             new FlatButton(

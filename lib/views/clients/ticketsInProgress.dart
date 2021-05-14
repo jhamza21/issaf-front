@@ -69,9 +69,17 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: new Text(getTranslate(context, "DELETE") + "?"),
+          title: RichText(
+              text: TextSpan(
+            children: [
+              WidgetSpan(child: Icon(Icons.remove_circle)),
+              TextSpan(
+                  text: "  " + getTranslate(context, "DELETE_TICKET") + " ?",
+                  style: TextStyle(color: Colors.black, fontSize: 18)),
+            ],
+          )),
           content:
-              new Text(getTranslate(context, "DELETE_CONFIRMATION") + " ?"),
+              new Text(getTranslate(context, "DELETE_TICKET_CONFIRMATION")),
           actions: <Widget>[
             // ignore: deprecated_member_use
             new FlatButton(
@@ -149,8 +157,8 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
                     Padding(
                       padding: const EdgeInsets.only(top: 10.0),
                       child: Container(
-                          height: 40,
-                          width: 40,
+                          height: 30,
+                          width: 30,
                           child: Image.asset(
                             'assets/images/alarm.gif',
                           )),
@@ -176,6 +184,9 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
                         ),
                       ],
                     ),
+                    Icon(ticket.notifications.length != 0
+                        ? Icons.notifications_on
+                        : Icons.notifications_off)
                   ],
                 ),
                 Text(
@@ -218,7 +229,7 @@ class _TicketsInProgressState extends State<TicketsInProgress> {
   @override
   Widget build(BuildContext context) {
     return _currentIndex == 1
-        ? BookTicket(_selectedTicket.service, changePage, _selectedTicket.id)
+        ? BookTicket(_selectedTicket.service, changePage, _selectedTicket)
         : _isLoading
             ? Center(child: circularProgressIndicator)
             : _tickets.length == 0

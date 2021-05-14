@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
+import 'package:issaf/models/service.dart';
 import 'package:issaf/views/responsables/bookTicket.dart';
 import 'package:issaf/views/responsables/ticketsInProgress.dart';
 import 'package:issaf/views/responsables/ticketsOld.dart';
 
 class Tickets extends StatefulWidget {
   final void Function(int) callback;
-  final int serviceId;
-  Tickets(this.callback, this.serviceId);
+  final Service service;
+  Tickets(this.callback, this.service);
   @override
   _TicketsState createState() => _TicketsState();
 }
@@ -15,7 +16,16 @@ class Tickets extends StatefulWidget {
 class _TicketsState extends State<Tickets> {
   int _currentIndex = 0;
 
+  bool _showAppBar = true;
+
+  switchAppBar(bool x) {
+    setState(() {
+      _showAppBar = x;
+    });
+  }
+
   void changePage(int i) {
+    _showAppBar = _currentIndex == 0 ? false : true;
     setState(() {
       _currentIndex = i;
     });
@@ -28,7 +38,7 @@ class _TicketsState extends State<Tickets> {
       child: Container(
         decoration: mainBoxDecoration,
         child: Scaffold(
-          appBar: _currentIndex == 0
+          appBar: _showAppBar
               ? AppBar(
                   elevation: 0,
                   title: Text(getTranslate(context, 'MY_TICKETS')),
@@ -53,11 +63,11 @@ class _TicketsState extends State<Tickets> {
           body: _currentIndex == 0
               ? TabBarView(
                   children: [
-                    TicketsInProgress(widget.serviceId),
-                    TicketsOld(widget.serviceId)
+                    TicketsInProgress(widget.service.id, switchAppBar),
+                    TicketsOld(widget.service.id)
                   ],
                 )
-              : BookTicket(changePage, widget.serviceId),
+              : BookTicket(widget.service, changePage, null),
         ),
       ),
     );

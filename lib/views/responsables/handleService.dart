@@ -400,7 +400,7 @@ class _HandleServiceState extends State<HandleService> {
   @override
   Widget build(BuildContext context) {
     return _currentIndex == 1
-        ? Tickets(changePage, _service.id)
+        ? Tickets(changePage, _service)
         : Scaffold(
             appBar: AppBar(
               centerTitle: true,

@@ -47,4 +47,11 @@ class ProviderService {
     request.fields['url'] = siteWeb;
     return await request.send();
   }
+
+  //delete provider
+  Future<http.Response> deleteProvider(String token, int id) async {
+    var url =
+        URL_BACKEND + "providers/" + id.toString() + "?api_token=" + token;
+    return await http.delete(url);
+  }
 }

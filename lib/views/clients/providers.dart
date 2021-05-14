@@ -310,7 +310,7 @@ class _ProvidersListState extends State<ProvidersList> {
       context: context,
       builder: (context) {
         return StatefulBuilder(
-          builder: (context, setState) {
+          builder: (dialogContext, setState) {
             return AlertDialog(
               title: Text(getTranslate(context, "FILTER_WITH")),
               content: Container(

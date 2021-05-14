@@ -104,4 +104,10 @@ class UserService {
     var url = URL_BACKEND + "logout?api_token=" + token;
     return await http.post(url);
   }
+
+  //delete user
+  Future<http.Response> deleteUser(String token) async {
+    var url = URL_BACKEND + "users/?api_token=" + token;
+    return await http.delete(url);
+  }
 }

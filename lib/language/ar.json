@@ -224,12 +224,15 @@
     "NO_NOTIFICATIONS":"لا توجد إخطارات مجدولة",
     "HANDLE_TICKETS":"إدارة التذاكر",
     "NO_TICKETS":"لم يتم العثور على تذاكر",
-    "TICKET_ALREADY_DONE":"تم تجهيز التذكرة بالفعل"
-
-
-
-
-
+    "TICKET_ALREADY_DONE":"تم تجهيز التذكرة بالفعل",
+    "DELETE_ACCOUNT":"احذف حسابي",
+    "DELETE_PROVIDER":"حذف خدمتي",
+    "DELETE_TICKET":"إلغاء هذه التذكرة",
+    "DELETE_TICKET_CONFIRMATION":"كن حذرا ، تفقد مكانك! هل أنت متأكد من إلغاء هذه التذكرة؟",
+    "DELETE_ACCOUNT_CONFIRMATION":"كن حذرا ، هذا العمل لا رجوع فيه! هل انت متأكد انك تريد حذف حسابك؟",
+    "DELETE_PROVIDER_CONFIRMATION":"كن حذرا ، هذا العمل لا رجوع فيه! سيتم حذف جميع الصفوف الإلكترونية التي تعتمد على هذه الخدمة! هل أنت متأكد أنك تريد حذف هذه الخدمة؟",
+    "DELETE_SERVICE_CONFIRMATION":"كن حذرا ، هذا العمل لا رجوع فيه! هل أنت متأكد من حذف هذا الصاف؟",
+    "TICKET_MSG_RESPONSIBLE":"لقد حجزت موعدًا لـ"
 
 
 }

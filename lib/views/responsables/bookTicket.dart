@@ -2,42 +2,37 @@ import 'dart:convert';
 
 import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:issaf/constants.dart';
+import 'package:issaf/models/service.dart';
+import 'package:issaf/models/ticket.dart';
 import 'package:issaf/services/ticketService.dart';
 
 class BookTicket extends StatefulWidget {
+  final Service service;
   final void Function(int) callback;
-  final int serviceId;
-  BookTicket(this.callback, this.serviceId);
+  final Ticket ticket;
+  BookTicket(this.service, this.callback, this.ticket);
   @override
   _BookTicketState createState() => _BookTicketState();
 }
 
 class _BookTicketState extends State<BookTicket> {
   String _selectedDate = new DateFormat("yyyy-MM-dd").format(DateTime.now()),
-      _name,
-      _error;
-  final _formKey = new GlobalKey<FormState>();
+      _error,
+      _name;
   Time _selectedTime;
   bool _isLoading = false, _isFetchingTimes;
+  List<int> _notifications = [];
   List<Time> _times = [];
   TextEditingController _controller = TextEditingController();
+  final _formKey = new GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
     _fetchAvailableTimes();
     _controller.text = "1"; // Setting the initial value for the field.
-  }
-
-  // Check if form is valid
-  bool validateAndSave() {
-    final form = _formKey.currentState;
-    if (form.validate()) {
-      form.save();
-      return true;
-    }
-    return false;
   }
 
   void _fetchAvailableTimes() async {
@@ -48,20 +43,46 @@ class _BookTicketState extends State<BookTicket> {
       });
       var prefs = await SharedPreferences.getInstance();
       var res = await TicketService().fetchAvailableTicketsByDat(
-          prefs.getString('token'), _selectedDate, widget.serviceId);
+          prefs.getString('token'), _selectedDate, widget.service.id);
       assert(res.statusCode == 200);
+      _times = [];
       var jsonData = json.decode(res.body);
       if (jsonData.length != 0)
         jsonData.entries
             .forEach((entry) => _times.add(Time(entry.key, entry.value)));
-      //get first available time
-      for (var i = 0; i < _times.length; i++) {
-        if (_times[i].isAvailable) {
-          _selectedTime = _times[i];
-          break;
+      if (widget.ticket != null) {
+        //get old ticket date
+        _selectedDate = widget.ticket.date;
+        //get old ticket time
+        int _timeIndex = _times.indexWhere(
+            (element) => element.value == widget.ticket.time.substring(0, 5));
+        if (_timeIndex != -1) {
+          _times[_timeIndex].isAvailable = true;
+          _selectedTime = _times[_timeIndex];
+        } else {
+          //get first available time
+          for (var i = 0; i < _times.length; i++) {
+            if (_times[i].isAvailable) {
+              _selectedTime = _times[i];
+              break;
+            }
+          }
+        }
+        //get old ticket notifications
+        widget.ticket.notifications.forEach((element) {
+          _notifications.add(element.number);
+        });
+        //get old ticket name
+        _name = widget.ticket.name;
+      } else {
+        //get first available time
+        for (var i = 0; i < _times.length; i++) {
+          if (_times[i].isAvailable) {
+            _selectedTime = _times[i];
+            break;
+          }
         }
       }
-
       setState(() {
         _isFetchingTimes = false;
       });
@@ -71,6 +92,16 @@ class _BookTicketState extends State<BookTicket> {
       });
       _error = getTranslate(context, "ERROR_SERVER");
     }
+  }
+
+  // Check if form is valid
+  bool validateAndSave() {
+    final form = _formKey.currentState;
+    if (form.validate()) {
+      form.save();
+      return true;
+    }
+    return false;
   }
 
   Widget buildNameInput() {
@@ -92,21 +123,35 @@ class _BookTicketState extends State<BookTicket> {
 
 //book ticket
   void _getTicket() async {
-    if (validateAndSave()) {
-      try {
+    try {
+      if (validateAndSave()) {
         setState(() {
           _isLoading = true;
           _error = null;
         });
         var prefs = await SharedPreferences.getInstance();
-        var res = await TicketService().addTicketToService(
-            prefs.getString('token'),
-            widget.serviceId,
-            _selectedDate,
-            _selectedTime.value,
-            _times.indexOf(_selectedTime) + 1,
-            _name);
-        if (res.statusCode == 201) {
+        var res;
+        if (widget.ticket != null)
+          res = await TicketService().reschudleTicket(
+              prefs.getString('token'),
+              widget.ticket.id,
+              _selectedDate,
+              _selectedTime.value,
+              _times.indexOf(_selectedTime) + 1,
+              widget.service.id,
+              _name,
+              _notifications);
+        else
+          res = await TicketService().addTicket(
+              prefs.getString('token'),
+              _selectedDate,
+              _selectedTime.value,
+              _times.indexOf(_selectedTime) + 1,
+              widget.service.id,
+              _name,
+              _notifications);
+
+        if (res.statusCode == 201 || res.statusCode == 200) {
           final snackBar = SnackBar(
             content: Text(getTranslate(context, "SUCCESS_ADD")),
           );
@@ -118,13 +163,49 @@ class _BookTicketState extends State<BookTicket> {
             _error = getTranslate(context, json.decode(res.body)["error"]);
           });
         }
-      } catch (e) {
-        setState(() {
-          _isLoading = false;
-          _error = getTranslate(context, "ERROR_SERVER");
-        });
       }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _error = getTranslate(context, "ERROR_SERVER");
+      });
     }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime d = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2030),
+    );
+    if (d != null) {
+      setState(() {
+        _selectedDate = new DateFormat("yyyy-MM-dd").format(d);
+      });
+      _fetchAvailableTimes();
+      _notifications = [];
+    }
+  }
+
+  Widget _showDatePicker() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Icon(Icons.calendar_today),
+        SizedBox(
+          width: 20,
+        ),
+        InkWell(
+          child: Text(_selectedDate,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Color(0xFF000000))),
+          onTap: () {
+            _selectDate(context);
+          },
+        ),
+      ],
+    );
   }
 
   Widget _showTimeInput() {
@@ -148,10 +229,12 @@ class _BookTicketState extends State<BookTicket> {
                           Text(getTranslate(context, "UNAVAILABLE_TICKET")),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  } else
+                  } else {
+                    _notifications = [];
                     setState(() {
                       _selectedTime = value;
                     });
+                  }
                 },
                 underline: SizedBox(),
                 items: _times
@@ -188,12 +271,12 @@ class _BookTicketState extends State<BookTicket> {
         // ignore: deprecated_member_use
         child: RaisedButton.icon(
           elevation: 8.0,
-          shape: new RoundedRectangleBorder(
-              borderRadius: new BorderRadius.circular(30.0)),
           icon: _isLoading
               ? circularProgressIndicator
               : Icon(Icons.bookmark, color: Colors.black),
           color: Colors.orange[600],
+          shape: new RoundedRectangleBorder(
+              borderRadius: new BorderRadius.circular(30.0)),
           label: Text(getTranslate(context, "BOOK_TICKET"),
               style: new TextStyle(fontSize: 15.0, color: Colors.black)),
           onPressed: _isLoading ||
@@ -233,65 +316,253 @@ class _BookTicketState extends State<BookTicket> {
     );
   }
 
+  Widget _incrementDecrement() {
+    return Container(
+      width: 90.0,
+      foregroundDecoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5.0),
+        border: Border.all(
+          color: Colors.orange,
+          width: 2.0,
+        ),
+      ),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            flex: 1,
+            child: TextFormField(
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.all(8.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
+              ),
+              controller: _controller,
+              keyboardType: TextInputType.numberWithOptions(
+                decimal: false,
+                signed: true,
+              ),
+              inputFormatters: <TextInputFormatter>[
+                // ignore: deprecated_member_use
+                WhitelistingTextInputFormatter.digitsOnly
+              ],
+            ),
+          ),
+          Container(
+            width: 45.0,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  width: 45.0,
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        width: 0.5,
+                      ),
+                    ),
+                  ),
+                  child: InkWell(
+                    child: Icon(
+                      Icons.arrow_drop_up,
+                      size: 22.0,
+                    ),
+                    onTap: () {
+                      int currentValue = int.parse(_controller.text);
+                      setState(() {
+                        currentValue++;
+                        _controller.text =
+                            (currentValue).toString(); // incrementing value
+                      });
+                    },
+                  ),
+                ),
+                Container(
+                  width: 45.0,
+                  child: InkWell(
+                    child: Icon(
+                      Icons.arrow_drop_down,
+                      size: 22.0,
+                    ),
+                    onTap: () {
+                      int currentValue = int.parse(_controller.text);
+                      setState(() {
+                        currentValue--;
+                        _controller.text =
+                            (currentValue >= 1 ? currentValue : 1)
+                                .toString(); // decrementing value
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
           elevation: 0.0,
-          title: Text(getTranslate(context, "RESERVE_TICKET")),
+          title: Text(widget.service.title),
           leading: IconButton(
             icon: Icon(Icons.navigate_before),
             onPressed: () => widget.callback(0),
           ),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.refresh),
-              onPressed: _isLoading || _isFetchingTimes
-                  ? null
-                  : () => _fetchAvailableTimes(),
-            ),
-          ],
         ),
         body: Form(
           key: _formKey,
-          child: Column(
-            children: [
-              SizedBox(
-                height: 100,
-              ),
-              Text(
-                getTranslate(context, "RESERVE_TICKET_MSG"),
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              buildNameInput(),
-              SizedBox(
-                height: 20,
-              ),
-              Text(
-                getTranslate(context, "A"),
-                style: TextStyle(fontSize: 20),
-              ),
-              SizedBox(
-                height: 15,
-              ),
-              _showTimeInput(),
-              _showErrorMessage(),
-              _showPrimaryButton(),
-              Spacer(),
-              _showNotice(),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 20,
+                ),
+                Text(
+                  getTranslate(context, "RESERVE_TICKET_MSG"),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                _isFetchingTimes ? circularProgressIndicator : buildNameInput(),
+                SizedBox(
+                  height: 20,
+                ),
+                _showDatePicker(),
+                SizedBox(
+                  height: 20,
+                ),
+                Text(
+                  getTranslate(context, "A"),
+                  style: TextStyle(fontSize: 20),
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                _showTimeInput(),
+                _showNotice(),
+                Divider(),
+                Row(
+                  children: [
+                    Icon(Icons.notifications),
+                    Text(
+                      getTranslate(context, "NOTIFICATIONS") + " :",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 05,
+                    ),
+                    Text(
+                      getTranslate(context, "ALERT_BEFORE") + " ",
+                    ),
+                    _incrementDecrement(),
+                    Text(
+                      "  " +
+                          getTranslate(context, "ALERT_N") +
+                          (int.parse(_controller.text) *
+                                  widget.service.timePerClient)
+                              .toString() +
+                          getTranslate(context, "ALERT_MN"),
+                    ),
+                    Spacer(),
+                    IconButton(
+                        onPressed: () {
+                          String _today = new DateFormat("yyyy-MM-dd")
+                              .format(DateTime.now());
+                          int _notifIndex = int.parse(_controller.text);
+                          int _ticketNumber = _times.indexOf(_selectedTime) + 1;
+                          if ((_today != _selectedDate &&
+                                  _notifIndex <= _ticketNumber) ||
+                              (_today == _selectedDate &&
+                                  (_ticketNumber - _notifIndex) <=
+                                      widget.service.counter)) {
+                            final snackBar = SnackBar(
+                              content: Text(
+                                  getTranslate(context, "IMPOSS_ALERT_1") +
+                                      _notifIndex.toString() +
+                                      getTranslate(context, "IMPOSS_ALERT_2")),
+                            );
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
+                            return;
+                          }
+                          if (!_notifications.contains(_notifIndex))
+                            setState(() {
+                              _notifications.add(_notifIndex);
+                            });
+                        },
+                        icon: Icon(
+                          Icons.add_circle,
+                        ))
+                  ],
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Container(
+                  height: 120,
+                  child: _notifications.length == 0
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: 50),
+                          child: Text(
+                            getTranslate(context, "NO_NOTIFICATIONS"),
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        )
+                      : Scrollbar(
+                          thickness: 10,
+                          child: ListView.builder(
+                              itemCount: _notifications.length,
+                              itemBuilder: (context, index) {
+                                return Row(
+                                  children: [
+                                    IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            _notifications
+                                                .remove(_notifications[index]);
+                                          });
+                                        },
+                                        icon: Icon(
+                                          Icons.delete,
+                                          size: 20,
+                                        )),
+                                    Text(getTranslate(context, "ALERT_BEFORE")),
+                                    Text(_notifications[index].toString()),
+                                    Text(getTranslate(context, "ALERT_N") +
+                                        (_notifications[index] *
+                                                widget.service.timePerClient)
+                                            .toString() +
+                                        getTranslate(context, "ALERT_MN"))
+                                  ],
+                                );
+                              }),
+                        ),
+                ),
+                _showErrorMessage(),
+                _showPrimaryButton(),
+              ],
+            ),
           ),
         ));
   }
 }
 
 class Time {
-  final String value;
-  final bool isAvailable;
+  String value;
+  bool isAvailable;
 
   Time(this.value, this.isAvailable);
 }

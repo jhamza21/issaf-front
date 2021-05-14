@@ -392,6 +392,68 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
     );
   }
 
+  void _deleteProvider(int id) async {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: RichText(
+              text: TextSpan(
+            children: [
+              WidgetSpan(child: Icon(Icons.delete)),
+              TextSpan(
+                  text: "  " + getTranslate(context, "DELETE_PROVIDER") + " ?",
+                  style: TextStyle(color: Colors.black, fontSize: 18)),
+            ],
+          )),
+          content:
+              new Text(getTranslate(context, "DELETE_PROVIDER_CONFIRMATION")),
+          actions: <Widget>[
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "NO")),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "YES")),
+              onPressed: () async {
+                try {
+                  Navigator.of(dialogContext).pop();
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  var prefs = await SharedPreferences.getInstance();
+                  final response = await ProviderService()
+                      .deleteProvider(prefs.getString('token'), id);
+                  assert(response.statusCode == 204);
+                  _provider = null;
+                  final snackBar = SnackBar(
+                    content: Text(getTranslate(context, "SUCCESS_DELETE")),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  setState(() {
+                    _isLoading = false;
+                  });
+                } catch (error) {
+                  final snackBar = SnackBar(
+                    content: Text(getTranslate(context, "ERROR_SERVER")),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  setState(() {
+                    _isLoading = false;
+                  });
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -399,6 +461,25 @@ class _AddUpdateProviderState extends State<AddUpdateProvider> {
       child: Scaffold(
         appBar: AppBar(
           elevation: 0,
+          actions: [
+            PopupMenuButton(
+              enabled: _provider == null || _isLoading ? false : true,
+              onSelected: (value) => _deleteProvider(_provider.id),
+              itemBuilder: (BuildContext context) {
+                return [
+                  PopupMenuItem(
+                    value: "DELETE",
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete, color: Colors.grey),
+                        Text("  " + getTranslate(context, "DELETE_PROVIDER")),
+                      ],
+                    ),
+                  )
+                ];
+              },
+            ),
+          ],
           title: Text(_isLoading
               ? "..."
               : _provider == null

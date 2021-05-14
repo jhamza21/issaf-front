@@ -5,13 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/service.dart';
+import 'package:issaf/models/ticket.dart';
 import 'package:issaf/services/ticketService.dart';
 
 class BookTicket extends StatefulWidget {
   final Service service;
   final void Function(int) callback;
-  final int idTicket;
-  BookTicket(this.service, this.callback, this.idTicket);
+  final Ticket ticket;
+  BookTicket(this.service, this.callback, this.ticket);
   @override
   _BookTicketState createState() => _BookTicketState();
 }
@@ -47,11 +48,35 @@ class _BookTicketState extends State<BookTicket> {
       if (jsonData.length != 0)
         jsonData.entries
             .forEach((entry) => _times.add(Time(entry.key, entry.value)));
-      //get first available time
-      for (var i = 0; i < _times.length; i++) {
-        if (_times[i].isAvailable) {
-          _selectedTime = _times[i];
-          break;
+      if (widget.ticket != null) {
+        //get old ticket date
+        _selectedDate = widget.ticket.date;
+        //get old ticket time
+        int _timeIndex = _times.indexWhere(
+            (element) => element.value == widget.ticket.time.substring(0, 5));
+        if (_timeIndex != -1) {
+          _times[_timeIndex].isAvailable = true;
+          _selectedTime = _times[_timeIndex];
+        } else {
+          //get first available time
+          for (var i = 0; i < _times.length; i++) {
+            if (_times[i].isAvailable) {
+              _selectedTime = _times[i];
+              break;
+            }
+          }
+        }
+        //get old ticket notifications
+        widget.ticket.notifications.forEach((element) {
+          _notifications.add(element.number);
+        });
+      } else {
+        //get first available time
+        for (var i = 0; i < _times.length; i++) {
+          if (_times[i].isAvailable) {
+            _selectedTime = _times[i];
+            break;
+          }
         }
       }
       setState(() {
@@ -74,14 +99,15 @@ class _BookTicketState extends State<BookTicket> {
       });
       var prefs = await SharedPreferences.getInstance();
       var res;
-      if (widget.idTicket != null)
+      if (widget.ticket != null)
         res = await TicketService().reschudleTicket(
             prefs.getString('token'),
-            widget.idTicket,
+            widget.ticket.id,
             _selectedDate,
             _selectedTime.value,
             _times.indexOf(_selectedTime) + 1,
             widget.service.id,
+            null,
             _notifications);
       else
         res = await TicketService().addTicket(
@@ -90,6 +116,7 @@ class _BookTicketState extends State<BookTicket> {
             _selectedTime.value,
             _times.indexOf(_selectedTime) + 1,
             widget.service.id,
+            null,
             _notifications);
       if (res.statusCode == 201 || res.statusCode == 200) {
         final snackBar = SnackBar(
@@ -493,8 +520,8 @@ class _BookTicketState extends State<BookTicket> {
 }
 
 class Time {
-  final String value;
-  final bool isAvailable;
+  String value;
+  bool isAvailable;
 
   Time(this.value, this.isAvailable);
 }

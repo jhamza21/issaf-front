@@ -506,10 +506,96 @@ class _ProfileState extends State<Profile> {
     );
   }
 
+  void _deleteUser() async {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: RichText(
+              text: TextSpan(
+            children: [
+              WidgetSpan(child: Icon(Icons.delete)),
+              TextSpan(
+                  text: "  " + getTranslate(context, "DELETE_ACCOUNT") + " ?",
+                  style: TextStyle(color: Colors.black, fontSize: 18)),
+            ],
+          )),
+          content: new Text(
+              getTranslate(context, "DELETE_ACCOUNT_CONFIRMATION") + " ?"),
+          actions: <Widget>[
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "NO")),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            // ignore: deprecated_member_use
+            new FlatButton(
+              child: new Text(getTranslate(context, "YES")),
+              onPressed: () async {
+                try {
+                  Navigator.of(dialogContext).pop();
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  var prefs = await SharedPreferences.getInstance();
+                  final response =
+                      await UserService().deleteUser(prefs.getString('token'));
+                  assert(response.statusCode == 204);
+                  await prefs.setString('token', null);
+                  Redux.store.dispatch(
+                    SetUserStateAction(
+                      UserState(
+                        isLoggedIn: false,
+                        user: null,
+                      ),
+                    ),
+                  );
+                  final snackBar = SnackBar(
+                    content: Text(getTranslate(context, "SUCCESS_DELETE")),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                } catch (error) {
+                  final snackBar = SnackBar(
+                    content: Text(getTranslate(context, "ERROR_SERVER")),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  setState(() {
+                    _isLoading = false;
+                  });
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget profile() {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
+        actions: [
+          PopupMenuButton(
+            enabled: !_isLoading,
+            onSelected: (value) => _deleteUser(),
+            itemBuilder: (BuildContext context) {
+              return [
+                PopupMenuItem(
+                  value: "DELETE",
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete, color: Colors.grey),
+                      Text("  " + getTranslate(context, "DELETE_ACCOUNT")),
+                    ],
+                  ),
+                )
+              ];
+            },
+          ),
+        ],
         title: Text(getTranslate(context, 'PROFILE')),
         centerTitle: true,
       ),
