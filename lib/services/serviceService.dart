@@ -6,18 +6,8 @@ import 'package:issaf/constants.dart';
 import 'package:issaf/models/user.dart';
 
 class ServiceService {
-//fetch all services
-  Future<http.Response> fetchServices(String token, int idProvider) async {
-    var url = URL_BACKEND +
-        "providers/" +
-        idProvider.toString() +
-        "?api_token=" +
-        token;
-    return await http.get(url);
-  }
-
-  //fetch admin services
-  Future<http.Response> fetchAdminServices(String token) async {
+  //fetch services related to connected user(admin)
+  Future<http.Response> fetchServicesByAdmin(String token) async {
     var url = URL_BACKEND + "getServicesByAdmin/?api_token=" + token;
     return await http.get(url);
   }
@@ -29,26 +19,10 @@ class ServiceService {
     return await http.get(url);
   }
 
-  //get service tickets
-  Future<http.Response> getServiceTickets(String token, int id) async {
-    var url = URL_BACKEND +
-        "getServiceTickets/" +
-        id.toString() +
-        "?api_token=" +
-        token;
-    return await http.get(url);
-  }
-
-  //get service by admin
+  //get service related to operator
   Future<http.Response> getServiceByRespo(String token) async {
     var url = URL_BACKEND + "getServiceByRespo/?api_token=" + token;
     return await http.get(url);
-  }
-
-//delete service
-  Future<http.Response> deleteService(String token, int id) async {
-    var url = URL_BACKEND + "services/" + id.toString() + "?api_token=" + token;
-    return await http.delete(url);
   }
 
 //add or update service data
@@ -105,7 +79,7 @@ class ServiceService {
     return await request.send();
   }
 
-  //RESET SERVICE COUNTER
+  //update service counter
   Future<http.Response> updateCounter(String token, int id, int number) async {
     var url = URL_BACKEND + "services/" + id.toString() + "?api_token=" + token;
     return await http.put(url,
@@ -114,5 +88,11 @@ class ServiceService {
           "Accept": "application/json"
         },
         body: json.encode({"counter": number}));
+  }
+
+  //delete service
+  Future<http.Response> deleteService(String token, int id) async {
+    var url = URL_BACKEND + "services/" + id.toString() + "?api_token=" + token;
+    return await http.delete(url);
   }
 }

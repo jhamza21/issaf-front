@@ -6,8 +6,7 @@ import 'package:issaf/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
-  //get all users
-
+  //return users (suggestions of users) based on given string
   Future<List<User>> getUserSuggestions(String text) async {
     try {
       var prefs = await SharedPreferences.getInstance();
@@ -19,6 +18,7 @@ class UserService {
             "?api_token=" +
             prefs.getString('token');
         var res = await http.get(url);
+        assert(res.statusCode == 200);
         return User.listFromJson(json.decode(res.body));
       } else
         return [];
@@ -27,7 +27,7 @@ class UserService {
     }
   }
 
-//get user by username
+//get user by email
   Future<http.Response> getUserByEmail(String email) async {
     var url = URL_BACKEND + "getUserByEmail/" + email;
     return await http.get(url);
@@ -75,7 +75,7 @@ class UserService {
       String mobile,
       String region,
       String messagingToken) async {
-    var url = URL_BACKEND + "updateAccount?api_token=" + token;
+    var url = URL_BACKEND + "users?api_token=" + token;
     Map<String, dynamic> data = {};
     if (username != null) data["username"] = username;
     if (password != null) data["password"] = password;

@@ -4,6 +4,13 @@ import 'package:http/http.dart' as http;
 import 'package:issaf/constants.dart';
 
 class ProviderService {
+  //get a provider by id
+  Future<http.Response> getProviderById(String token, int id) async {
+    var url =
+        URL_BACKEND + "providers/" + id.toString() + "?api_token=" + token;
+    return await http.get(url);
+  }
+
 //fetch all providers
   Future<http.Response> fetchProviders(String token) async {
     var url = URL_BACKEND + "providers?api_token=" + token;
@@ -13,8 +20,8 @@ class ProviderService {
   }
 
   //fetch connected user provider
-  Future<http.Response> fetchProviderUser(String token) async {
-    var url = URL_BACKEND + "getUserProvider?api_token=" + token;
+  Future<http.Response> fetchProviderByUser(String token) async {
+    var url = URL_BACKEND + "getProviderByUser?api_token=" + token;
     return await http.get(url);
   }
 

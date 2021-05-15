@@ -40,7 +40,7 @@ class _BookTicketState extends State<BookTicket> {
         _error = null;
       });
       var prefs = await SharedPreferences.getInstance();
-      var res = await TicketService().fetchAvailableTicketsByDat(
+      var res = await TicketService().fetchAvailableTicketsByDate(
           prefs.getString('token'), _selectedDate, widget.service.id);
       assert(res.statusCode == 200);
       _times = [];

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/ticket.dart';
-import 'package:issaf/services/serviceService.dart';
+import 'package:issaf/services/ticketService.dart';
 
 class LineChart extends StatefulWidget {
   final int serviceId;
@@ -39,8 +39,8 @@ class _LineChartState extends State<LineChart> {
   void initializeServiceData() async {
     try {
       var prefs = await SharedPreferences.getInstance();
-      var response = await ServiceService()
-          .getServiceTickets(prefs.getString('token'), widget.serviceId);
+      var response = await TicketService()
+          .getTicketsByService(prefs.getString('token'), widget.serviceId);
       assert(response.statusCode == 200);
       var jsonData = json.decode(response.body);
       List<Ticket> _tickets = [];

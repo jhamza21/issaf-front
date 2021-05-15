@@ -67,7 +67,7 @@ class _HandleServiceState extends State<HandleService> {
       _times = [];
       _service = Service.fromJson(json.decode(response.body));
       String _todayDate = new DateFormat("yyyy-MM-dd").format(DateTime.now());
-      var res = await TicketService().fetchAvailableTicketsByDat(
+      var res = await TicketService().fetchAvailableTicketsByDate(
           prefs.getString('token'), _todayDate, _service.id);
       assert(res.statusCode == 200);
       var jsonData = json.decode(res.body);

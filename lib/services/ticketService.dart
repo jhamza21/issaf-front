@@ -4,25 +4,35 @@ import 'package:http/http.dart' as http;
 import 'package:issaf/constants.dart';
 
 class TicketService {
-  //fetch tickets
+  //fetch tickets of connected user
   Future<http.Response> fetchTickets(String token) async {
     var url = URL_BACKEND + "tickets/?api_token=" + token;
     return await http.get(url);
   }
 
-  //fetch tickets responsible
-  Future<http.Response> fetchTicketsByServiceId(
+  //return tickets reserved by operator
+  Future<http.Response> fetchOperatorTickets(
       String token, int serviceId) async {
     var url = URL_BACKEND +
-        "ticketsBySerice/" +
+        "getTicketsByOperator/" +
         serviceId.toString() +
         "?api_token=" +
         token;
     return await http.get(url);
   }
 
-  //fetch available tickets by Date
-  Future<http.Response> fetchAvailableTicketsByDat(
+  //return all tickets related to service
+  Future<http.Response> getTicketsByService(String token, int id) async {
+    var url = URL_BACKEND +
+        "getTicketsByService/" +
+        id.toString() +
+        "?api_token=" +
+        token;
+    return await http.get(url);
+  }
+
+  //return available tickets/times in service based on given date
+  Future<http.Response> fetchAvailableTicketsByDate(
       String token, String date, int serviceId) async {
     var url = URL_BACKEND +
         "tickets/" +
@@ -34,7 +44,7 @@ class TicketService {
     return await http.get(url);
   }
 
-  //add ticket
+  //store a new ticket
   Future<http.Response> addTicket(String token, String date, String time,
       int number, int serviceId, String name, List<int> notifications) async {
     var url = URL_BACKEND + "tickets?api_token=" + token;
@@ -53,7 +63,7 @@ class TicketService {
         }));
   }
 
-  //reschudle ticket
+  //reschudle old ticket
   Future<http.Response> reschudleTicket(
       String token,
       int ticketId,

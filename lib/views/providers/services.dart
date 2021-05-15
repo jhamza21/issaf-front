@@ -32,7 +32,7 @@ class _ServiceListState extends State<ServiceList> {
     try {
       var prefs = await SharedPreferences.getInstance();
       final response =
-          await ServiceService().fetchAdminServices(prefs.getString('token'));
+          await ServiceService().fetchServicesByAdmin(prefs.getString('token'));
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         _services = Service.listFromJson(jsonData);

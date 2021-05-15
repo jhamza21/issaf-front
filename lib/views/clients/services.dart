@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/provider.dart';
 import 'package:issaf/models/service.dart';
-import 'package:issaf/services/serviceService.dart';
+import 'package:issaf/services/provideService.dart';
 import 'package:issaf/views/clients/bookTicket.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -38,8 +38,8 @@ class _ServiceListState extends State<ServiceList> {
         _isLoading = true;
       });
       var prefs = await SharedPreferences.getInstance();
-      final response = await ServiceService()
-          .fetchServices(prefs.getString('token'), widget.provider.id);
+      final response = await ProviderService()
+          .getProviderById(prefs.getString('token'), widget.provider.id);
 
       assert(response.statusCode == 200);
       final jsonData = json.decode(response.body)["services"];
