@@ -195,7 +195,9 @@ class _HandleServiceState extends State<HandleService> {
       assert(response.statusCode == 200);
       var jsonData = json.decode(response.body);
       _service = Service.fromJson(jsonData);
-      _times[_times.indexOf(_selectedTime)].isDone = true;
+      for (int i = 0; i < _times.length; i++) {
+        _times[i].isDone = _service.counter > i + 1 ? true : false;
+      }
       _selectedTime = _times.length >= _service.counter - 1
           ? _times[_service.counter - 1]
           : null;
@@ -453,44 +455,45 @@ class _HandleServiceState extends State<HandleService> {
                               style: TextStyle(
                                   fontSize: 20, fontWeight: FontWeight.bold),
                             ),
-                            SizedBox(
-                              height: 40,
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.orange[100],
-                                  borderRadius: BorderRadius.circular(30)),
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    50.0, 10.0, 50.0, 10.0),
+                            Padding(
+                              padding: const EdgeInsets.all(40.0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    color: Colors.orange[100],
+                                    borderRadius: BorderRadius.circular(30)),
                                 child: DropdownButton<Time>(
                                   underline: SizedBox(),
                                   value: _selectedTime,
-                                  elevation: 5,
+                                  isExpanded: true,
+                                  menuMaxHeight: 500,
                                   style: TextStyle(color: Colors.black),
                                   items: _times.map<DropdownMenuItem<Time>>(
                                       (Time value) {
                                     return DropdownMenuItem<Time>(
                                       value: value,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            (_times.indexOf(value) + 1)
-                                                    .toString() +
-                                                " - ",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 20),
-                                          ),
-                                          Text(" (~" + value.value + ")"),
-                                          Icon(Icons.circle,
-                                              size: 15,
-                                              color: value.isDone
-                                                  ? Colors.green
-                                                  : Colors.grey)
-                                        ],
+                                      child: Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            30.0, 0, 20, 0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              (_times.indexOf(value) + 1)
+                                                      .toString() +
+                                                  " - ",
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 20),
+                                            ),
+                                            Text(" (~" + value.value + ")"),
+                                            Icon(Icons.check_circle,
+                                                size: 20,
+                                                color: value.isDone
+                                                    ? Colors.green
+                                                    : Colors.grey)
+                                          ],
+                                        ),
                                       ),
                                     );
                                   }).toList(),
@@ -519,9 +522,6 @@ class _HandleServiceState extends State<HandleService> {
                                         },
                                 ),
                               ),
-                            ),
-                            SizedBox(
-                              height: 40,
                             ),
                             _isStarted
                                 ? Row(

@@ -565,6 +565,7 @@ class _LoginSignUpState extends State<LoginSignUp> {
             ? getTranslate(context, "REQUIRED_USER_REGION")
             : null,
         isExpanded: true,
+        menuMaxHeight: 500,
         dropdownColor: Colors.orange[50],
         value: _region,
         onChanged: (value) {

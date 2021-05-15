@@ -203,6 +203,9 @@ class _BookTicketState extends State<BookTicket> {
             _selectDate(context);
           },
         ),
+        SizedBox(
+          width: 40,
+        ),
       ],
     );
   }
@@ -212,51 +215,59 @@ class _BookTicketState extends State<BookTicket> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(Icons.access_time),
-        SizedBox(
-          width: 20,
-        ),
         _isFetchingTimes
             ? circularProgressIndicator
-            : DropdownButton(
-                dropdownColor: Colors.orange[50],
-                hint: Text(getTranslate(context, "NO_TICKETS")),
-                value: _selectedTime,
-                onChanged: (Time value) {
-                  if (!value.isAvailable) {
-                    final snackBar = SnackBar(
-                      content:
-                          Text(getTranslate(context, "UNAVAILABLE_TICKET")),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  } else {
-                    _notifications = [];
-                    setState(() {
-                      _selectedTime = value;
-                    });
-                  }
-                },
-                underline: SizedBox(),
-                items: _times
-                    .map<DropdownMenuItem<Time>>((_time) => DropdownMenuItem(
-                          value: _time,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                (_times.indexOf(_time) + 1).toString(),
-                                style: TextStyle(fontWeight: FontWeight.bold),
+            : Container(
+                width: 180,
+                child: DropdownButton(
+                  dropdownColor: Colors.orange[50],
+                  hint: Text(getTranslate(context, "NO_TICKETS")),
+                  value: _selectedTime,
+                  isExpanded: true,
+                  menuMaxHeight: 500,
+                  onChanged: (Time value) {
+                    if (!value.isAvailable) {
+                      final snackBar = SnackBar(
+                        content:
+                            Text(getTranslate(context, "UNAVAILABLE_TICKET")),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    } else {
+                      _notifications = [];
+                      setState(() {
+                        _selectedTime = value;
+                      });
+                    }
+                  },
+                  underline: SizedBox(),
+                  items: _times
+                      .map<DropdownMenuItem<Time>>((_time) => DropdownMenuItem(
+                            value: _time,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.fromLTRB(20.0, 0, 20, 0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    (_times.indexOf(_time) + 1).toString(),
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(" (~ " + _time.value + ")",
+                                      style: TextStyle(fontSize: 12)),
+                                  Icon(Icons.circle,
+                                      size: 15,
+                                      color: _time.isAvailable
+                                          ? Colors.green
+                                          : Colors.red)
+                                ],
                               ),
-                              Text(" (~ " + _time.value + ")",
-                                  style: TextStyle(fontSize: 12)),
-                              Icon(Icons.circle,
-                                  size: 15,
-                                  color: _time.isAvailable
-                                      ? Colors.green
-                                      : Colors.red)
-                            ],
-                          ),
-                        ))
-                    .toList(),
+                            ),
+                          ))
+                      .toList(),
+                ),
               ),
       ],
     );
