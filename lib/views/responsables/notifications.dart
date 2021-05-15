@@ -186,7 +186,7 @@ class _NotificationsState extends State<Notifications> {
       style: TextStyle(fontWeight: FontWeight.bold),
     ));
     for (var i = 0; i < service.hoolidays.length; i++) {
-      list.add(new Text(getTranslate(context, service.hoolidays[i])));
+      list.add(new Text(service.hoolidays[i]));
       list.add(Text("/"));
     }
     if (service.hoolidays.length == 0)

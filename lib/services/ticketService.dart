@@ -95,11 +95,9 @@ class TicketService {
 
   //validate ticket
   Future<http.Response> validateTicket(
-      String token, int serviceId, int id, String status, int duration) async {
+      String token, int serviceId, String status, int duration) async {
     var url = URL_BACKEND +
         "validate/" +
-        id.toString() +
-        "/" +
         serviceId.toString() +
         "?api_token=" +
         token;

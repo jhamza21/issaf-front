@@ -150,7 +150,6 @@ class _BookTicketState extends State<BookTicket> {
               widget.service.id,
               _name,
               _notifications);
-
         if (res.statusCode == 201 || res.statusCode == 200) {
           final snackBar = SnackBar(
             content: Text(getTranslate(context, "SUCCESS_ADD")),

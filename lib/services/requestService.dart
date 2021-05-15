@@ -17,7 +17,7 @@ class RequestService {
   //refuse request
   Future<http.Response> refuseRequest(String token, int id) async {
     var url =
-        URL_BACKEND + "refuseRequest" + id.toString() + "?api_token=" + token;
+        URL_BACKEND + "refuseRequest/" + id.toString() + "?api_token=" + token;
     return await http.put(url);
   }
 

@@ -202,6 +202,14 @@ class _LoginSignUpState extends State<LoginSignUp> {
         return;
       }
       assert(res.statusCode == 200);
+      try {
+        var prefs = await SharedPreferences.getInstance();
+        String _messagingToken = await FirebaseMessaging.instance.getToken();
+        await UserService().updateUser(prefs.getString('token'), null, null,
+            null, null, null, null, _messagingToken);
+      } catch (e) {
+        print(e);
+      }
       var prefs = await SharedPreferences.getInstance();
       final jsonData = json.decode(res.body);
       await prefs.setString('token', jsonData["api_token"]);

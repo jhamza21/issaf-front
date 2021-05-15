@@ -90,7 +90,6 @@ class _HandleServiceState extends State<HandleService> {
         _isLoading = false;
       });
     } catch (e) {
-      print(e);
       _error = getTranslate(context, "ERROR_SERVER");
       setState(() {
         _isLoading = false;
@@ -190,15 +189,9 @@ class _HandleServiceState extends State<HandleService> {
         _dur += minutes;
         _dur += hours * 60;
       }
-      Ticket _ticket = _service.tickets.firstWhere(
-          (element) => element.time.substring(0, 5) == _selectedTime.value,
-          orElse: () => null);
-      final response = await TicketService().validateTicket(
-          prefs.getString('token'),
-          _service.id,
-          _ticket != null ? _ticket.id : -1,
-          status,
-          _dur);
+
+      final response = await TicketService()
+          .validateTicket(prefs.getString('token'), _service.id, status, _dur);
       assert(response.statusCode == 200);
       var jsonData = json.decode(response.body);
       _service = Service.fromJson(jsonData);
