@@ -232,5 +232,15 @@
     "DELETE_ACCOUNT_CONFIRMATION":"Attention, cette action est irréversible! Etes vous sûr de supprimer votre compte ?",
     "DELETE_PROVIDER_CONFIRMATION":"Attention, cette action est irréversible! Tous les E-Saffs qui dépendent de ce service seront supprimés! Etes vous sûr de supprimer ce service ?",
     "DELETE_SERVICE_CONFIRMATION":"Attention, cette action est irréversible! Etes vous sûr de supprimer ce E-SAFF ?",
-    "TICKET_MSG_RESPONSIBLE":"Vous avez réservé un rendez-vous pour"
+    "TICKET_MSG_RESPONSIBLE":"Vous avez réservé un rendez-vous pour",
+    "HOW_DELETE_MY_ACCOUNT":"Comment supprimer mon compte E-SAFF ?",
+    "HOW_DELETE_MY_ACCOUNT_RESPONSE":"La suppression de votre compte est un processus irréversible, que nous ne pouvons pas annuler même si vous l'exécutez par accident.\n\nPour supprimer votre compte :\n 1- Connectez-vous.\n 2- Cliquez sur l'onglet de gestion de profil en bas de l'écran.\n 3- Cliquez sur les 3 points situés en haut de l'écran. \n 4- Cliquez sur \"Supprimer mon compte\".\n\nLes conséquences de suppression de votre compte :\n 1- Si vous êtes êtes un simple Client, tous vous tickets réservés seront annulés.\n 2- Si vous êtes un Adminsitrateur et vous posséder d'un service, alors vous perdez votre service et les SAFFs qui sont en relation avec.\n 3- Si vous êtes un Opérateur et vous appartenez à un service, vous perdez votre place en tant qu'opérateur.",
+    "HOW_TO_ADD_MY_OWN_SERVICE":"Comment ajouter mon propre service à l'application E-SAFF ?",
+    "HOW_TO_ADD_MY_OWN_SERVICE_RESPONSE":"Pour ajouter un service à l'application E-SAFF, vous devez avoir un compte. Si vous n'êtes pas inscit, vous devez créer un compte.\n\nLes étapes d'ajout d'un service :\n 1- Connectez vous.\n 2- Cliquez sur l'onglet de gestion de profil en bas de l'écran et sélectionner \"Se connecter en tant que : Administrateur\".\n 3- Ajoutez les informations relatives à votre service.",
+    "WHAT_IS_THE_USE_OF_AVG_TIME_PER_CLIENT":"A quoi ça sert le temps moyen par client (mn) relative à un E-SAFF ?",
+    "WHAT_IS_THE_USE_OF_AVG_TIME_PER_CLIENT_RESPONSE":"Le temps moyen par client (mn) sert à conclure le nombre de tickets total d'un E-SAFF par jour. En effet, le temps de travail du E-SAFF est divisé par le temps moyen par client (mn).",
+    "HOW_TO_INVITE_USER_TO_HANDLE_ESAFF":"Comment inviter un opérateur(utilisateur) pour gérer mon E-SAFF ?",
+    "HOW_TO_INVITE_USER_TO_HANDLE_ESAFF_RESPONSE":"Pour inviter un opérateur(utilisateur) pour gérer votre E-SAFF, cet utilisateur devra avoir un compte dans l'application E-SAFF.\n\nLes étapes d'invitation d'un utilisateur :\n 1- Se connecter en tant que Administrateur.\n2- Sélectionner le E-SAFF en question et cliquez sur moDifier. \n3- Rechercher et séléctionner l'utilisateur dans la partie réservée pour l'ajout d'un opérateur (La recherche de l'utilisateur peut être réalisée soit par nom soit par nom d'utilisateur soit par email).\n4- Cliquer sur \"Enregistrer les moDifications\".\n\n Vous pouver consulter vos invitations pour s'assurer que l'utilisateur en question à bien reçu l'invitation.",
+    "HOW_TO_LOGOUT":"Comment se déconnecter de l'application ?",
+    "HOW_TO_LOGOUT_RESPONSE":"Les étapes de déconnexion:\n1- Cliquez sur l'onglet de gestion de profil en bas de l'écran.\n2- Cliquer sur \"Se déconnecter\" en bas de l'écran."
 } 

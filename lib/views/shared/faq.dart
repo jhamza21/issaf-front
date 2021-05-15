@@ -11,18 +11,18 @@ class Faq extends StatefulWidget {
 class _FaqState extends State<Faq> {
   List<Question> questions = [
     Question(
-        title:
-            "Qu'est-ce que tu peux me dire... qu'est-ce que ça répresente pour toi la cuisine française ?",
-        response:
-            "Bah, c'est une cuisine raffinée, c'est sûr.... cuisine raffinée qui, euh, qui a des racines aussi, euh, un petit peu dans d'autres cuisines, qui a pris des racines un peu dans d'autres cuisines, qui fait que c'est une cuisine qui est élaborée de façon, euh comment dire, j... en tenant compte un petit peu de goût de plus grand nombre"),
+        title: "HOW_DELETE_MY_ACCOUNT",
+        response: "HOW_DELETE_MY_ACCOUNT_RESPONSE"),
     Question(
-        title: "Qu'est-ce que tu peux me dire sur les plats typiques du Sud ? ",
-        response:
-            "C'est des plats épicés, c'est des... ce sont des plats de... légumes... ils mangent beaucoup de légumes dans, dans le Midi, et plats épicés, quoi. Voilà."),
+        title: "HOW_TO_ADD_MY_OWN_SERVICE",
+        response: "HOW_TO_ADD_MY_OWN_SERVICE_RESPONSE"),
     Question(
-        title: "Et quels sont les plats typiques des Alpes ?",
-        response:
-            "Des Alpes, c'est fromage évidemment. Fromage, bah base de fromage, quoi, et la charcuterie"),
+        title: "WHAT_IS_THE_USE_OF_AVG_TIME_PER_CLIENT",
+        response: "WHAT_IS_THE_USE_OF_AVG_TIME_PER_CLIENT_RESPONSE"),
+    Question(
+        title: "HOW_TO_INVITE_USER_TO_HANDLE_ESAFF",
+        response: "HOW_TO_INVITE_USER_TO_HANDLE_ESAFF_RESPONSE"),
+    Question(title: "HOW_TO_LOGOUT", response: "HOW_TO_LOGOUT_RESPONSE"),
   ];
 
   @override
@@ -55,7 +55,7 @@ class _FaqState extends State<Faq> {
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      _question.title,
+                      getTranslate(context, _question.title),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontFamily: 'OpenSans',
@@ -66,7 +66,7 @@ class _FaqState extends State<Faq> {
                 body: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    _question.response,
+                    getTranslate(context, _question.response),
                     style: TextStyle(
                       fontFamily: 'OpenSans',
                     ),
