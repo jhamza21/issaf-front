@@ -47,7 +47,7 @@ class _WelcomeState extends State<Welcome> {
           child: Text(
             getTranslate(context, "WELCOME_MSG"),
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
