@@ -22,7 +22,10 @@ class ServiceService {
   //get service related to operator
   Future<http.Response> getServiceByRespo(String token) async {
     var url = URL_BACKEND + "getServiceByRespo/?api_token=" + token;
-    return await http.get(url);
+    return await http.get(url, headers: {
+      "Accept": "application/json",
+      "Access-Control_Allow_Origin": "*"
+    });
   }
 
 //add or update service data

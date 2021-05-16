@@ -30,8 +30,8 @@ class _RootPageState extends State<RootPage> {
     try {
       var prefs = await SharedPreferences.getInstance();
       final response = await UserService().checkToken(prefs.getString('token'));
+      assert(response.statusCode == 200);
       final jsonData = json.decode(response.body);
-      assert(jsonData["id"] != null);
       Redux.store.dispatch(
         SetUserStateAction(
           UserState(
