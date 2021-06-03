@@ -1,67 +1,49 @@
-import 'dart:convert';
-
-import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/ticket.dart';
-import 'package:issaf/services/ticketService.dart';
 
 class LineChart extends StatefulWidget {
-  final int serviceId;
-  LineChart(this.serviceId);
+  final List<Ticket> tickets;
+  final String startDate;
+  final String endDate;
+  LineChart(this.tickets, this.startDate, this.endDate);
   @override
   _LineChartState createState() => _LineChartState();
 }
 
 class _LineChartState extends State<LineChart> {
-  List<charts.Series<Tickets, int>> _seriesLineData =
-      // ignore: deprecated_member_use
-      List<charts.Series<Tickets, int>>();
+  List<charts.Series<Tickets, int>> _seriesLineData;
   List<Tickets> linedata = [];
+  List<Ticket> _tickets = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    initializeServiceData();
+    // ignore: deprecated_member_use
+    _seriesLineData = List<charts.Series<Tickets, int>>();
+    initializeChartData();
+  }
+
+  void initializeChartData() async {
+    _tickets = widget.tickets;
+    List<Ticket> present = _tickets.where((c) => c.status == "DONE").toList();
+    for (int i = 0; i < present.length; i++) {
+      linedata.add(Tickets(i, present[i].duration));
+    }
     _seriesLineData.add(
       charts.Series(
         colorFn: (__, _) => charts.ColorUtil.fromDartColor(Colors.blue),
-        id: 'Temps moyen par client',
+        id: 'avgTime',
         data: linedata,
         domainFn: (Tickets ticket, _) => ticket.period,
         measureFn: (Tickets ticket, _) => ticket.value,
       ),
     );
-  }
-
-  void initializeServiceData() async {
-    try {
-      var prefs = await SharedPreferences.getInstance();
-      var response = await TicketService()
-          .getTicketsByService(prefs.getString('token'), widget.serviceId);
-      assert(response.statusCode == 200);
-      var jsonData = json.decode(response.body);
-      List<Ticket> _tickets = [];
-
-      _tickets = Ticket.listFromJson(jsonData);
-      List<Ticket> present = _tickets.where((c) => c.status == "DONE").toList();
-      for (int i = 0; i < present.length; i++) {
-        linedata.add(Tickets(i, present[i].duration));
-      }
-      setState(() {
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      final snackBar = SnackBar(
-        content: Text(getTranslate(context, "ERROR_SERVER")),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -78,6 +60,13 @@ class _LineChartState extends State<LineChart> {
                       getTranslate(context, "TIME_PER_CLIENT"),
                       style: TextStyle(
                           fontSize: 18.0, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      widget.startDate + " - " + widget.endDate,
+                      style: TextStyle(fontSize: 12.0, color: Colors.grey),
                     ),
                     Expanded(
                       child: charts.LineChart(

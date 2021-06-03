@@ -22,10 +22,15 @@ class TicketService {
   }
 
   //return all tickets related to service
-  Future<http.Response> getTicketsByService(String token, int id) async {
+  Future<http.Response> getTicketsByService(
+      String token, int id, String start, String end) async {
     var url = URL_BACKEND +
         "getTicketsByService/" +
         id.toString() +
+        "/" +
+        start +
+        "/" +
+        end +
         "?api_token=" +
         token;
     return await http.get(url);

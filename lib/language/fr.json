@@ -242,5 +242,7 @@
     "HOW_TO_INVITE_USER_TO_HANDLE_ESAFF":"Comment inviter un opérateur(utilisateur) pour gérer mon E-SAFF ?",
     "HOW_TO_INVITE_USER_TO_HANDLE_ESAFF_RESPONSE":"Pour inviter un opérateur(utilisateur) pour gérer votre E-SAFF, cet utilisateur devra avoir un compte dans l'application E-SAFF.\n\nLes étapes d'invitation d'un utilisateur :\n 1- Se connecter en tant que Administrateur.\n2- Sélectionner le E-SAFF en question et cliquez sur moDifier. \n3- Rechercher et séléctionner l'utilisateur dans la partie réservée pour l'ajout d'un opérateur (La recherche de l'utilisateur peut être réalisée soit par nom soit par nom d'utilisateur soit par email).\n4- Cliquer sur \"Enregistrer les moDifications\".\n\n Vous pouver consulter vos invitations pour s'assurer que l'utilisateur en question à bien reçu l'invitation.",
     "HOW_TO_LOGOUT":"Comment se déconnecter de l'application ?",
-    "HOW_TO_LOGOUT_RESPONSE":"Les étapes de déconnexion:\n1- Cliquez sur l'onglet de gestion de profil en bas de l'écran.\n2- Cliquer sur \"Se déconnecter\" en bas de l'écran."
+    "HOW_TO_LOGOUT_RESPONSE":"Les étapes de déconnexion:\n1- Cliquez sur l'onglet de gestion de profil en bas de l'écran.\n2- Cliquer sur \"Se déconnecter\" en bas de l'écran.",
+    "FILTER_BY_PERIOD":"Filtrer par periode :",
+    "FROM":"De :"
 } 

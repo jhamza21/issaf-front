@@ -1,15 +1,13 @@
-import 'dart:convert';
-
-import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:issaf/constants.dart';
 import 'package:issaf/models/ticket.dart';
-import 'package:issaf/services/ticketService.dart';
 
 class PieChart extends StatefulWidget {
-  final int serviceId;
-  PieChart(this.serviceId);
+  final List<Ticket> tickets;
+  final String startDate;
+  final String endDate;
+  PieChart(this.tickets, this.startDate, this.endDate);
   @override
   _PieChartState createState() => _PieChartState();
 }
@@ -25,54 +23,40 @@ class _PieChartState extends State<PieChart> {
   @override
   void initState() {
     super.initState();
-    initializeServiceData();
+    Future.delayed(Duration.zero, () {
+      initializeChartData();
+    });
+  }
+
+  void initializeChartData() async {
+    _tickets = widget.tickets;
+    int present = _tickets.where((c) => c.status == "DONE").toList().length;
+    int absent = _tickets.where((c) => c.status == "UNDONE").toList().length;
+    int inProgress =
+        _tickets.where((c) => c.status == "IN_PROGRESS").toList().length;
+    if (present != 0)
+      piedata.add(Tickets(
+          getTranslate(context, "PRESENT_CLIENTS"), present, Colors.green));
+    if (absent != 0)
+      piedata.add(
+          Tickets(getTranslate(context, "ABSENT_CLIENTS"), absent, Colors.red));
+    if (inProgress != 0)
+      piedata.add(Tickets(getTranslate(context, "IN_PROGRESS_CLIENTS"),
+          inProgress, Colors.grey));
     _seriesPieData.add(
       charts.Series(
         domainFn: (Tickets tickets, _) => tickets.name,
         measureFn: (Tickets tickets, _) => tickets.value,
         colorFn: (Tickets tickets, _) =>
             charts.ColorUtil.fromDartColor(tickets.colorval),
-        id: 'Clients',
+        id: 'presentClients',
         data: piedata,
         labelAccessorFn: (Tickets row, _) => '${row.value}',
       ),
     );
-  }
-
-  void initializeServiceData() async {
-    try {
-      var prefs = await SharedPreferences.getInstance();
-      var response = await TicketService()
-          .getTicketsByService(prefs.getString('token'), widget.serviceId);
-      assert(response.statusCode == 200);
-      var jsonData = json.decode(response.body);
-      _tickets = Ticket.listFromJson(jsonData);
-      int present = _tickets.where((c) => c.status == "DONE").toList().length;
-      int absent = _tickets.where((c) => c.status == "UNDONE").toList().length;
-      int inProgress =
-          _tickets.where((c) => c.status == "IN_PROGRESS").toList().length;
-      if (present != 0)
-        piedata.add(Tickets(
-            getTranslate(context, "PRESENT_CLIENTS"), present, Colors.green));
-      if (absent != 0)
-        piedata.add(Tickets(
-            getTranslate(context, "ABSENT_CLIENTS"), absent, Colors.red));
-      if (inProgress != 0)
-        piedata.add(Tickets(getTranslate(context, "IN_PROGRESS_CLIENTS"),
-            inProgress, Colors.grey));
-
-      setState(() {
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      final snackBar = SnackBar(
-        content: Text(getTranslate(context, "ERROR_SERVER")),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -89,6 +73,13 @@ class _PieChartState extends State<PieChart> {
                       getTranslate(context, "CHART_PRESENT_CLIENTS"),
                       style: TextStyle(
                           fontSize: 16.0, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      widget.startDate + " - " + widget.endDate,
+                      style: TextStyle(fontSize: 12.0, color: Colors.grey),
                     ),
                     SizedBox(
                       height: 10.0,
