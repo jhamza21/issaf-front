@@ -457,7 +457,7 @@ class _BookTicketState extends State<BookTicket> {
                       int _notifIndex = int.parse(_controller.text);
                       int _ticketNumber = _times.indexOf(_selectedTime) + 1;
                       if ((_today != _selectedDate &&
-                              _notifIndex <= _ticketNumber) ||
+                              _notifIndex >= _ticketNumber) ||
                           (_today == _selectedDate &&
                               (_ticketNumber - _notifIndex) <=
                                   widget.service.counter)) {
